@@ -115,6 +115,18 @@ func Load(dir string, lang string, opts ...Option) (*Config, error) {
 	return cfg, nil
 }
 
+func Save(dir string, cfg *Config, opts ...Option) error {
+	o := &options{
+		writeFileFunc: os.WriteFile,
+	}
+	for _, opt := range opts {
+		opt(o)
+	}
+
+	_, err := write(dir, cfg, o)
+	return err
+}
+
 func findConfigFile(dir string, o *options) ([]byte, error) {
 	path := filepath.Join(dir, "gen.yaml")
 
