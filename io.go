@@ -25,6 +25,7 @@ type options struct {
 	writeFileFunc          WriteFileFunc
 	UpgradeFunc            UpgradeFunc
 	getLanguageDefaultFunc GetLanguageDefaultFunc
+	langs                  []string
 }
 
 func WithFileSystemFuncs(rf ReadFileFunc, wf WriteFileFunc) Option {
@@ -46,16 +47,23 @@ func WithLanguageDefaultFunc(f GetLanguageDefaultFunc) Option {
 	}
 }
 
-func Load(dir string, lang string, opts ...Option) (*Config, error) {
+func WithLanguages(langs ...string) Option {
+	return func(o *options) {
+		o.langs = langs
+	}
+}
+
+func Load(dir string, opts ...Option) (*Config, error) {
 	o := &options{
 		readFileFunc:  os.ReadFile,
 		writeFileFunc: os.WriteFile,
+		langs:         []string{},
 	}
 	for _, opt := range opts {
 		opt(o)
 	}
 
-	cfg, err := GetDefaultConfig(lang, o.getLanguageDefaultFunc)
+	cfg, err := GetDefaultConfig(o.getLanguageDefaultFunc, o.langs...)
 	if err != nil {
 		return nil, err
 	}

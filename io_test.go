@@ -141,7 +141,7 @@ func TestLoad_Success(t *testing.T) {
 			require.NoError(t, err)
 			defer os.RemoveAll(dir)
 
-			cfg, err := Load(filepath.Join(os.TempDir(), testDir), "go", WithUpgradeFunc(testUpdateLang))
+			cfg, err := Load(filepath.Join(os.TempDir(), testDir), WithLanguages("go"), WithUpgradeFunc(testUpdateLang))
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, cfg)
 			_, err = os.Stat(filepath.Join(dir, "gen.yaml"))

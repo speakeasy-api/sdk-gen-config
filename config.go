@@ -33,26 +33,30 @@ type Config struct {
 	Languages     map[string]LanguageConfig `yaml:",inline"`
 }
 
-func GetDefaultConfig(lang string, getLangDefaultFunc GetLanguageDefaultFunc) (*Config, error) {
-	langDefault := &LanguageConfig{
-		Version: "0.0.1",
-	}
-
-	if getLangDefaultFunc != nil {
-		var err error
-		langDefault, err = getLangDefaultFunc(lang)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &Config{
+func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string) (*Config, error) {
+	cfg := &Config{
 		ConfigVersion: Version,
 		Generation: Generation{
 			SDKClassName: "SDK",
 		},
-		Languages: map[string]LanguageConfig{
-			lang: *langDefault,
-		},
-	}, nil
+		Languages: map[string]LanguageConfig{},
+	}
+
+	for _, lang := range langs {
+		langDefault := &LanguageConfig{
+			Version: "0.0.1",
+		}
+
+		if getLangDefaultFunc != nil {
+			var err error
+			langDefault, err = getLangDefaultFunc(lang)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		cfg.Languages[lang] = *langDefault
+	}
+
+	return cfg, nil
 }
