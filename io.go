@@ -23,6 +23,7 @@ type (
 type options struct {
 	readFileFunc           ReadFileFunc
 	writeFileFunc          WriteFileFunc
+	UpgradeFunc            UpgradeFunc
 	getLanguageDefaultFunc GetLanguageDefaultFunc
 }
 
@@ -33,13 +34,19 @@ func WithFileSystemFuncs(rf ReadFileFunc, wf WriteFileFunc) Option {
 	}
 }
 
+func WithUpgradeFunc(f UpgradeFunc) Option {
+	return func(o *options) {
+		o.UpgradeFunc = f
+	}
+}
+
 func WithLanguageDefaultFunc(f GetLanguageDefaultFunc) Option {
 	return func(o *options) {
 		o.getLanguageDefaultFunc = f
 	}
 }
 
-func Load(dir string, lang string, uf UpgradeFunc, opts ...Option) (*Config, error) {
+func Load(dir string, lang string, opts ...Option) (*Config, error) {
 	o := &options{
 		readFileFunc:  os.ReadFile,
 		writeFileFunc: os.WriteFile,
@@ -84,8 +91,12 @@ func Load(dir string, lang string, uf UpgradeFunc, opts ...Option) (*Config, err
 	}
 
 	if version != Version {
+		if o.UpgradeFunc == nil {
+			return nil, fmt.Errorf("config is version %s but upgrades not available", version)
+		}
+
 		// Upgrade config file if version is different and write it
-		cfgMap, err = upgrade(version, cfgMap, uf)
+		cfgMap, err = upgrade(version, cfgMap, o.UpgradeFunc)
 		if err != nil {
 			return nil, err
 		}
