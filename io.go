@@ -69,11 +69,13 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	}
 
 	// Find existing config file
-	data, err := findConfigFile(dir, o)
+	data, path, err := findConfigFile(dir, o)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
+			path = filepath.Join(dir, "gen.yaml")
+
 			// Create new config file if it doesn't exist
-			data, err = write(dir, cfg, o)
+			data, err = write(path, cfg, o)
 			if err != nil {
 				return nil, err
 			}
@@ -109,7 +111,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 			return nil, err
 		}
 
-		data, err = write(dir, cfgMap, o)
+		data, err = write(path, cfgMap, o)
 		if err != nil {
 			return nil, err
 		}
@@ -131,11 +133,23 @@ func Save(dir string, cfg *Config, opts ...Option) error {
 		opt(o)
 	}
 
-	_, err := write(dir, cfg, o)
-	return err
+	_, path, err := findConfigFile(dir, o)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			path = filepath.Join(dir, "gen.yaml")
+		} else {
+			return err
+		}
+	}
+
+	if _, err := write(path, cfg, o); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func findConfigFile(dir string, o *options) ([]byte, error) {
+func findConfigFile(dir string, o *options) ([]byte, string, error) {
 	path := filepath.Join(dir, "gen.yaml")
 
 	for {
@@ -144,27 +158,27 @@ func findConfigFile(dir string, o *options) ([]byte, error) {
 			if errors.Is(err, fs.ErrNotExist) {
 				currentDir := filepath.Dir(path)
 				if currentDir == "." || currentDir == "/" {
-					return nil, ErrNotFound
+					return nil, "", ErrNotFound
 				}
 
 				path = filepath.Join(filepath.Dir(filepath.Dir(path)), "gen.yaml")
 				continue
 			}
 
-			return nil, fmt.Errorf("could not read gen.yaml: %w", err)
+			return nil, "", fmt.Errorf("could not read gen.yaml: %w", err)
 		}
 
-		return data, nil
+		return data, path, nil
 	}
 }
 
-func write(dir string, cfg any, o *options) ([]byte, error) {
+func write(path string, cfg any, o *options) ([]byte, error) {
 	data, err := yaml.Marshal(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("could not marshal gen.yaml: %w", err)
 	}
 
-	if err := o.writeFileFunc(filepath.Join(dir, "gen.yaml"), data, os.ModePerm); err != nil {
+	if err := o.writeFileFunc(path, data, os.ModePerm); err != nil {
 		return nil, fmt.Errorf("could not write gen.yaml: %w", err)
 	}
 

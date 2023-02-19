@@ -47,15 +47,15 @@ func Test_upgrade_Success(t *testing.T) {
 					"docVersion":       "1.0.0",
 					"speakeasyVersion": "1.0.0",
 				},
-				"comments": map[string]any{
-					"disabled":                        true,
-					"omitDescriptionIfSummaryPresent": true,
-				},
 				"generation": map[string]any{
 					"baseServerUrl":          "http://localhost:8080",
 					"telemetryEnabled":       true,
 					"sdkClassName":           "MySDK",
 					"tagNamespacingDisabled": true,
+					"comments": map[string]any{
+						"disabled":                        true,
+						"omitDescriptionIfSummaryPresent": true,
+					},
 				},
 				"go": map[string]any{
 					"version":     "0.0.1",
