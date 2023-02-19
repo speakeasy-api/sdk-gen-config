@@ -54,14 +54,7 @@ func WithLanguages(langs ...string) Option {
 }
 
 func Load(dir string, opts ...Option) (*Config, error) {
-	o := &options{
-		readFileFunc:  os.ReadFile,
-		writeFileFunc: os.WriteFile,
-		langs:         []string{},
-	}
-	for _, opt := range opts {
-		opt(o)
-	}
+	o := applyOptions(opts)
 
 	cfg, err := GetDefaultConfig(o.getLanguageDefaultFunc, o.langs...)
 	if err != nil {
@@ -126,12 +119,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 }
 
 func Save(dir string, cfg *Config, opts ...Option) error {
-	o := &options{
-		writeFileFunc: os.WriteFile,
-	}
-	for _, opt := range opts {
-		opt(o)
-	}
+	o := applyOptions(opts)
 
 	_, path, err := findConfigFile(dir, o)
 	if err != nil {
@@ -183,4 +171,17 @@ func write(path string, cfg any, o *options) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func applyOptions(opts []Option) *options {
+	o := &options{
+		readFileFunc:  os.ReadFile,
+		writeFileFunc: os.WriteFile,
+		langs:         []string{},
+	}
+	for _, opt := range opts {
+		opt(o)
+	}
+
+	return o
 }
