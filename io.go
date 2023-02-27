@@ -115,6 +115,11 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
 	}
 
+	// And write it again to ensure it's in the correct format and contains all defaults
+	if _, err := write(path, cfgMap, o); err != nil {
+		return nil, err
+	}
+
 	return cfg, nil
 }
 
