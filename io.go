@@ -116,7 +116,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	}
 
 	// And write it again to ensure it's in the correct format and contains all defaults
-	if _, err := write(path, cfgMap, o); err != nil {
+	if _, err := write(path, cfg, o); err != nil {
 		return nil, err
 	}
 
