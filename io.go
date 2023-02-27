@@ -97,11 +97,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 	}
 
-	if version != Version {
-		if o.UpgradeFunc == nil {
-			return nil, fmt.Errorf("config is version %s but upgrades not available", version)
-		}
-
+	if version != Version && o.UpgradeFunc != nil {
 		// Upgrade config file if version is different and write it
 		cfgMap, err = upgrade(version, cfgMap, o.UpgradeFunc)
 		if err != nil {
