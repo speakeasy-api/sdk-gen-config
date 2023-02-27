@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -166,10 +168,20 @@ func findConfigFile(dir string, o *options) ([]byte, string, error) {
 }
 
 func write(path string, cfg any, o *options) ([]byte, error) {
-	data, err := yaml.Marshal(cfg)
-	if err != nil {
+	var b bytes.Buffer
+	buf := bufio.NewWriter(&b)
+
+	e := yaml.NewEncoder(buf)
+	e.SetIndent(2)
+	if err := e.Encode(cfg); err != nil {
 		return nil, fmt.Errorf("could not marshal gen.yaml: %w", err)
 	}
+
+	if err := buf.Flush(); err != nil {
+		return nil, fmt.Errorf("could not marshal gen.yaml: %w", err)
+	}
+
+	data := b.Bytes()
 
 	if err := o.writeFileFunc(path, data, os.ModePerm); err != nil {
 		return nil, fmt.Errorf("could not write gen.yaml: %w", err)
