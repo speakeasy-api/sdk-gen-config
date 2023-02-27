@@ -19,6 +19,7 @@ type Generation struct {
 	TelemetryEnabled       bool      `yaml:"telemetryEnabled"`
 	SDKClassName           string    `yaml:"sdkClassName"`
 	TagNamespacingDisabled bool      `yaml:"tagNamespacingDisabled,omitempty"`
+	SDKFlattening          bool      `yaml:"sdkFlattening"`
 }
 
 type LanguageConfig struct {
@@ -37,7 +38,8 @@ func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string
 	cfg := &Config{
 		ConfigVersion: Version,
 		Generation: Generation{
-			SDKClassName: "SDK",
+			SDKClassName:  "SDK",
+			SDKFlattening: false, // Defaults to false for existing users, default overridden for new users
 		},
 		Languages: map[string]LanguageConfig{},
 	}
