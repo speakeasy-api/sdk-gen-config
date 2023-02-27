@@ -27,6 +27,15 @@ type LanguageConfig struct {
 	Cfg     map[string]any `yaml:",inline"`
 }
 
+type LanguageConfigField struct {
+	Name              string  `yaml:"name" json:"name"`
+	Required          bool    `yaml:"required" json:"required"`
+	DefaultValue      *string `yaml:"defaultValue,omitempty" json:"default_value,omitempty"`
+	Description       *string `yaml:"description,omitempty" json:"description,omitempty"`
+	ValidationRegex   *string `yaml:"validationRegex,omitempty" json:"validation_regex,omitempty"`
+	ValidationMessage *string `yaml:"validationMessage,omitempty" json:"validation_message,omitempty"`
+}
+
 type Config struct {
 	ConfigVersion string                    `yaml:"configVersion"`
 	Management    *Management               `yaml:"management,omitempty"`
