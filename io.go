@@ -58,6 +58,11 @@ func WithLanguages(langs ...string) Option {
 func Load(dir string, opts ...Option) (*Config, error) {
 	o := applyOptions(opts)
 
+	defaultCfg, err := GetDefaultConfig(o.getLanguageDefaultFunc, o.langs...)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg, err := GetDefaultConfig(o.getLanguageDefaultFunc, o.langs...)
 	if err != nil {
 		return nil, err
@@ -115,6 +120,19 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	// Okay finally able to unmarshal the config file into expected struct
 	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
+	}
+
+	// Maps are overwritten by unmarshal, so we need to ensure that the defaults are set
+	for lang, langCfg := range defaultCfg.Languages {
+		if _, ok := cfg.Languages[lang]; !ok {
+			cfg.Languages[lang] = langCfg
+		}
+
+		for k, v := range langCfg.Cfg {
+			if _, ok := cfg.Languages[lang].Cfg[k]; !ok {
+				cfg.Languages[lang].Cfg[k] = v
+			}
+		}
 	}
 
 	// And write it again to ensure it's in the correct format and contains all defaults
