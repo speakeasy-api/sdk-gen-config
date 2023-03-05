@@ -129,6 +129,12 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 
 		for k, v := range langCfg.Cfg {
+			if cfg.Languages[lang].Cfg == nil {
+				langCfg = cfg.Languages[lang]
+				langCfg.Cfg = map[string]interface{}{}
+				cfg.Languages[lang] = langCfg
+			}
+
 			if _, ok := cfg.Languages[lang].Cfg[k]; !ok {
 				cfg.Languages[lang].Cfg[k] = v
 			}
