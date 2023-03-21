@@ -3,9 +3,10 @@ package config
 const Version = "1.0.0"
 
 type Management struct {
-	DocChecksum      string `yaml:"docChecksum"`
-	DocVersion       string `yaml:"docVersion"`
-	SpeakeasyVersion string `yaml:"speakeasyVersion"`
+	DocChecksum       string `yaml:"docChecksum"`
+	DocVersion        string `yaml:"docVersion"`
+	SpeakeasyVersion  string `yaml:"speakeasyVersion"`
+	GenerationVersion string `yaml:"generationVersion,omitempty"`
 }
 
 type Comments struct {
