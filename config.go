@@ -29,12 +29,13 @@ type LanguageConfig struct {
 }
 
 type LanguageConfigField struct {
-	Name              string  `yaml:"name" json:"name"`
-	Required          bool    `yaml:"required" json:"required"`
-	DefaultValue      *string `yaml:"defaultValue,omitempty" json:"default_value,omitempty"`
-	Description       *string `yaml:"description,omitempty" json:"description,omitempty"`
-	ValidationRegex   *string `yaml:"validationRegex,omitempty" json:"validation_regex,omitempty"`
-	ValidationMessage *string `yaml:"validationMessage,omitempty" json:"validation_message,omitempty"`
+	Name                  string  `yaml:"name" json:"name"`
+	Required              bool    `yaml:"required" json:"required"`
+	RequiredForPublishing *bool   `yaml:"requiredForPublishing,omitempty" json:"required_for_publishing,omitempty"`
+	DefaultValue          *string `yaml:"defaultValue,omitempty" json:"default_value,omitempty"`
+	Description           *string `yaml:"description,omitempty" json:"description,omitempty"`
+	ValidationRegex       *string `yaml:"validationRegex,omitempty" json:"validation_regex,omitempty"`
+	ValidationMessage     *string `yaml:"validationMessage,omitempty" json:"validation_message,omitempty"`
 }
 
 type Config struct {
