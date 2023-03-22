@@ -21,6 +21,7 @@ type Generation struct {
 	SDKClassName           string    `yaml:"sdkClassName"`
 	TagNamespacingDisabled bool      `yaml:"tagNamespacingDisabled,omitempty"`
 	SDKFlattening          bool      `yaml:"sdkFlattening"`
+	SingleTagPerOp         bool      `yaml:"singleTagPerOp"`
 }
 
 type LanguageConfig struct {
@@ -49,8 +50,9 @@ func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string
 	cfg := &Config{
 		ConfigVersion: Version,
 		Generation: Generation{
-			SDKClassName:  "SDK",
-			SDKFlattening: false, // Defaults to false for existing users, default overridden for new users
+			SDKClassName:   "SDK",
+			SDKFlattening:  false, // Defaults to false for existing users, default overridden for new users
+			SingleTagPerOp: false,
 		},
 		Languages: map[string]LanguageConfig{},
 	}
