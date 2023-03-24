@@ -46,6 +46,11 @@ type Config struct {
 	Languages     map[string]LanguageConfig `yaml:",inline"`
 }
 
+type SdkGenConfig struct {
+	SdkGenLanguageConfig map[string][]LanguageConfigField `yaml:"languageConfigs,inline"`
+	SdkGenCommonConfig   []LanguageConfigField            `yaml:",inline"`
+}
+
 func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string) (*Config, error) {
 	cfg := &Config{
 		ConfigVersion: Version,
