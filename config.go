@@ -29,7 +29,7 @@ type LanguageConfig struct {
 	Cfg     map[string]any `yaml:",inline"`
 }
 
-type LanguageConfigField struct {
+type SdkGenConfigField struct {
 	Name                  string  `yaml:"name" json:"name"`
 	Required              bool    `yaml:"required" json:"required"`
 	RequiredForPublishing *bool   `yaml:"requiredForPublishing,omitempty" json:"required_for_publishing,omitempty"`
@@ -47,8 +47,8 @@ type Config struct {
 }
 
 type SdkGenConfig struct {
-	SdkGenLanguageConfig map[string][]LanguageConfigField `json:"language_configs"`
-	SdkGenCommonConfig   []LanguageConfigField            `json:"generation_config"`
+	SdkGenLanguageConfig map[string][]SdkGenConfigField `json:"language_configs"`
+	SdkGenCommonConfig   []SdkGenConfigField            `json:"generation_config"`
 }
 
 func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string) (*Config, error) {
