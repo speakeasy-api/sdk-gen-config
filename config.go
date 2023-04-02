@@ -47,7 +47,7 @@ type Config struct {
 
 type SdkGenConfig struct {
 	SdkGenLanguageConfig map[string][]SdkGenConfigField `json:"language_configs"`
-	SdkGenCommonConfig   []SdkGenConfigField            `json:"generation_config"`
+	SdkGenCommonConfig   []SdkGenConfigField            `json:"common_config"`
 }
 
 func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string) (*Config, error) {
