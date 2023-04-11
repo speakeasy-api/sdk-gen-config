@@ -75,10 +75,6 @@ func Load(dir string, opts ...Option) (*Config, error) {
 			path = filepath.Join(dir, "gen.yaml")
 
 			// Create new config file if it doesn't exist
-
-			// Special case backwards compatibility defaults
-			cfg.Generation.SDKFlattening = true // default to true for new projects
-
 			data, err = write(path, cfg, o)
 			if err != nil {
 				return nil, err

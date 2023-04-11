@@ -20,7 +20,6 @@ type Generation struct {
 	TelemetryEnabled       bool      `yaml:"telemetryEnabled"`
 	SDKClassName           string    `yaml:"sdkClassName"`
 	TagNamespacingDisabled bool      `yaml:"tagNamespacingDisabled,omitempty"`
-	SDKFlattening          bool      `yaml:"sdkFlattening"`
 	SingleTagPerOp         bool      `yaml:"singleTagPerOp"`
 }
 
@@ -56,7 +55,6 @@ func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string
 		ConfigVersion: Version,
 		Generation: Generation{
 			SDKClassName:   "SDK",
-			SDKFlattening:  false, // Defaults to false for existing users, default overridden for new users
 			SingleTagPerOp: false,
 		},
 		Languages: map[string]LanguageConfig{},

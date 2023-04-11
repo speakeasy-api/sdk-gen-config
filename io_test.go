@@ -36,7 +36,6 @@ func TestLoad_Success(t *testing.T) {
 				Generation: Generation{
 					SDKClassName:     "SDK",
 					TelemetryEnabled: false,
-					SDKFlattening:    true,
 				},
 			},
 		},
@@ -68,7 +67,6 @@ func TestLoad_Success(t *testing.T) {
 					Comments: &Comments{
 						OmitDescriptionIfSummaryPresent: true,
 					},
-					SDKFlattening: false,
 				},
 			},
 		},
@@ -100,7 +98,6 @@ func TestLoad_Success(t *testing.T) {
 					Comments: &Comments{
 						OmitDescriptionIfSummaryPresent: true,
 					},
-					SDKFlattening: false,
 				},
 			},
 		},
@@ -132,7 +129,6 @@ func TestLoad_Success(t *testing.T) {
 					Comments: &Comments{
 						OmitDescriptionIfSummaryPresent: true,
 					},
-					SDKFlattening: false,
 				},
 			},
 		},
