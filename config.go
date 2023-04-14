@@ -1,6 +1,9 @@
 package config
 
-const Version = "1.0.0"
+const (
+	Version               = "1.0.0"
+	GithubWritePermission = "write"
+)
 
 type Management struct {
 	DocChecksum       string `yaml:"docChecksum"`
@@ -62,9 +65,17 @@ type Push struct {
 }
 
 type GenerateWorkflow struct {
-	Name string     `yaml:"name"`
-	On   GenerateOn `yaml:"on"`
-	Jobs Jobs       `yaml:"jobs"`
+	Name        string      `yaml:"name"`
+	Permissions Permissions `yaml:"permissions"`
+	On          GenerateOn  `yaml:"on"`
+	Jobs        Jobs        `yaml:"jobs"`
+}
+
+type Permissions struct {
+	Checks       string `yaml:"checks"`
+	Contents     string `yaml:"contents,omitempty"`
+	PullRequests string `yaml:"pull-requests,omitempty"`
+	Statuses     string `yaml:"statuses"`
 }
 
 type GenerateOn struct {
