@@ -21,6 +21,7 @@ type Generation struct {
 	SDKClassName           string    `yaml:"sdkClassName"`
 	TagNamespacingDisabled bool      `yaml:"tagNamespacingDisabled,omitempty"`
 	SingleTagPerOp         bool      `yaml:"singleTagPerOp"`
+	SDKFlattening          bool      `yaml:"sdkFlattening"`
 }
 
 type LanguageConfig struct {
