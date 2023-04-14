@@ -45,6 +45,89 @@ type Config struct {
 	Languages     map[string]LanguageConfig `yaml:",inline"`
 }
 
+type PublishWorkflow struct {
+	Name string    `yaml:"name"`
+	On   PublishOn `yaml:"on"`
+	Jobs Jobs      `yaml:"jobs"`
+}
+
+type PublishOn struct {
+	Push Push `yaml:"push"`
+}
+
+type Push struct {
+	Branches []string `yaml:"branches"`
+	Paths    []string `yaml:"paths"`
+}
+
+type GenerateWorkflow struct {
+	Name string     `yaml:"name"`
+	On   GenerateOn `yaml:"on"`
+	Jobs Jobs       `yaml:"jobs"`
+}
+
+type GenerateOn struct {
+	WorkflowDispatch WorkflowDispatch `yaml:"workflow_dispatch"`
+	Schedule         []Schedule       `yaml:"schedule,omitempty"`
+}
+
+type Jobs struct {
+	Generate Job `yaml:"generate,omitempty"`
+	Publish  Job `yaml:"publish,omitempty"`
+}
+
+type Job struct {
+	Uses    string  `yaml:"uses"`
+	With    With    `yaml:"with"`
+	Secrets Secrets `yaml:"secrets"`
+}
+
+type With struct {
+	SpeakeasyVersion     string `yaml:"speakeasy_version,omitempty"`
+	OpenAPIDocLocation   string `yaml:"openapi_doc_location,omitempty"`
+	OpenAPIDocAuthHeader string `yaml:"openapi_doc_auth_header,omitempty"`
+	Languages            string `yaml:"languages,omitempty"`
+	PublishPython        bool   `yaml:"publish_python,omitempty"`
+	PublishTypescript    bool   `yaml:"publish_typescript,omitempty"`
+	PublishJava          bool   `yaml:"publish_java,omitempty"`
+	PublishPhp           bool   `yaml:"publish_php,omitempty"`
+	CreateRelease        bool   `yaml:"create_release,omitempty"`
+	Mode                 string `yaml:"mode,omitempty"`
+	ForceInput           string `yaml:"force,omitempty"`
+}
+
+type Secrets struct {
+	GithubAccessToken   string `yaml:"github_access_token"`
+	SpeakeasyApiKey     string `yaml:"speakeasy_api_key"`
+	OpenAPIDocAuthToken string `yaml:"openapi_doc_auth_token,omitempty"`
+	PypiToken           string `yaml:"pypi_token,omitempty"`
+	NpmToken            string `yaml:"npm_token,omitempty"`
+	PackagistUsername   string `yaml:"packagist_username,omitempty"`
+	PackagistToken      string `yaml:"packagist_token,omitempty"`
+	OssrhUsername       string `yaml:"maven_username,omitempty"`
+	OssrhPassword       string `yaml:"maven_password,omitempty"`
+	JavaGPGSecretKey    string `yaml:"java_gpg_secret_key,omitempty"`
+	JavaGPGPassphrase   string `yaml:"java_gpg_passphrase,omitempty"`
+}
+
+type WorkflowDispatch struct {
+	Inputs Inputs `yaml:"inputs"`
+}
+
+type Schedule struct {
+	Cron string `yaml:"cron"`
+}
+
+type Inputs struct {
+	Force Force `yaml:"force"`
+}
+
+type Force struct {
+	Description string `yaml:"description"`
+	Type        string `yaml:"type"`
+	Default     bool   `yaml:"default"`
+}
+
 type SdkGenConfig struct {
 	SdkGenLanguageConfig map[string][]SdkGenConfigField `json:"language_configs"`
 	SdkGenCommonConfig   []SdkGenConfigField            `json:"common_config"`
