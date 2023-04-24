@@ -3,6 +3,22 @@ package config
 const (
 	Version               = "1.0.0"
 	GithubWritePermission = "write"
+
+	// Constants to be used as keys in the config files
+
+	BaseServerURL          = "baseServerUrl"
+	TelemetryEnabled       = "telemetryEnabled"
+	SDKClassName           = "sdkClassName"
+	SingleTagPerOp         = "singleTagPerOp"
+	TagNamespacingDisabled = "tagNamespacingDisabled"
+
+	Languages = "languages"
+	Mode      = "mode"
+
+	GithubAccessToken    = "github_access_token"
+	SpeakeasyApiKey      = "speakeasy_api_key"
+	OpenAPIDocAuthHeader = "openapi_doc_auth_header"
+	OpenAPIDocAuthToken  = "openapi_doc_auth_token"
 )
 
 type Management struct {
@@ -18,13 +34,8 @@ type Comments struct {
 }
 
 type Generation struct {
-	BaseServerURL          string    `yaml:"baseServerUrl,omitempty"`
-	Comments               *Comments `yaml:"comments,omitempty"`
-	TelemetryEnabled       bool      `yaml:"telemetryEnabled"`
-	SDKClassName           string    `yaml:"sdkClassName"`
-	TagNamespacingDisabled bool      `yaml:"tagNamespacingDisabled,omitempty"`
-	SingleTagPerOp         bool      `yaml:"singleTagPerOp"`
-	SDKFlattening          bool      `yaml:"sdkFlattening"`
+	CommentFields map[string]bool `yaml:"comments,omitempty"`
+	Fields        map[string]any  `yaml:",inline"`
 }
 
 type LanguageConfig struct {
@@ -38,6 +49,8 @@ type SdkGenConfigField struct {
 	RequiredForPublishing *bool   `yaml:"requiredForPublishing,omitempty" json:"required_for_publishing,omitempty"`
 	DefaultValue          *any    `yaml:"defaultValue,omitempty" json:"default_value,omitempty"`
 	Description           *string `yaml:"description,omitempty" json:"description,omitempty"`
+	Language              *string `yaml:"language,omitempty" json:"language,omitempty"`
+	SecretName            *string `yaml:"secretName,omitempty" json:"secret_name,omitempty"`
 	ValidationRegex       *string `yaml:"validationRegex,omitempty" json:"validation_regex,omitempty"`
 	ValidationMessage     *string `yaml:"validationMessage,omitempty" json:"validation_message,omitempty"`
 }
@@ -89,37 +102,9 @@ type Jobs struct {
 }
 
 type Job struct {
-	Uses    string  `yaml:"uses"`
-	With    With    `yaml:"with"`
-	Secrets Secrets `yaml:"secrets"`
-}
-
-type With struct {
-	SpeakeasyVersion     string `yaml:"speakeasy_version,omitempty"`
-	OpenAPIDocLocation   string `yaml:"openapi_doc_location,omitempty"`
-	OpenAPIDocAuthHeader string `yaml:"openapi_doc_auth_header,omitempty"`
-	Languages            string `yaml:"languages,omitempty"`
-	PublishPython        bool   `yaml:"publish_python,omitempty"`
-	PublishTypescript    bool   `yaml:"publish_typescript,omitempty"`
-	PublishJava          bool   `yaml:"publish_java,omitempty"`
-	PublishPhp           bool   `yaml:"publish_php,omitempty"`
-	CreateRelease        bool   `yaml:"create_release,omitempty"`
-	Mode                 string `yaml:"mode,omitempty"`
-	ForceInput           string `yaml:"force,omitempty"`
-}
-
-type Secrets struct {
-	GithubAccessToken   string `yaml:"github_access_token"`
-	SpeakeasyApiKey     string `yaml:"speakeasy_api_key"`
-	OpenAPIDocAuthToken string `yaml:"openapi_doc_auth_token,omitempty"`
-	PypiToken           string `yaml:"pypi_token,omitempty"`
-	NpmToken            string `yaml:"npm_token,omitempty"`
-	PackagistUsername   string `yaml:"packagist_username,omitempty"`
-	PackagistToken      string `yaml:"packagist_token,omitempty"`
-	OssrhUsername       string `yaml:"maven_username,omitempty"`
-	OssrhPassword       string `yaml:"maven_password,omitempty"`
-	JavaGPGSecretKey    string `yaml:"java_gpg_secret_key,omitempty"`
-	JavaGPGPassphrase   string `yaml:"java_gpg_passphrase,omitempty"`
+	Uses    string            `yaml:"uses"`
+	With    map[string]any    `yaml:"with"`
+	Secrets map[string]string `yaml:"secrets"`
 }
 
 type WorkflowDispatch struct {
@@ -149,8 +134,10 @@ func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string
 	cfg := &Config{
 		ConfigVersion: Version,
 		Generation: Generation{
-			SDKClassName:   "SDK",
-			SingleTagPerOp: false,
+			Fields: map[string]any{
+				"sdkClassName":   "SDK",
+				"singleTagPerOp": false,
+			},
 		},
 		Languages: map[string]LanguageConfig{},
 	}
