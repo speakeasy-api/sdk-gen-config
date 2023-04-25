@@ -11,14 +11,12 @@ const (
 	SDKClassName           = "sdkClassName"
 	SingleTagPerOp         = "singleTagPerOp"
 	TagNamespacingDisabled = "tagNamespacingDisabled"
-
-	Languages = "languages"
-	Mode      = "mode"
-
-	GithubAccessToken    = "github_access_token"
-	SpeakeasyApiKey      = "speakeasy_api_key"
-	OpenAPIDocAuthHeader = "openapi_doc_auth_header"
-	OpenAPIDocAuthToken  = "openapi_doc_auth_token"
+	Languages              = "languages"
+	Mode                   = "mode"
+	GithubAccessToken      = "github_access_token"
+	SpeakeasyApiKey        = "speakeasy_api_key"
+	OpenAPIDocAuthHeader   = "openapi_doc_auth_header"
+	OpenAPIDocAuthToken    = "openapi_doc_auth_token"
 )
 
 type Management struct {
