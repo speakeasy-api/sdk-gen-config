@@ -17,6 +17,7 @@ const (
 	SpeakeasyApiKey        = "speakeasy_api_key"
 	OpenAPIDocAuthHeader   = "openapi_doc_auth_header"
 	OpenAPIDocAuthToken    = "openapi_doc_auth_token"
+	OpenAPIDocs            = "openapi_docs"
 )
 
 type Management struct {
