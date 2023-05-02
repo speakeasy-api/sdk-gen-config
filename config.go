@@ -20,6 +20,8 @@ const (
 	OpenAPIDocs            = "openapi_docs"
 )
 
+var CommentFields = []string{"disableComments", "omitDescriptionIfSummaryPresent"}
+
 type Management struct {
 	DocChecksum       string `yaml:"docChecksum"`
 	DocVersion        string `yaml:"docVersion"`
