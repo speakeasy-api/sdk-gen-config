@@ -32,9 +32,7 @@ func upgrade(currentVersion string, cfg map[string]any, uf UpgradeFunc) (map[str
 }
 
 func upgradeToV100(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, error) {
-	generation := map[string]any{
-		"telemetryEnabled": false,
-	}
+	generation := map[string]any{}
 	upgraded := map[string]any{
 		"configVersion": version100,
 		"generation":    generation,
@@ -61,8 +59,8 @@ func upgradeToV100(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 		}
 
 		generation["comments"] = map[string]any{
-			"disabled":                        comments["disabled"],
-			"omitDescriptionIfSummaryPresent": comments["omitdescriptionifsummarypresent"],
+			DisableComments:                 comments["disabled"],
+			OmitDescriptionIfSummaryPresent: comments["omitdescriptionifsummarypresent"],
 		}
 		delete(cfg, "comments")
 	}
@@ -71,12 +69,6 @@ func upgradeToV100(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 	if ok {
 		generation["baseServerUrl"] = baseServerURL
 		delete(cfg, "baseserverurl")
-	}
-
-	telemetryEnabled, ok := cfg["telemetryenabled"]
-	if ok {
-		generation["telemetryEnabled"] = telemetryEnabled
-		delete(cfg, "telemetryenabled")
 	}
 
 	sdkClassName, ok := cfg["sdkclassname"]
