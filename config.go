@@ -6,32 +6,28 @@ const (
 
 	// Constants to be used as keys in the config files
 
-	BaseServerURL          = "baseServerUrl"
-	TelemetryEnabled       = "telemetryEnabled"
-	SDKClassName           = "sdkClassName"
-	SingleTagPerOp         = "singleTagPerOp"
-	TagNamespacingDisabled = "tagNamespacingDisabled"
-	Languages              = "languages"
-	Mode                   = "mode"
-	GithubAccessToken      = "github_access_token"
-	SpeakeasyApiKey        = "speakeasy_api_key"
-	OpenAPIDocAuthHeader   = "openapi_doc_auth_header"
-	OpenAPIDocAuthToken    = "openapi_doc_auth_token"
-	OpenAPIDocs            = "openapi_docs"
+	BaseServerURL                   = "baseServerUrl"
+	SDKClassName                    = "sdkClassName"
+	SingleTagPerOp                  = "singleTagPerOp"
+	TagNamespacingDisabled          = "tagNamespacingDisabled"
+	Languages                       = "languages"
+	Mode                            = "mode"
+	GithubAccessToken               = "github_access_token"
+	SpeakeasyApiKey                 = "speakeasy_api_key"
+	OpenAPIDocAuthHeader            = "openapi_doc_auth_header"
+	OpenAPIDocAuthToken             = "openapi_doc_auth_token"
+	OpenAPIDocs                     = "openapi_docs"
+	OmitDescriptionIfSummaryPresent = "omitDescriptionIfSummaryPresent"
+	DisableComments                 = "disableComments"
 )
 
-var CommentFields = []string{"disableComments", "omitDescriptionIfSummaryPresent"}
+var CommentFields = []string{DisableComments, OmitDescriptionIfSummaryPresent}
 
 type Management struct {
 	DocChecksum       string `yaml:"docChecksum"`
 	DocVersion        string `yaml:"docVersion"`
 	SpeakeasyVersion  string `yaml:"speakeasyVersion"`
 	GenerationVersion string `yaml:"generationVersion,omitempty"`
-}
-
-type Comments struct {
-	Disabled                        bool `yaml:"disabled,omitempty"`
-	OmitDescriptionIfSummaryPresent bool `yaml:"omitDescriptionIfSummaryPresent,omitempty"`
 }
 
 type Generation struct {
@@ -136,8 +132,8 @@ func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string
 		ConfigVersion: Version,
 		Generation: Generation{
 			Fields: map[string]any{
-				"sdkClassName":   "SDK",
-				"singleTagPerOp": false,
+				SDKClassName:   "SDK",
+				SingleTagPerOp: false,
 			},
 		},
 		Languages: map[string]LanguageConfig{},

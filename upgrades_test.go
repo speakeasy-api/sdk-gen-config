@@ -31,7 +31,6 @@ func Test_upgrade_Success(t *testing.T) {
 						"omitdescriptionifsummarypresent": true,
 					},
 					"baseserverurl":          "http://localhost:8080",
-					"telemetryenabled":       true,
 					"sdkclassname":           "MySDK",
 					"tagnamespacingdisabled": true,
 					"go": map[string]any{
@@ -49,11 +48,10 @@ func Test_upgrade_Success(t *testing.T) {
 				},
 				"generation": map[string]any{
 					"baseServerUrl":          "http://localhost:8080",
-					"telemetryEnabled":       true,
 					"sdkClassName":           "MySDK",
 					"tagNamespacingDisabled": true,
 					"comments": map[string]any{
-						"disabled":                        true,
+						"disableComments":                 true,
 						"omitDescriptionIfSummaryPresent": true,
 					},
 				},
@@ -78,8 +76,7 @@ func Test_upgrade_Success(t *testing.T) {
 			want: map[string]any{
 				"configVersion": version100,
 				"generation": map[string]any{
-					"telemetryEnabled": false,
-					"sdkClassName":     "MySDK",
+					"sdkClassName": "MySDK",
 				},
 				"go": map[string]any{
 					"version":     "0.0.1",

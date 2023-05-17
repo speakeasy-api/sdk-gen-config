@@ -5,10 +5,9 @@ management:
 go:
   version: 1.3.0
   packagename: github.com/speakeasy-api/speakeasy-client-sdk-go
-telemetryenabled: true
 baseserverurl: https://api.prod.speakeasyapi.dev
 sdkclassname: speakeasy
 tagnamespacingdisabled: false
 comments:
-  disable: false
+  disabled: false
   omitdescriptionifsummarypresent: true

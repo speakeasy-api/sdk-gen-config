@@ -34,8 +34,10 @@ func TestLoad_Success(t *testing.T) {
 					},
 				},
 				Generation: Generation{
-					SDKClassName:     "SDK",
-					TelemetryEnabled: false,
+					Fields: map[string]any{
+						SDKClassName:   "SDK",
+						SingleTagPerOp: false,
+					},
 				},
 			},
 		},
@@ -61,11 +63,15 @@ func TestLoad_Success(t *testing.T) {
 					},
 				},
 				Generation: Generation{
-					TelemetryEnabled: true,
-					BaseServerURL:    "https://api.prod.speakeasyapi.dev",
-					SDKClassName:     "speakeasy",
-					Comments: &Comments{
+					Fields: map[string]any{
+						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
+						SDKClassName:           "speakeasy",
+						SingleTagPerOp:         false,
+						TagNamespacingDisabled: false,
+					},
+					CommentFields: map[string]bool{
 						OmitDescriptionIfSummaryPresent: true,
+						DisableComments:                 false,
 					},
 				},
 			},
@@ -92,10 +98,14 @@ func TestLoad_Success(t *testing.T) {
 					},
 				},
 				Generation: Generation{
-					TelemetryEnabled: true,
-					BaseServerURL:    "https://api.prod.speakeasyapi.dev",
-					SDKClassName:     "speakeasy",
-					Comments: &Comments{
+					Fields: map[string]any{
+						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
+						SDKClassName:           "speakeasy",
+						SingleTagPerOp:         false,
+						TagNamespacingDisabled: false,
+					},
+					CommentFields: map[string]bool{
+						DisableComments:                 false,
 						OmitDescriptionIfSummaryPresent: true,
 					},
 				},
@@ -123,10 +133,14 @@ func TestLoad_Success(t *testing.T) {
 					},
 				},
 				Generation: Generation{
-					TelemetryEnabled: true,
-					BaseServerURL:    "https://api.prod.speakeasyapi.dev",
-					SDKClassName:     "speakeasy",
-					Comments: &Comments{
+					Fields: map[string]any{
+						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
+						SDKClassName:           "speakeasy",
+						SingleTagPerOp:         false,
+						TagNamespacingDisabled: false,
+					},
+					CommentFields: map[string]bool{
+						DisableComments:                 false,
 						OmitDescriptionIfSummaryPresent: true,
 					},
 				},
