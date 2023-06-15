@@ -100,6 +100,7 @@ type Jobs struct {
 
 type Job struct {
 	Uses    string            `yaml:"uses"`
+	Env     map[string]string `yaml:"env,omitempty"`
 	With    map[string]any    `yaml:"with"`
 	Secrets map[string]string `yaml:"secrets"`
 }
