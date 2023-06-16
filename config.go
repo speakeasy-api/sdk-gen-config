@@ -60,9 +60,10 @@ type Config struct {
 }
 
 type PublishWorkflow struct {
-	Name string    `yaml:"name"`
-	On   PublishOn `yaml:"on"`
-	Jobs Jobs      `yaml:"jobs"`
+	Name string            `yaml:"name"`
+	Env  map[string]string `yaml:"env,omitempty"`
+	On   PublishOn         `yaml:"on"`
+	Jobs Jobs              `yaml:"jobs"`
 }
 
 type PublishOn struct {
@@ -75,10 +76,11 @@ type Push struct {
 }
 
 type GenerateWorkflow struct {
-	Name        string      `yaml:"name"`
-	Permissions Permissions `yaml:"permissions"`
-	On          GenerateOn  `yaml:"on"`
-	Jobs        Jobs        `yaml:"jobs"`
+	Name        string            `yaml:"name"`
+	Env         map[string]string `yaml:"env,omitempty"`
+	Permissions Permissions       `yaml:"permissions"`
+	On          GenerateOn        `yaml:"on"`
+	Jobs        Jobs              `yaml:"jobs"`
 }
 
 type Permissions struct {
@@ -100,7 +102,6 @@ type Jobs struct {
 
 type Job struct {
 	Uses    string            `yaml:"uses"`
-	Env     map[string]string `yaml:"env,omitempty"`
 	With    map[string]any    `yaml:"with"`
 	Secrets map[string]string `yaml:"secrets"`
 }
