@@ -14,6 +14,7 @@ const (
 	Mode                            = "mode"
 	GithubAccessToken               = "github_access_token"
 	SpeakeasyApiKey                 = "speakeasy_api_key"
+	SpeakeasyServerURL              = "speakeasy_server_url"
 	OpenAPIDocAuthHeader            = "openapi_doc_auth_header"
 	OpenAPIDocAuthToken             = "openapi_doc_auth_token"
 	OpenAPIDocs                     = "openapi_docs"
@@ -60,10 +61,9 @@ type Config struct {
 }
 
 type PublishWorkflow struct {
-	Name string            `yaml:"name"`
-	Env  map[string]string `yaml:"env,omitempty"`
-	On   PublishOn         `yaml:"on"`
-	Jobs Jobs              `yaml:"jobs"`
+	Name string    `yaml:"name"`
+	On   PublishOn `yaml:"on"`
+	Jobs Jobs      `yaml:"jobs"`
 }
 
 type PublishOn struct {
@@ -76,11 +76,10 @@ type Push struct {
 }
 
 type GenerateWorkflow struct {
-	Name        string            `yaml:"name"`
-	Env         map[string]string `yaml:"env,omitempty"`
-	Permissions Permissions       `yaml:"permissions"`
-	On          GenerateOn        `yaml:"on"`
-	Jobs        Jobs              `yaml:"jobs"`
+	Name        string      `yaml:"name"`
+	Permissions Permissions `yaml:"permissions"`
+	On          GenerateOn  `yaml:"on"`
+	Jobs        Jobs        `yaml:"jobs"`
 }
 
 type Permissions struct {
