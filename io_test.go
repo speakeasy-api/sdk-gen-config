@@ -17,10 +17,9 @@ func TestLoad_Success(t *testing.T) {
 		genYaml string
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    *Config
-		wantNew bool
+		name string
+		args args
+		want *Config
 	}{
 		{
 			name: "creates config file if it doesn't exist",
@@ -40,8 +39,8 @@ func TestLoad_Success(t *testing.T) {
 						SingleTagPerOp: false,
 					},
 				},
+				New: true,
 			},
-			wantNew: true,
 		},
 		{
 			name: "loads and upgrades pre v1.0.0 config file",
@@ -157,10 +156,9 @@ func TestLoad_Success(t *testing.T) {
 			require.NoError(t, err)
 			defer os.RemoveAll(dir)
 
-			cfg, newConfig, err := Load(filepath.Join(os.TempDir(), testDir), WithLanguages("go"), WithUpgradeFunc(testUpdateLang))
+			cfg, err := Load(filepath.Join(os.TempDir(), testDir), WithLanguages("go"), WithUpgradeFunc(testUpdateLang))
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, cfg)
-			assert.Equal(t, tt.wantNew, newConfig)
 			_, err = os.Stat(filepath.Join(dir, "gen.yaml"))
 			assert.NoError(t, err)
 		})

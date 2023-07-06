@@ -55,20 +55,18 @@ func WithLanguages(langs ...string) Option {
 	}
 }
 
-func Load(dir string, opts ...Option) (*Config, bool, error) {
+func Load(dir string, opts ...Option) (*Config, error) {
 	o := applyOptions(opts)
 
 	defaultCfg, err := GetDefaultConfig(o.getLanguageDefaultFunc, o.langs...)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
 	cfg, err := GetDefaultConfig(o.getLanguageDefaultFunc, o.langs...)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
-
-	newConfig := false
 
 	// Find existing config file
 	data, path, err := findConfigFile(dir, o)
@@ -76,22 +74,22 @@ func Load(dir string, opts ...Option) (*Config, bool, error) {
 		if errors.Is(err, ErrNotFound) {
 			path = filepath.Join(dir, "gen.yaml")
 
+			cfg.New = true
+
 			// Create new config file if it doesn't exist
 			data, err = write(path, cfg, o)
 			if err != nil {
-				return nil, false, err
+				return nil, err
 			}
-
-			newConfig = true
 		} else {
-			return nil, false, err
+			return nil, err
 		}
 	}
 
 	// Unmarshal config file and check version
 	cfgMap := map[string]any{}
 	if err := yaml.Unmarshal(data, &cfgMap); err != nil {
-		return nil, false, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
+		return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
 	}
 
 	version := ""
@@ -108,18 +106,18 @@ func Load(dir string, opts ...Option) (*Config, bool, error) {
 		// Upgrade config file if version is different and write it
 		cfgMap, err = upgrade(version, cfgMap, o.UpgradeFunc)
 		if err != nil {
-			return nil, false, err
+			return nil, err
 		}
 
 		data, err = write(path, cfgMap, o)
 		if err != nil {
-			return nil, false, err
+			return nil, err
 		}
 	}
 
 	// Okay finally able to unmarshal the config file into expected struct
 	if err := yaml.Unmarshal(data, cfg); err != nil {
-		return nil, false, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
+		return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
 	}
 
 	// Maps are overwritten by unmarshal, so we need to ensure that the defaults are set
@@ -143,10 +141,10 @@ func Load(dir string, opts ...Option) (*Config, bool, error) {
 
 	// And write it again to ensure it's in the correct format and contains all defaults
 	if _, err := write(path, cfg, o); err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
-	return cfg, newConfig, nil
+	return cfg, nil
 }
 
 func Save(dir string, cfg *Config, opts ...Option) error {

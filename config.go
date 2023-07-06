@@ -58,6 +58,7 @@ type Config struct {
 	Management    *Management               `yaml:"management,omitempty"`
 	Generation    Generation                `yaml:"generation"`
 	Languages     map[string]LanguageConfig `yaml:",inline"`
+	New           bool                      `yaml:"-"`
 }
 
 type PublishWorkflow struct {
