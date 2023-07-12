@@ -20,6 +20,7 @@ const (
 	OpenAPIDocs                     = "openapi_docs"
 	OmitDescriptionIfSummaryPresent = "omitDescriptionIfSummaryPresent"
 	DisableComments                 = "disableComments"
+	ClientServerStatusCodesAsErrors = "clientServerStatusCodesAsErrors"
 )
 
 var CommentFields = []string{DisableComments, OmitDescriptionIfSummaryPresent}

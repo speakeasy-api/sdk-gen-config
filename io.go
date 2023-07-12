@@ -68,6 +68,8 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		return nil, err
 	}
 
+	newConfig := false
+
 	// Find existing config file
 	data, path, err := findConfigFile(dir, o)
 	if err != nil {
@@ -75,6 +77,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 			path = filepath.Join(dir, "gen.yaml")
 
 			cfg.New = true
+			newConfig = true
 
 			// Create new config file if it doesn't exist
 			data, err = write(path, cfg, o)
@@ -134,7 +137,9 @@ func Load(dir string, opts ...Option) (*Config, error) {
 			}
 
 			if _, ok := cfg.Languages[lang].Cfg[k]; !ok {
-				cfg.Languages[lang].Cfg[k] = v
+				if newConfig || k != ClientServerStatusCodesAsErrors { // Special case for ensuring no breaking changes to existing configs, if we do this for more config options in the future we should make this systematic
+					cfg.Languages[lang].Cfg[k] = v
+				}
 			}
 		}
 	}
