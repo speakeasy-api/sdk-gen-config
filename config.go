@@ -60,6 +60,7 @@ type Config struct {
 	Generation    Generation                `yaml:"generation"`
 	Languages     map[string]LanguageConfig `yaml:",inline"`
 	New           bool                      `yaml:"-"`
+	Features      map[string]string         `yaml:"features,omitempty"`
 }
 
 type PublishWorkflow struct {
@@ -140,6 +141,7 @@ func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string
 			},
 		},
 		Languages: map[string]LanguageConfig{},
+		Features:  map[string]string{},
 	}
 
 	for _, lang := range langs {

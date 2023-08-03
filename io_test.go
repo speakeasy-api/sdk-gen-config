@@ -39,7 +39,8 @@ func TestLoad_Success(t *testing.T) {
 						SingleTagPerOp: false,
 					},
 				},
-				New: true,
+				New:      true,
+				Features: map[string]string{},
 			},
 		},
 		{
@@ -75,6 +76,7 @@ func TestLoad_Success(t *testing.T) {
 						DisableComments:                 false,
 					},
 				},
+				Features: map[string]string{},
 			},
 		},
 		{
@@ -110,6 +112,9 @@ func TestLoad_Success(t *testing.T) {
 						OmitDescriptionIfSummaryPresent: true,
 					},
 				},
+				Features: map[string]string{
+					"core": "2.90.0",
+				},
 			},
 		},
 		{
@@ -144,6 +149,9 @@ func TestLoad_Success(t *testing.T) {
 						DisableComments:                 false,
 						OmitDescriptionIfSummaryPresent: true,
 					},
+				},
+				Features: map[string]string{
+					"core": "2.90.0",
 				},
 			},
 		},
