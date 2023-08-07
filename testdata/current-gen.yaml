@@ -14,4 +14,5 @@ management:
   docVersion: 0.3.0
   speakeasyVersion: 1.3.1
 features:
-  core: 2.90.0
+  go:
+    core: 2.90.0

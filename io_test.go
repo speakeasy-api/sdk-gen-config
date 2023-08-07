@@ -40,7 +40,7 @@ func TestLoad_Success(t *testing.T) {
 					},
 				},
 				New:      true,
-				Features: map[string]string{},
+				Features: map[string]map[string]string{},
 			},
 		},
 		{
@@ -76,7 +76,7 @@ func TestLoad_Success(t *testing.T) {
 						DisableComments:                 false,
 					},
 				},
-				Features: map[string]string{},
+				Features: map[string]map[string]string{},
 			},
 		},
 		{
@@ -112,8 +112,10 @@ func TestLoad_Success(t *testing.T) {
 						OmitDescriptionIfSummaryPresent: true,
 					},
 				},
-				Features: map[string]string{
-					"core": "2.90.0",
+				Features: map[string]map[string]string{
+					"go": {
+						"core": "2.90.0",
+					},
 				},
 			},
 		},
@@ -150,8 +152,10 @@ func TestLoad_Success(t *testing.T) {
 						OmitDescriptionIfSummaryPresent: true,
 					},
 				},
-				Features: map[string]string{
-					"core": "2.90.0",
+				Features: map[string]map[string]string{
+					"go": {
+						"core": "2.90.0",
+					},
 				},
 			},
 		},

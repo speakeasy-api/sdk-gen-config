@@ -55,12 +55,12 @@ type SdkGenConfigField struct {
 }
 
 type Config struct {
-	ConfigVersion string                    `yaml:"configVersion"`
-	Management    *Management               `yaml:"management,omitempty"`
-	Generation    Generation                `yaml:"generation"`
-	Languages     map[string]LanguageConfig `yaml:",inline"`
-	New           bool                      `yaml:"-"`
-	Features      map[string]string         `yaml:"features,omitempty"`
+	ConfigVersion string                       `yaml:"configVersion"`
+	Management    *Management                  `yaml:"management,omitempty"`
+	Generation    Generation                   `yaml:"generation"`
+	Languages     map[string]LanguageConfig    `yaml:",inline"`
+	New           bool                         `yaml:"-"`
+	Features      map[string]map[string]string `yaml:"features,omitempty"`
 }
 
 type PublishWorkflow struct {
@@ -141,7 +141,7 @@ func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string
 			},
 		},
 		Languages: map[string]LanguageConfig{},
-		Features:  map[string]string{},
+		Features:  map[string]map[string]string{},
 	}
 
 	for _, lang := range langs {
