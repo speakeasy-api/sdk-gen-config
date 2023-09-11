@@ -37,6 +37,12 @@ type Generation struct {
 	Fields        map[string]any  `yaml:",inline"`
 }
 
+type DevContainers struct {
+	Enabled bool `yaml:"enabled"`
+	// This can be a local path or a remote URL
+	SchemaPath bool `yaml:"schemaPath"`
+}
+
 type LanguageConfig struct {
 	Version string         `yaml:"version"`
 	Cfg     map[string]any `yaml:",inline"`
@@ -57,6 +63,7 @@ type SdkGenConfigField struct {
 type Config struct {
 	ConfigVersion string                       `yaml:"configVersion"`
 	Management    *Management                  `yaml:"management,omitempty"`
+	DevContainers *DevContainers               `yaml:"devcontainers,omitempty"`
 	Generation    Generation                   `yaml:"generation"`
 	Languages     map[string]LanguageConfig    `yaml:",inline"`
 	New           bool                         `yaml:"-"`
