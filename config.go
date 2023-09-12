@@ -41,7 +41,7 @@ type Generation struct {
 type DevContainers struct {
 	Enabled bool `yaml:"enabled"`
 	// This can be a local path or a remote URL
-	SchemaPath bool `yaml:"schemaPath"`
+	SchemaPath string `yaml:"schemaPath"`
 }
 
 type LanguageConfig struct {
