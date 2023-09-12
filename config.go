@@ -34,6 +34,7 @@ type Management struct {
 
 type Generation struct {
 	CommentFields map[string]bool `yaml:"comments,omitempty"`
+	DevContainers *DevContainers  `yaml:"devContainers,omitempty"`
 	Fields        map[string]any  `yaml:",inline"`
 }
 
@@ -63,7 +64,6 @@ type SdkGenConfigField struct {
 type Config struct {
 	ConfigVersion string                       `yaml:"configVersion"`
 	Management    *Management                  `yaml:"management,omitempty"`
-	DevContainers *DevContainers               `yaml:"devcontainers,omitempty"`
 	Generation    Generation                   `yaml:"generation"`
 	Languages     map[string]LanguageConfig    `yaml:",inline"`
 	New           bool                         `yaml:"-"`
