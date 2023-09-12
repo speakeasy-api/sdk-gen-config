@@ -34,7 +34,14 @@ type Management struct {
 
 type Generation struct {
 	CommentFields map[string]bool `yaml:"comments,omitempty"`
+	DevContainers *DevContainers  `yaml:"devContainers,omitempty"`
 	Fields        map[string]any  `yaml:",inline"`
+}
+
+type DevContainers struct {
+	Enabled bool `yaml:"enabled"`
+	// This can be a local path or a remote URL
+	SchemaPath bool `yaml:"schemaPath"`
 }
 
 type LanguageConfig struct {
