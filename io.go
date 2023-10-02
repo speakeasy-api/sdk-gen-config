@@ -20,6 +20,7 @@ type (
 	ReadFileFunc           func(filename string) ([]byte, error)
 	WriteFileFunc          func(filename string, data []byte, perm os.FileMode) error
 	GetLanguageDefaultFunc func(string) (*LanguageConfig, error)
+	TransformerFunc		   func(*Config) (*Config, error)
 )
 
 type options struct {
@@ -28,6 +29,7 @@ type options struct {
 	UpgradeFunc            UpgradeFunc
 	getLanguageDefaultFunc GetLanguageDefaultFunc
 	langs                  []string
+	transformerFunc        TransformerFunc
 }
 
 func WithFileSystemFuncs(rf ReadFileFunc, wf WriteFileFunc) Option {
@@ -52,6 +54,12 @@ func WithLanguageDefaultFunc(f GetLanguageDefaultFunc) Option {
 func WithLanguages(langs ...string) Option {
 	return func(o *options) {
 		o.langs = langs
+	}
+}
+
+func WithTransformerFunc(f TransformerFunc) Option {
+	return func(o *options) {
+		o.transformerFunc = f
 	}
 }
 
@@ -141,6 +149,13 @@ func Load(dir string, opts ...Option) (*Config, error) {
 					cfg.Languages[lang].Cfg[k] = v
 				}
 			}
+		}
+	}
+
+	if o.transformerFunc != nil {
+		cfg, err = o.transformerFunc(cfg);
+		if err != nil {
+			return nil, err
 		}
 	}
 
