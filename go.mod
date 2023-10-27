@@ -1,8 +1,10 @@
 module github.com/speakeasy-api/sdk-gen-config
 
-go 1.19
+go 1.21
 
 require (
+	github.com/AlekSi/pointer v1.2.0
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
 )

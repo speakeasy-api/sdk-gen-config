@@ -1,29 +1,24 @@
 package config
 
+import (
+	"github.com/AlekSi/pointer"
+	"github.com/mitchellh/mapstructure"
+)
+
 const (
 	Version               = "1.0.0"
 	GithubWritePermission = "write"
 
 	// Constants to be used as keys in the config files
-
-	BaseServerURL                   = "baseServerUrl"
-	SDKClassName                    = "sdkClassName"
-	SingleTagPerOp                  = "singleTagPerOp"
-	TagNamespacingDisabled          = "tagNamespacingDisabled"
-	Languages                       = "languages"
-	Mode                            = "mode"
-	GithubAccessToken               = "github_access_token"
-	SpeakeasyApiKey                 = "speakeasy_api_key"
-	SpeakeasyServerURL              = "speakeasy_server_url"
-	OpenAPIDocAuthHeader            = "openapi_doc_auth_header"
-	OpenAPIDocAuthToken             = "openapi_doc_auth_token"
-	OpenAPIDocs                     = "openapi_docs"
-	OmitDescriptionIfSummaryPresent = "omitDescriptionIfSummaryPresent"
-	DisableComments                 = "disableComments"
-	ClientServerStatusCodesAsErrors = "clientServerStatusCodesAsErrors"
+	Languages            = "languages"
+	Mode                 = "mode"
+	GithubAccessToken    = "github_access_token"
+	SpeakeasyApiKey      = "speakeasy_api_key"
+	SpeakeasyServerURL   = "speakeasy_server_url"
+	OpenAPIDocAuthHeader = "openapi_doc_auth_header"
+	OpenAPIDocAuthToken  = "openapi_doc_auth_token"
+	OpenAPIDocs          = "openapi_docs"
 )
-
-var CommentFields = []string{DisableComments, OmitDescriptionIfSummaryPresent}
 
 type Management struct {
 	DocChecksum       string `yaml:"docChecksum"`
@@ -32,10 +27,19 @@ type Management struct {
 	GenerationVersion string `yaml:"generationVersion,omitempty"`
 }
 
+type Comments struct {
+	OmitDescriptionIfSummaryPresent bool `yaml:"omitDescriptionIfSummaryPresent,omitempty"`
+	DisableComments                 bool `yaml:"disableComments,omitempty"`
+}
+
 type Generation struct {
-	CommentFields map[string]bool `yaml:"comments,omitempty"`
-	DevContainers *DevContainers  `yaml:"devContainers,omitempty"`
-	Fields        map[string]any  `yaml:",inline"`
+	Comments               *Comments      `yaml:"comments,omitempty"`
+	DevContainers          *DevContainers `yaml:"devContainers,omitempty"`
+	BaseServerURL          string         `yaml:"baseServerUrl,omitempty"`
+	SDKClassName           string         `yaml:"sdkClassName,omitempty"`
+	SingleTagPerOp         bool           `yaml:"singleTagPerOp,omitempty"`
+	TagNamespacingDisabled bool           `yaml:"tagNamespacingDisabled,omitempty"`
+	RepoURL                string         `yaml:"repoURL,omitempty"`
 }
 
 type DevContainers struct {
@@ -49,7 +53,7 @@ type LanguageConfig struct {
 	Cfg     map[string]any `yaml:",inline"`
 }
 
-type SdkGenConfigField struct {
+type SDKGenConfigField struct {
 	Name                  string  `yaml:"name" json:"name"`
 	Required              bool    `yaml:"required" json:"required"`
 	RequiredForPublishing *bool   `yaml:"requiredForPublishing,omitempty" json:"required_for_publishing,omitempty"`
@@ -59,6 +63,7 @@ type SdkGenConfigField struct {
 	SecretName            *string `yaml:"secretName,omitempty" json:"secret_name,omitempty"`
 	ValidationRegex       *string `yaml:"validationRegex,omitempty" json:"validation_regex,omitempty"`
 	ValidationMessage     *string `yaml:"validationMessage,omitempty" json:"validation_message,omitempty"`
+	TestValue             *any    `yaml:"testValue,omitempty" json:"test_value,omitempty"`
 }
 
 type Config struct {
@@ -66,7 +71,7 @@ type Config struct {
 	Management    *Management                  `yaml:"management,omitempty"`
 	Generation    Generation                   `yaml:"generation"`
 	Languages     map[string]LanguageConfig    `yaml:",inline"`
-	New           bool                         `yaml:"-"`
+	New           map[string]bool              `yaml:"-"`
 	Features      map[string]map[string]string `yaml:"features,omitempty"`
 }
 
@@ -133,32 +138,51 @@ type Force struct {
 	Default     bool   `yaml:"default"`
 }
 
-type SdkGenConfig struct {
-	SdkGenLanguageConfig map[string][]SdkGenConfigField `json:"language_configs"`
-	SdkGenCommonConfig   []SdkGenConfigField            `json:"common_config"`
+type SDKGenConfig struct {
+	SDKGenLanguageConfig map[string][]SDKGenConfigField `json:"language_configs"`
+	SDKGenCommonConfig   []SDKGenConfigField            `json:"common_config"`
 }
 
-func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string) (*Config, error) {
-	cfg := &Config{
-		ConfigVersion: Version,
-		Generation: Generation{
-			Fields: map[string]any{
-				SDKClassName:   "SDK",
-				SingleTagPerOp: false,
-			},
-		},
-		Languages: map[string]LanguageConfig{},
-		Features:  map[string]map[string]string{},
+func GetDefaultConfig(newSDK bool, getLangDefaultFunc GetLanguageDefaultFunc, langs map[string]bool) (*Config, error) {
+	defaults := GetGenerationDefaults(newSDK)
+
+	fields := map[string]any{}
+	for _, field := range defaults {
+		if field.DefaultValue != nil {
+			fields[field.Name] = *field.DefaultValue
+		}
 	}
 
-	for _, lang := range langs {
+	var genConfig Generation
+
+	d, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result:  &genConfig,
+		TagName: "yaml",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := d.Decode(fields); err != nil {
+		return nil, err
+	}
+
+	cfg := &Config{
+		ConfigVersion: Version,
+		Generation:    genConfig,
+		Languages:     map[string]LanguageConfig{},
+		Features:      map[string]map[string]string{},
+		New:           map[string]bool{},
+	}
+
+	for lang, new := range langs {
 		langDefault := &LanguageConfig{
 			Version: "0.0.1",
 		}
 
 		if getLangDefaultFunc != nil {
 			var err error
-			langDefault, err = getLangDefaultFunc(lang)
+			langDefault, err = getLangDefaultFunc(lang, new)
 			if err != nil {
 				return nil, err
 			}
@@ -168,4 +192,72 @@ func GetDefaultConfig(getLangDefaultFunc GetLanguageDefaultFunc, langs ...string
 	}
 
 	return cfg, nil
+}
+
+func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
+	return []SDKGenConfigField{
+		{
+			Name:              "baseServerURL",
+			Required:          false,
+			DefaultValue:      ptr(""),
+			Description:       pointer.To("The base URL of the server. This value will be used if global servers are not defined in the spec."),
+			ValidationRegex:   pointer.To(`^(https?):\/\/([\w\-]+\.)+\w+(\/.*)?$`),
+			ValidationMessage: pointer.To("Must be a valid server URL"),
+		},
+		{
+			Name:              "sdkClassName",
+			Required:          false,
+			DefaultValue:      ptr("SDK"),
+			Description:       pointer.To("Generated name of the root SDK class"),
+			ValidationRegex:   pointer.To(`^[\w.\-]+$`),
+			ValidationMessage: pointer.To("Letters, numbers, or .-_ only"),
+		},
+		{
+			Name:         "tagNamespacingDisabled",
+			Required:     false,
+			DefaultValue: ptr(false),
+			Description:  pointer.To("All operations will be created under the root SDK class instead of being namespaced by tag"),
+		},
+		{
+			Name:         "singleTagPerOp",
+			Required:     false,
+			DefaultValue: ptr(false),
+			Description:  pointer.To("Operations with multiple tags will only generate methods namespaced by the first tag"),
+		},
+		{
+			Name:         "disableComments",
+			Required:     false,
+			DefaultValue: ptr(false),
+			Description:  pointer.To("Disable generating comments from spec on the SDK"),
+		},
+		{
+			Name:         "omitDescriptionIfSummaryPresent",
+			Required:     false,
+			DefaultValue: ptr(false),
+			Description:  pointer.To("Omit generating comment descriptions if spec provides a summary"),
+		},
+	}
+}
+
+func (c *Config) GetGenerationFieldsMap() (map[string]any, error) {
+	fields := map[string]any{}
+
+	// Yes the decoder can encode too :face_palm:
+	d, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result:  &fields,
+		TagName: "yaml",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := d.Decode(c.Generation); err != nil {
+		return nil, err
+	}
+
+	return fields, nil
+}
+
+func ptr(a any) *any {
+	return &a
 }

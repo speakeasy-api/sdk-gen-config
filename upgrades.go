@@ -59,8 +59,8 @@ func upgradeToV100(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 		}
 
 		generation["comments"] = map[string]any{
-			DisableComments:                 comments["disabled"],
-			OmitDescriptionIfSummaryPresent: comments["omitdescriptionifsummarypresent"],
+			"disableComments":                 comments["disabled"],
+			"omitDescriptionIfSummaryPresent": comments["omitdescriptionifsummarypresent"],
 		}
 		delete(cfg, "comments")
 	}
