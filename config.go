@@ -1,6 +1,8 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/AlekSi/pointer"
 	"github.com/mitchellh/mapstructure"
 )
@@ -40,6 +42,7 @@ type Generation struct {
 	SingleTagPerOp         bool           `yaml:"singleTagPerOp,omitempty"`
 	TagNamespacingDisabled bool           `yaml:"tagNamespacingDisabled,omitempty"`
 	RepoURL                string         `yaml:"repoURL,omitempty"`
+	MaintainOpenAPIOrder   bool           `yaml:"maintainOpenAPIOrder,omitempty"`
 }
 
 type DevContainers struct {
@@ -149,7 +152,25 @@ func GetDefaultConfig(newSDK bool, getLangDefaultFunc GetLanguageDefaultFunc, la
 	fields := map[string]any{}
 	for _, field := range defaults {
 		if field.DefaultValue != nil {
-			fields[field.Name] = *field.DefaultValue
+			if strings.Contains(field.Name, ".") {
+				parts := strings.Split(field.Name, ".")
+
+				currMap := fields
+
+				for i, part := range parts {
+					if i == len(parts)-1 {
+						currMap[part] = *field.DefaultValue
+					} else {
+						if _, ok := currMap[part]; !ok {
+							currMap[part] = map[string]any{}
+						}
+
+						currMap = currMap[part].(map[string]any)
+					}
+				}
+			} else {
+				fields[field.Name] = *field.DefaultValue
+			}
 		}
 	}
 
@@ -225,16 +246,22 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Description:  pointer.To("Operations with multiple tags will only generate methods namespaced by the first tag"),
 		},
 		{
-			Name:         "disableComments",
+			Name:         "comments.disableComments",
 			Required:     false,
 			DefaultValue: ptr(false),
 			Description:  pointer.To("Disable generating comments from spec on the SDK"),
 		},
 		{
-			Name:         "omitDescriptionIfSummaryPresent",
+			Name:         "comments.omitDescriptionIfSummaryPresent",
 			Required:     false,
 			DefaultValue: ptr(false),
 			Description:  pointer.To("Omit generating comment descriptions if spec provides a summary"),
+		},
+		{
+			Name:         "maintainOpenAPIOrder",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Maintains the order of things like parameters and fields when generating the SDK"),
 		},
 	}
 }

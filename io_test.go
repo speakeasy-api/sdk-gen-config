@@ -36,8 +36,13 @@ func TestLoad_Success(t *testing.T) {
 					},
 				},
 				Generation: Generation{
-					SDKClassName:   "SDK",
-					SingleTagPerOp: false,
+					Comments: &Comments{
+						DisableComments:                 false,
+						OmitDescriptionIfSummaryPresent: false,
+					},
+					SDKClassName:         "SDK",
+					SingleTagPerOp:       false,
+					MaintainOpenAPIOrder: true,
 				},
 				New: map[string]bool{
 					"go": true,
