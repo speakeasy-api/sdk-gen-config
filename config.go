@@ -23,15 +23,30 @@ const (
 )
 
 type Management struct {
-	DocChecksum       string `yaml:"docChecksum"`
-	DocVersion        string `yaml:"docVersion"`
-	SpeakeasyVersion  string `yaml:"speakeasyVersion"`
-	GenerationVersion string `yaml:"generationVersion,omitempty"`
+	DocChecksum          string         `yaml:"docChecksum"`
+	DocVersion           string         `yaml:"docVersion"`
+	SpeakeasyVersion     string         `yaml:"speakeasyVersion"`
+	GenerationVersion    string         `yaml:"generationVersion,omitempty"`
+	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type Comments struct {
-	OmitDescriptionIfSummaryPresent bool `yaml:"omitDescriptionIfSummaryPresent,omitempty"`
-	DisableComments                 bool `yaml:"disableComments,omitempty"`
+	OmitDescriptionIfSummaryPresent bool           `yaml:"omitDescriptionIfSummaryPresent,omitempty"`
+	DisableComments                 bool           `yaml:"disableComments,omitempty"`
+	AdditionalProperties            map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+}
+
+type OptionalPropertyRenderingOption string
+
+const (
+	OptionalPropertyRenderingOptionAlways      OptionalPropertyRenderingOption = "always"
+	OptionalPropertyRenderingOptionNever       OptionalPropertyRenderingOption = "never"
+	OptionalPropertyRenderingOptionWithExample OptionalPropertyRenderingOption = "withExample"
+)
+
+type UsageSnippets struct {
+	OptionalPropertyRendering OptionalPropertyRenderingOption `yaml:"optionalPropertyRendering"`
+	AdditionalProperties      map[string]any                  `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type Generation struct {
@@ -43,12 +58,15 @@ type Generation struct {
 	TagNamespacingDisabled bool           `yaml:"tagNamespacingDisabled,omitempty"`
 	RepoURL                string         `yaml:"repoURL,omitempty"`
 	MaintainOpenAPIOrder   bool           `yaml:"maintainOpenAPIOrder,omitempty"`
+	UsageSnippets          *UsageSnippets `yaml:"usageSnippets,omitempty"`
+	AdditionalProperties   map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type DevContainers struct {
 	Enabled bool `yaml:"enabled"`
 	// This can be a local path or a remote URL
-	SchemaPath string `yaml:"schemaPath"`
+	SchemaPath           string         `yaml:"schemaPath"`
+	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type LanguageConfig struct {
@@ -262,6 +280,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Maintains the order of things like parameters and fields when generating the SDK"),
+		},
+		{
+			Name:         "usageSnippets.optionalPropertyRendering",
+			Required:     false,
+			DefaultValue: ptr(OptionalPropertyRenderingOptionWithExample),
+			Description:  pointer.To("Controls how optional properties are rendered in usage snippets, by default they will be rendered when an example is present in the OpenAPI spec"),
 		},
 	}
 }
