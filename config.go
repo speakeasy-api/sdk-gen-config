@@ -50,16 +50,18 @@ type UsageSnippets struct {
 }
 
 type Generation struct {
-	Comments               *Comments      `yaml:"comments,omitempty"`
-	DevContainers          *DevContainers `yaml:"devContainers,omitempty"`
-	BaseServerURL          string         `yaml:"baseServerUrl,omitempty"`
-	SDKClassName           string         `yaml:"sdkClassName,omitempty"`
-	SingleTagPerOp         bool           `yaml:"singleTagPerOp,omitempty"`
-	TagNamespacingDisabled bool           `yaml:"tagNamespacingDisabled,omitempty"`
-	RepoURL                string         `yaml:"repoURL,omitempty"`
-	MaintainOpenAPIOrder   bool           `yaml:"maintainOpenAPIOrder,omitempty"`
-	UsageSnippets          *UsageSnippets `yaml:"usageSnippets,omitempty"`
-	AdditionalProperties   map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	Comments                    *Comments      `yaml:"comments,omitempty"`
+	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
+	BaseServerURL               string         `yaml:"baseServerUrl,omitempty"`
+	SDKClassName                string         `yaml:"sdkClassName,omitempty"`
+	SingleTagPerOp              bool           `yaml:"singleTagPerOp,omitempty"`
+	TagNamespacingDisabled      bool           `yaml:"tagNamespacingDisabled,omitempty"`
+	RepoURL                     string         `yaml:"repoURL,omitempty"`
+	MaintainOpenAPIOrder        bool           `yaml:"maintainOpenAPIOrder,omitempty"`
+	UsageSnippets               *UsageSnippets `yaml:"usageSnippets,omitempty"`
+	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty"`
+
+	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type DevContainers struct {
@@ -286,6 +288,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(OptionalPropertyRenderingOptionWithExample),
 			Description:  pointer.To("Controls how optional properties are rendered in usage snippets, by default they will be rendered when an example is present in the OpenAPI spec"),
+		},
+		{
+			Name:         "useClassNamesForArrayFields",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Use class names for array fields instead of the child's schema type"),
 		},
 	}
 }
