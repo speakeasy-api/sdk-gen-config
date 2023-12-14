@@ -49,6 +49,11 @@ type UsageSnippets struct {
 	AdditionalProperties      map[string]any                  `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
+type Fixes struct {
+	NameResolutionDec2023 bool           `yaml:"nameResolutionDec2023"`
+	AdditionalProperties  map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+}
+
 type Generation struct {
 	Comments                    *Comments      `yaml:"comments,omitempty"`
 	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
@@ -60,6 +65,7 @@ type Generation struct {
 	MaintainOpenAPIOrder        bool           `yaml:"maintainOpenAPIOrder,omitempty"`
 	UsageSnippets               *UsageSnippets `yaml:"usageSnippets,omitempty"`
 	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty"`
+	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
 
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
@@ -294,6 +300,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Use class names for array fields instead of the child's schema type"),
+		},
+		{
+			Name:         "fixes.nameResolutionDec2023",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Enables a number of breaking changes introduced in December 2023, that improve name resolution for inline schemas and reduce chances of name collisions"),
 		},
 	}
 }
