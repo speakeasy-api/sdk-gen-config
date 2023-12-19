@@ -212,14 +212,23 @@ func Save(dir string, cfg *Config, opts ...Option) error {
 }
 
 func findConfigFile(dir string, o *options) ([]byte, string, error) {
-	path := filepath.Join(dir, "gen.yaml")
+	absPath, err := filepath.Abs(dir)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get absolute path: %w", err)
+	}
+
+	path := filepath.Join(absPath, "gen.yaml")
 
 	for {
 		data, err := o.readFileFunc(path)
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				currentDir := filepath.Dir(path)
-				if currentDir == "." || currentDir == "/" {
+				// Check for the root of the filesystem or path
+				// ie `.` for `./something`
+				// or `/` for `/some/absolute/path` in linux
+				// or `:\\` for `C:\\` in windows
+				if currentDir == "." || currentDir == "/" || currentDir[1:] == ":\\" {
 					return nil, "", ErrNotFound
 				}
 

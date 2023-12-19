@@ -43,6 +43,13 @@ func TestLoad_Success(t *testing.T) {
 					SDKClassName:         "SDK",
 					SingleTagPerOp:       false,
 					MaintainOpenAPIOrder: true,
+					UsageSnippets: &UsageSnippets{
+						OptionalPropertyRendering: "withExample",
+					},
+					Fixes: &Fixes{
+						NameResolutionDec2023: true,
+					},
+					UseClassNamesForArrayFields: true,
 				},
 				New: map[string]bool{
 					"go": true,
@@ -81,6 +88,12 @@ func TestLoad_Success(t *testing.T) {
 						OmitDescriptionIfSummaryPresent: true,
 						DisableComments:                 false,
 					},
+					UsageSnippets: &UsageSnippets{
+						OptionalPropertyRendering: "withExample",
+					},
+					Fixes: &Fixes{
+						NameResolutionDec2023: false,
+					},
 				},
 				Features: map[string]map[string]string{},
 				New:      map[string]bool{},
@@ -116,6 +129,12 @@ func TestLoad_Success(t *testing.T) {
 					Comments: &Comments{
 						DisableComments:                 false,
 						OmitDescriptionIfSummaryPresent: true,
+					},
+					UsageSnippets: &UsageSnippets{
+						OptionalPropertyRendering: "withExample",
+					},
+					Fixes: &Fixes{
+						NameResolutionDec2023: false,
 					},
 				},
 				Features: map[string]map[string]string{
@@ -156,6 +175,12 @@ func TestLoad_Success(t *testing.T) {
 					Comments: &Comments{
 						DisableComments:                 false,
 						OmitDescriptionIfSummaryPresent: true,
+					},
+					UsageSnippets: &UsageSnippets{
+						OptionalPropertyRendering: "withExample",
+					},
+					Fixes: &Fixes{
+						NameResolutionDec2023: false,
 					},
 				},
 				Features: map[string]map[string]string{
@@ -199,6 +224,12 @@ func TestLoad_Success(t *testing.T) {
 					Comments: &Comments{
 						DisableComments:                 false,
 						OmitDescriptionIfSummaryPresent: true,
+					},
+					UsageSnippets: &UsageSnippets{
+						OptionalPropertyRendering: "withExample",
+					},
+					Fixes: &Fixes{
+						NameResolutionDec2023: false,
 					},
 				},
 				Features: map[string]map[string]string{
