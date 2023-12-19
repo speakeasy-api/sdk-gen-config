@@ -176,7 +176,8 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		return nil, err
 	}
 
-	if newConfig {
+	// We only write the config files out if upgrading is enabled otherwise we just want to read the new values
+	if newConfig && o.UpgradeFunc != nil {
 		// Write new cfg
 		configData, err = write(configPath, cfg, o)
 		if err != nil {
@@ -184,7 +185,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 	}
 
-	if lockFileData == nil {
+	if lockFileData == nil && o.UpgradeFunc != nil {
 		lockFile := NewLockFile()
 		lockFileData, err = write(lockFilePath, lockFile, o)
 		if err != nil {
@@ -230,9 +231,11 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 	}
 
-	// Finally write it out to finalize any upgrades/defaults added
-	if _, err := write(configPath, cfg, o); err != nil {
-		return nil, err
+	if o.UpgradeFunc != nil {
+		// Finally write it out to finalize any upgrades/defaults added
+		if _, err := write(configPath, cfg, o); err != nil {
+			return nil, err
+		}
 	}
 
 	return &Config{
