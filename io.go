@@ -229,9 +229,6 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	if lockFile.Features == nil {
 		lockFile.Features = make(map[string]map[string]string)
 	}
-	if lockFile.Management == nil {
-		lockFile.Management = &Management{}
-	}
 
 	config := &Config{
 		Config:   cfg,

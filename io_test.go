@@ -63,7 +63,7 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
-					Management:  &Management{},
+					Management:  Management{},
 					Features:    make(map[string]map[string]string),
 				},
 			},
@@ -102,7 +102,7 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
-					Management: &Management{
+					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
@@ -146,7 +146,7 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
-					Management: &Management{
+					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
@@ -195,7 +195,7 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
-					Management: &Management{
+					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
@@ -245,7 +245,7 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
-					Management:  &Management{},
+					Management:  Management{},
 					Features:    make(map[string]map[string]string),
 				},
 			},
@@ -285,7 +285,7 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
-					Management: &Management{
+					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
@@ -337,7 +337,7 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
-					Management: &Management{
+					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
@@ -391,7 +391,7 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
-					Management: &Management{
+					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",

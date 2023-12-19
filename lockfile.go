@@ -5,7 +5,7 @@ import "github.com/google/uuid"
 type LockFile struct {
 	LockVersion          string                       `yaml:"lockVersion"`
 	ID                   string                       `yaml:"id"`
-	Management           *Management                  `yaml:"management,omitempty"`
+	Management           Management                   `yaml:"management"`
 	Features             map[string]map[string]string `yaml:"features,omitempty"`
 	GeneratedFiles       []string                     `yaml:"generatedFiles,omitempty"`
 	AdditionalProperties map[string]any               `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
