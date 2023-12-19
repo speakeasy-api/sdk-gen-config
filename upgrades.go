@@ -7,34 +7,38 @@ import (
 
 var ErrFailedUpgrade = errors.New("failed to upgrade config")
 
-const (
-	version100 = "1.0.0"
-)
-
 type UpgradeFunc func(lang, oldVersion, newVersion string, cfg map[string]any) (map[string]any, error)
 
-func upgrade(currentVersion string, cfg map[string]any, uf UpgradeFunc) (map[string]any, error) {
+func upgrade(currentVersion string, cfg map[string]any, lockFile map[string]any, uf UpgradeFunc) (map[string]any, map[string]any, error) {
 	if currentVersion == "" {
 		var err error
 		currentVersion, cfg, err = upgradeToV100(cfg, uf)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
+		}
+	}
+
+	if currentVersion == v1 {
+		var err error
+		currentVersion, cfg, lockFile, err = upgradeToV200(cfg, uf)
+		if err != nil {
+			return nil, nil, err
 		}
 	}
 
 	// Put upgrade logic for future versions here, also upgrade incrementally between versions
 
 	if currentVersion != Version {
-		return nil, ErrFailedUpgrade
+		return nil, nil, ErrFailedUpgrade
 	}
 
-	return cfg, nil
+	return cfg, lockFile, nil
 }
 
 func upgradeToV100(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, error) {
 	generation := map[string]any{}
 	upgraded := map[string]any{
-		"configVersion": version100,
+		"configVersion": v1,
 		"generation":    generation,
 	}
 
@@ -90,7 +94,7 @@ func upgradeToV100(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 			return "", nil, fmt.Errorf("%w: %s is not a map", ErrFailedUpgrade, lang)
 		}
 
-		langCfg, err := uf(lang, "", version100, langCfg)
+		langCfg, err := uf(lang, "", v1, langCfg)
 		if err != nil {
 			return "", nil, err
 		}
@@ -98,5 +102,41 @@ func upgradeToV100(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 		upgraded[lang] = langCfg
 	}
 
-	return version100, upgraded, nil
+	return v1, upgraded, nil
+}
+
+func upgradeToV200(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, map[string]any, error) {
+	upgradedConfig := map[string]any{
+		"configVersion": v2,
+	}
+
+	newLockFile := map[string]any{
+		"lockVersion": v2,
+		"id":          getUUID(),
+	}
+
+	for key, val := range cfg {
+		switch key {
+		case "configVersion":
+			continue
+		case "management", "features":
+			newLockFile[key] = val
+		case "generation":
+			upgradedConfig[key] = val
+		default:
+			langCfg, ok := val.(map[string]any)
+			if !ok {
+				return "", nil, nil, fmt.Errorf("%w: %s is not a map", ErrFailedUpgrade, key)
+			}
+
+			langCfg, err := uf(key, v1, v2, langCfg)
+			if err != nil {
+				return "", nil, nil, err
+			}
+
+			upgradedConfig[key] = langCfg
+		}
+	}
+
+	return v2, upgradedConfig, newLockFile, nil
 }

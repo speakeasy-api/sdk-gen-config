@@ -14,13 +14,18 @@ import (
 
 var ErrNotFound = errors.New("could not find gen.yaml")
 
+type Config struct {
+	Config   *Configuration
+	LockFile *LockFile
+}
+
 type Option func(*options)
 
 type (
 	ReadFileFunc           func(filename string) ([]byte, error)
 	WriteFileFunc          func(filename string, data []byte, perm os.FileMode) error
 	GetLanguageDefaultFunc func(string, bool) (*LanguageConfig, error)
-	TransformerFunc        func(*Config) (*Config, error)
+	TransformerFunc        func(*Configuration) (*Configuration, error)
 )
 
 type options struct {
@@ -70,10 +75,10 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	newForLang := map[string]bool{}
 
 	// Find existing config file
-	data, path, err := findConfigFile(dir, o)
+	configData, configPath, err := findConfigFile(dir, o)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			path = filepath.Join(dir, "gen.yaml")
+			configPath = filepath.Join(dir, ".speakeasy", "gen.yaml")
 			newConfig = true
 
 			for _, lang := range o.langs {
@@ -84,11 +89,26 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 	}
 
+	lockFilePath := filepath.Join(dir, ".speakeasy", "gen.lock")
+	lockFileData, err := o.readFileFunc(lockFilePath)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return nil, fmt.Errorf("could not read gen.lock: %w", err)
+	}
+
 	if !newConfig {
 		// Unmarshal config file and check version
 		cfgMap := map[string]any{}
-		if err := yaml.Unmarshal(data, &cfgMap); err != nil {
+		if err := yaml.Unmarshal(configData, &cfgMap); err != nil {
 			return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
+		}
+
+		var lockFileMap map[string]any
+		lockFilePresent := false
+		if lockFileData != nil {
+			if err := yaml.Unmarshal(lockFileData, &lockFileMap); err != nil {
+				return nil, fmt.Errorf("could not unmarshal gen.lock: %w", err)
+			}
+			lockFilePresent = true
 		}
 
 		version := ""
@@ -103,27 +123,40 @@ func Load(dir string, opts ...Option) (*Config, error) {
 
 		if version != Version && o.UpgradeFunc != nil {
 			// Upgrade config file if version is different and write it
-			cfgMap, err = upgrade(version, cfgMap, o.UpgradeFunc)
+			cfgMap, lockFileMap, err = upgrade(version, cfgMap, lockFileMap, o.UpgradeFunc)
 			if err != nil {
 				return nil, err
 			}
 
 			// Write back out to disk and update data
-			data, err = write(path, cfgMap, o)
+			configData, err = write(configPath, cfgMap, o)
 			if err != nil {
 				return nil, err
 			}
+
+			if lockFileMap != nil {
+				lockFileData, err = write(lockFilePath, lockFileMap, o)
+				if err != nil {
+					return nil, err
+				}
+			}
 		}
 
-		if cfgMap["features"] == nil && version != "" {
-			for _, lang := range o.langs {
-				newForLang[lang] = true
-			}
-		} else if features, ok := cfgMap["features"].(map[string]interface{}); ok {
-			for _, lang := range o.langs {
-				if _, ok := features[lang]; !ok {
+		if lockFileMap != nil {
+			if lockFileMap["features"] == nil && version != "" {
+				for _, lang := range o.langs {
 					newForLang[lang] = true
 				}
+			} else if features, ok := lockFileMap["features"].(map[string]interface{}); ok {
+				for _, lang := range o.langs {
+					if _, ok := features[lang]; !ok {
+						newForLang[lang] = true
+					}
+				}
+			}
+		} else if !lockFilePresent {
+			for _, lang := range o.langs {
+				newForLang[lang] = true
 			}
 		}
 	}
@@ -145,15 +178,28 @@ func Load(dir string, opts ...Option) (*Config, error) {
 
 	if newConfig {
 		// Write new cfg
-		data, err = write(path, cfg, o)
+		configData, err = write(configPath, cfg, o)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if lockFileData == nil {
+		lockFile := NewLockFile()
+		lockFileData, err = write(lockFilePath, lockFile, o)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// Okay finally able to unmarshal the config file into expected struct
-	if err := yaml.Unmarshal(data, cfg); err != nil {
+	if err := yaml.Unmarshal(configData, cfg); err != nil {
 		return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
+	}
+
+	var lockFile LockFile
+	if err := yaml.Unmarshal(lockFileData, &lockFile); err != nil {
+		return nil, fmt.Errorf("could not unmarshal gen.lock: %w", err)
 	}
 
 	cfg.New = newForLang
@@ -185,11 +231,14 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	}
 
 	// Finally write it out to finalize any upgrades/defaults added
-	if _, err := write(path, cfg, o); err != nil {
+	if _, err := write(configPath, cfg, o); err != nil {
 		return nil, err
 	}
 
-	return cfg, nil
+	return &Config{
+		Config:   cfg,
+		LockFile: &lockFile,
+	}, nil
 }
 
 func Save(dir string, cfg *Config, opts ...Option) error {
@@ -217,7 +266,7 @@ func findConfigFile(dir string, o *options) ([]byte, string, error) {
 		return nil, "", fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	path := filepath.Join(absPath, "gen.yaml")
+	path := filepath.Join(absPath, ".speakeasy", "gen.yaml")
 
 	for {
 		data, err := o.readFileFunc(path)
@@ -231,8 +280,13 @@ func findConfigFile(dir string, o *options) ([]byte, string, error) {
 				if currentDir == "." || currentDir == "/" || currentDir[1:] == ":\\" {
 					return nil, "", ErrNotFound
 				}
+				parentDir := filepath.Dir(currentDir)
+				if filepath.Base(currentDir) != ".speakeasy" {
+					// Check the speakeasy dir in the parent dir first
+					parentDir = filepath.Join(parentDir, ".speakeasy")
+				}
 
-				path = filepath.Join(filepath.Dir(filepath.Dir(path)), "gen.yaml")
+				path = filepath.Join(parentDir, "gen.yaml")
 				continue
 			}
 
@@ -269,7 +323,7 @@ func write(path string, cfg any, o *options) ([]byte, error) {
 func applyOptions(opts []Option) *options {
 	o := &options{
 		readFileFunc:  os.ReadFile,
-		writeFileFunc: os.WriteFile,
+		writeFileFunc: writeFile,
 		langs:         []string{},
 	}
 	for _, opt := range opts {
@@ -277,4 +331,12 @@ func applyOptions(opts []Option) *options {
 	}
 
 	return o
+}
+
+func writeFile(filename string, data []byte, perm os.FileMode) error {
+	if err := os.MkdirAll(filepath.Dir(filename), os.ModePerm); err != nil {
+		return err
+	}
+
+	return os.WriteFile(filename, data, perm)
 }
