@@ -3,6 +3,8 @@ package config
 import (
 	"bufio"
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -25,7 +27,7 @@ type (
 	ReadFileFunc           func(filename string) ([]byte, error)
 	WriteFileFunc          func(filename string, data []byte, perm os.FileMode) error
 	GetLanguageDefaultFunc func(string, bool) (*LanguageConfig, error)
-	TransformerFunc        func(*Configuration) (*Configuration, error)
+	TransformerFunc        func(*Config) (*Config, error)
 )
 
 type options struct {
@@ -224,27 +226,39 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 	}
 
+	if lockFile.Features == nil {
+		lockFile.Features = make(map[string]map[string]string)
+	}
+	if lockFile.Management == nil {
+		lockFile.Management = &Management{}
+	}
+
+	config := &Config{
+		Config:   cfg,
+		LockFile: &lockFile,
+	}
+
 	if o.transformerFunc != nil {
-		cfg, err = o.transformerFunc(cfg)
+		config, err = o.transformerFunc(config)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if o.UpgradeFunc != nil {
-		// Finally write it out to finalize any upgrades/defaults added
-		if _, err := write(configPath, cfg, o); err != nil {
+		// Finally write out the files to solidfy any defaults, upgrades or transformations
+		if _, err := write(configPath, config.Config, o); err != nil {
+			return nil, err
+		}
+		if _, err := write(lockFilePath, config.LockFile, o); err != nil {
 			return nil, err
 		}
 	}
 
-	return &Config{
-		Config:   cfg,
-		LockFile: &lockFile,
-	}, nil
+	return config, nil
 }
 
-func Save(dir string, cfg *Config, opts ...Option) error {
+func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 	o := applyOptions(opts)
 
 	_, path, err := findConfigFile(dir, o)
@@ -261,6 +275,28 @@ func Save(dir string, cfg *Config, opts ...Option) error {
 	}
 
 	return nil
+}
+
+func SaveLockFile(dir string, lockFile *LockFile, opts ...Option) error {
+	o := applyOptions(opts)
+
+	if _, err := write(filepath.Join(dir, ".speakeasy", "gen.lock"), lockFile, o); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetConfigChecksum(dir string, opts ...Option) (string, error) {
+	o := applyOptions(opts)
+
+	data, _, err := findConfigFile(dir, o)
+	if err != nil {
+		return "", err
+	}
+
+	hash := md5.Sum(data)
+	return hex.EncodeToString(hash[:]), nil
 }
 
 func findConfigFile(dir string, o *options) ([]byte, string, error) {

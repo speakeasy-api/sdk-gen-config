@@ -18,8 +18,9 @@ type Management struct {
 	GenerationVersion    string         `yaml:"generationVersion,omitempty"`
 	ReleaseVersion       string         `yaml:"releaseVersion,omitempty"`
 	ConfigChecksum       string         `yaml:"configChecksum,omitempty"`
-	RepoURL              string         `yaml:"repoUrl,omitempty"`
-	InstallationURL      string         `yaml:"installationUrl,omitempty"`
+	RepoURL              string         `yaml:"repoURL,omitempty"`
+	RepoSubDirectory     string         `yaml:"repoSubDirectory,omitempty"`
+	InstallationURL      string         `yaml:"installationURL,omitempty"`
 	Published            bool           `yaml:"published,omitempty"`
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }

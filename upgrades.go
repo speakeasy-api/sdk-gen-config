@@ -115,27 +115,73 @@ func upgradeToV200(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 		"id":          getUUID(),
 	}
 
-	for key, val := range cfg {
-		switch key {
-		case "configVersion":
-			continue
-		case "management", "features":
-			newLockFile[key] = val
-		case "generation":
-			upgradedConfig[key] = val
-		default:
-			langCfg, ok := val.(map[string]any)
-			if !ok {
-				return "", nil, nil, fmt.Errorf("%w: %s is not a map", ErrFailedUpgrade, key)
-			}
+	delete(cfg, "configVersion")
 
-			langCfg, err := uf(key, v1, v2, langCfg)
-			if err != nil {
-				return "", nil, nil, err
-			}
-
-			upgradedConfig[key] = langCfg
+	management := map[string]any{}
+	if mgmt, ok := cfg["management"]; ok {
+		management, ok = mgmt.(map[string]any)
+		if !ok {
+			return "", nil, nil, fmt.Errorf("%w: management is not a map", ErrFailedUpgrade)
 		}
+		delete(cfg, "management")
+	}
+
+	if features, ok := cfg["features"]; ok {
+		newLockFile["features"] = features
+		delete(cfg, "features")
+	}
+
+	if generation, ok := cfg["generation"]; ok {
+		genMap, ok := generation.(map[string]any)
+		if !ok {
+			return "", nil, nil, fmt.Errorf("%w: generation is not a map", ErrFailedUpgrade)
+		}
+
+		if repoURL, ok := genMap["repoURL"]; ok {
+			management["repoURL"] = repoURL
+			delete(genMap, "repoURL")
+		}
+
+		delete(genMap, "comments")
+		delete(genMap, "singleTagPerOp")
+		delete(genMap, "tagNamespacingDisabled")
+
+		upgradedConfig["generation"] = genMap
+		delete(cfg, "generation")
+	}
+
+	// Remaining keys are language configs
+	for lang, langCfgAny := range cfg {
+		langCfg, ok := langCfgAny.(map[string]any)
+		if !ok {
+			return "", nil, nil, fmt.Errorf("%w: %s is not a map", ErrFailedUpgrade, lang)
+		}
+
+		if published, ok := langCfg["published"]; ok {
+			management["published"] = published
+			delete(langCfg, "published")
+		}
+
+		if repoSubDirectory, ok := langCfg["repoSubDirectory"]; ok {
+			management["repoSubDirectory"] = repoSubDirectory
+			delete(langCfg, "repoSubDirectory")
+		}
+
+		if installationURL, ok := langCfg["installationURL"]; ok {
+			management["installationURL"] = installationURL
+			delete(langCfg, "installationURL")
+		}
+
+		langCfg, err := uf(lang, v1, v2, langCfg)
+		if err != nil {
+			return "", nil, nil, err
+		}
+
+		upgradedConfig[lang] = langCfg
+	}
+
+	if len(management) > 0 {
+		newLockFile["management"] = management
 	}
 
 	return v2, upgradedConfig, newLockFile, nil

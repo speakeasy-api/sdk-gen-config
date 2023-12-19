@@ -48,13 +48,8 @@ func Test_upgrade_Success(t *testing.T) {
 			wantCfg: map[string]any{
 				"configVersion": v2,
 				"generation": map[string]any{
-					"baseServerUrl":          "http://localhost:8080",
-					"sdkClassName":           "MySDK",
-					"tagNamespacingDisabled": true,
-					"comments": map[string]any{
-						"disableComments":                 true,
-						"omitDescriptionIfSummaryPresent": true,
-					},
+					"baseServerUrl": "http://localhost:8080",
+					"sdkClassName":  "MySDK",
 				},
 				"go": map[string]any{
 					"version":     "0.0.1",
@@ -113,10 +108,12 @@ func Test_upgrade_Success(t *testing.T) {
 						"baseServerUrl":          "http://localhost:8080",
 						"sdkClassName":           "MySDK",
 						"tagNamespacingDisabled": true,
+						"singleTagPerOp":         true,
 						"comments": map[string]any{
 							"disableComments":                 true,
 							"omitDescriptionIfSummaryPresent": true,
 						},
+						"repoURL": "http://localhost:8080",
 					},
 					"features": map[string]map[string]string{
 						"go": {
@@ -125,21 +122,19 @@ func Test_upgrade_Success(t *testing.T) {
 						},
 					},
 					"go": map[string]any{
-						"version":     "0.0.1",
-						"packageName": "openapi",
+						"version":          "0.0.1",
+						"packageName":      "openapi",
+						"published":        true,
+						"installationURL":  "https://github.com/speakeasy-api/sdk",
+						"repoSubDirectory": "./go",
 					},
 				},
 			},
 			wantCfg: map[string]any{
 				"configVersion": v2,
 				"generation": map[string]any{
-					"baseServerUrl":          "http://localhost:8080",
-					"sdkClassName":           "MySDK",
-					"tagNamespacingDisabled": true,
-					"comments": map[string]any{
-						"disableComments":                 true,
-						"omitDescriptionIfSummaryPresent": true,
-					},
+					"baseServerUrl": "http://localhost:8080",
+					"sdkClassName":  "MySDK",
 				},
 				"go": map[string]any{
 					"version":     "0.0.1",
@@ -153,6 +148,10 @@ func Test_upgrade_Success(t *testing.T) {
 					"docChecksum":      "123",
 					"docVersion":       "1.0.0",
 					"speakeasyVersion": "1.0.0",
+					"repoURL":          "http://localhost:8080",
+					"published":        true,
+					"installationURL":  "https://github.com/speakeasy-api/sdk",
+					"repoSubDirectory": "./go",
 				},
 				"features": map[string]map[string]string{
 					"go": {

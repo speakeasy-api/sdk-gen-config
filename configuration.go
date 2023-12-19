@@ -25,12 +25,6 @@ const (
 	OpenAPIDocs          = "openapi_docs"
 )
 
-type Comments struct {
-	OmitDescriptionIfSummaryPresent bool           `yaml:"omitDescriptionIfSummaryPresent,omitempty"`
-	DisableComments                 bool           `yaml:"disableComments,omitempty"`
-	AdditionalProperties            map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
-}
-
 type OptionalPropertyRenderingOption string
 
 const (
@@ -50,13 +44,9 @@ type Fixes struct {
 }
 
 type Generation struct {
-	Comments                    *Comments      `yaml:"comments,omitempty"`
 	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
 	BaseServerURL               string         `yaml:"baseServerUrl,omitempty"`
 	SDKClassName                string         `yaml:"sdkClassName,omitempty"`
-	SingleTagPerOp              bool           `yaml:"singleTagPerOp,omitempty"`
-	TagNamespacingDisabled      bool           `yaml:"tagNamespacingDisabled,omitempty"`
-	RepoURL                     string         `yaml:"repoURL,omitempty"`
 	MaintainOpenAPIOrder        bool           `yaml:"maintainOpenAPIOrder,omitempty"`
 	UsageSnippets               *UsageSnippets `yaml:"usageSnippets,omitempty"`
 	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty"`
@@ -245,30 +235,6 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Description:       pointer.To("Generated name of the root SDK class"),
 			ValidationRegex:   pointer.To(`^[\w.\-]+$`),
 			ValidationMessage: pointer.To("Letters, numbers, or .-_ only"),
-		},
-		{
-			Name:         "tagNamespacingDisabled",
-			Required:     false,
-			DefaultValue: ptr(false),
-			Description:  pointer.To("All operations will be created under the root SDK class instead of being namespaced by tag"),
-		},
-		{
-			Name:         "singleTagPerOp",
-			Required:     false,
-			DefaultValue: ptr(false),
-			Description:  pointer.To("Operations with multiple tags will only generate methods namespaced by the first tag"),
-		},
-		{
-			Name:         "comments.disableComments",
-			Required:     false,
-			DefaultValue: ptr(false),
-			Description:  pointer.To("Disable generating comments from spec on the SDK"),
-		},
-		{
-			Name:         "comments.omitDescriptionIfSummaryPresent",
-			Required:     false,
-			DefaultValue: ptr(false),
-			Description:  pointer.To("Omit generating comment descriptions if spec provides a summary"),
 		},
 		{
 			Name:         "maintainOpenAPIOrder",

@@ -46,12 +46,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 					},
 					Generation: Generation{
-						Comments: &Comments{
-							DisableComments:                 false,
-							OmitDescriptionIfSummaryPresent: false,
-						},
 						SDKClassName:         "SDK",
-						SingleTagPerOp:       false,
 						MaintainOpenAPIOrder: true,
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
@@ -68,6 +63,8 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
+					Management:  &Management{},
+					Features:    make(map[string]map[string]string),
 				},
 			},
 		},
@@ -91,14 +88,8 @@ func TestLoad_Success(t *testing.T) {
 						},
 					},
 					Generation: Generation{
-						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
-						SDKClassName:           "speakeasy",
-						SingleTagPerOp:         false,
-						TagNamespacingDisabled: false,
-						Comments: &Comments{
-							OmitDescriptionIfSummaryPresent: true,
-							DisableComments:                 false,
-						},
+						BaseServerURL: "https://api.prod.speakeasyapi.dev",
+						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
 						},
@@ -116,6 +107,7 @@ func TestLoad_Success(t *testing.T) {
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
 					},
+					Features: make(map[string]map[string]string),
 				},
 			},
 		},
@@ -140,14 +132,8 @@ func TestLoad_Success(t *testing.T) {
 						},
 					},
 					Generation: Generation{
-						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
-						SDKClassName:           "speakeasy",
-						SingleTagPerOp:         false,
-						TagNamespacingDisabled: false,
-						Comments: &Comments{
-							DisableComments:                 false,
-							OmitDescriptionIfSummaryPresent: true,
-						},
+						BaseServerURL: "https://api.prod.speakeasyapi.dev",
+						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
 						},
@@ -195,14 +181,8 @@ func TestLoad_Success(t *testing.T) {
 						},
 					},
 					Generation: Generation{
-						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
-						SDKClassName:           "speakeasy",
-						SingleTagPerOp:         false,
-						TagNamespacingDisabled: false,
-						Comments: &Comments{
-							DisableComments:                 false,
-							OmitDescriptionIfSummaryPresent: true,
-						},
+						BaseServerURL: "https://api.prod.speakeasyapi.dev",
+						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
 						},
@@ -249,14 +229,8 @@ func TestLoad_Success(t *testing.T) {
 						},
 					},
 					Generation: Generation{
-						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
-						SDKClassName:           "speakeasy",
-						SingleTagPerOp:         false,
-						TagNamespacingDisabled: false,
-						Comments: &Comments{
-							DisableComments:                 false,
-							OmitDescriptionIfSummaryPresent: true,
-						},
+						BaseServerURL: "https://api.prod.speakeasyapi.dev",
+						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
 						},
@@ -271,6 +245,8 @@ func TestLoad_Success(t *testing.T) {
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
+					Management:  &Management{},
+					Features:    make(map[string]map[string]string),
 				},
 			},
 		},
@@ -295,14 +271,8 @@ func TestLoad_Success(t *testing.T) {
 						},
 					},
 					Generation: Generation{
-						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
-						SDKClassName:           "speakeasy",
-						SingleTagPerOp:         false,
-						TagNamespacingDisabled: false,
-						Comments: &Comments{
-							DisableComments:                 false,
-							OmitDescriptionIfSummaryPresent: true,
-						},
+						BaseServerURL: "https://api.prod.speakeasyapi.dev",
+						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
 						},
@@ -351,14 +321,8 @@ func TestLoad_Success(t *testing.T) {
 						},
 					},
 					Generation: Generation{
-						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
-						SDKClassName:           "speakeasy",
-						SingleTagPerOp:         false,
-						TagNamespacingDisabled: false,
-						Comments: &Comments{
-							DisableComments:                 false,
-							OmitDescriptionIfSummaryPresent: true,
-						},
+						BaseServerURL: "https://api.prod.speakeasyapi.dev",
+						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
 						},
@@ -411,14 +375,8 @@ func TestLoad_Success(t *testing.T) {
 						},
 					},
 					Generation: Generation{
-						BaseServerURL:          "https://api.prod.speakeasyapi.dev",
-						SDKClassName:           "speakeasy",
-						SingleTagPerOp:         false,
-						TagNamespacingDisabled: false,
-						Comments: &Comments{
-							DisableComments:                 false,
-							OmitDescriptionIfSummaryPresent: true,
-						},
+						BaseServerURL: "https://api.prod.speakeasyapi.dev",
+						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
 						},
