@@ -8,7 +8,10 @@ import (
 )
 
 const (
-	Version               = "1.0.0"
+	v1      = "1.0.0"
+	v2      = "2.0.0"
+	Version = v2
+
 	GithubWritePermission = "write"
 
 	// Constants to be used as keys in the config files
@@ -21,20 +24,6 @@ const (
 	OpenAPIDocAuthToken  = "openapi_doc_auth_token"
 	OpenAPIDocs          = "openapi_docs"
 )
-
-type Management struct {
-	DocChecksum          string         `yaml:"docChecksum"`
-	DocVersion           string         `yaml:"docVersion"`
-	SpeakeasyVersion     string         `yaml:"speakeasyVersion"`
-	GenerationVersion    string         `yaml:"generationVersion,omitempty"`
-	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
-}
-
-type Comments struct {
-	OmitDescriptionIfSummaryPresent bool           `yaml:"omitDescriptionIfSummaryPresent,omitempty"`
-	DisableComments                 bool           `yaml:"disableComments,omitempty"`
-	AdditionalProperties            map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
-}
 
 type OptionalPropertyRenderingOption string
 
@@ -55,13 +44,9 @@ type Fixes struct {
 }
 
 type Generation struct {
-	Comments                    *Comments      `yaml:"comments,omitempty"`
 	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
 	BaseServerURL               string         `yaml:"baseServerUrl,omitempty"`
 	SDKClassName                string         `yaml:"sdkClassName,omitempty"`
-	SingleTagPerOp              bool           `yaml:"singleTagPerOp,omitempty"`
-	TagNamespacingDisabled      bool           `yaml:"tagNamespacingDisabled,omitempty"`
-	RepoURL                     string         `yaml:"repoURL,omitempty"`
 	MaintainOpenAPIOrder        bool           `yaml:"maintainOpenAPIOrder,omitempty"`
 	UsageSnippets               *UsageSnippets `yaml:"usageSnippets,omitempty"`
 	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty"`
@@ -95,13 +80,11 @@ type SDKGenConfigField struct {
 	TestValue             *any    `yaml:"testValue,omitempty" json:"test_value,omitempty"`
 }
 
-type Config struct {
-	ConfigVersion string                       `yaml:"configVersion"`
-	Management    *Management                  `yaml:"management,omitempty"`
-	Generation    Generation                   `yaml:"generation"`
-	Languages     map[string]LanguageConfig    `yaml:",inline"`
-	New           map[string]bool              `yaml:"-"`
-	Features      map[string]map[string]string `yaml:"features,omitempty"`
+type Configuration struct {
+	ConfigVersion string                    `yaml:"configVersion"`
+	Generation    Generation                `yaml:"generation"`
+	Languages     map[string]LanguageConfig `yaml:",inline"`
+	New           map[string]bool           `yaml:"-"`
 }
 
 type PublishWorkflow struct {
@@ -167,12 +150,7 @@ type Force struct {
 	Default     bool   `yaml:"default"`
 }
 
-type SDKGenConfig struct {
-	SDKGenLanguageConfig map[string][]SDKGenConfigField `json:"language_configs"`
-	SDKGenCommonConfig   []SDKGenConfigField            `json:"common_config"`
-}
-
-func GetDefaultConfig(newSDK bool, getLangDefaultFunc GetLanguageDefaultFunc, langs map[string]bool) (*Config, error) {
+func GetDefaultConfig(newSDK bool, getLangDefaultFunc GetLanguageDefaultFunc, langs map[string]bool) (*Configuration, error) {
 	defaults := GetGenerationDefaults(newSDK)
 
 	fields := map[string]any{}
@@ -214,11 +192,10 @@ func GetDefaultConfig(newSDK bool, getLangDefaultFunc GetLanguageDefaultFunc, la
 		return nil, err
 	}
 
-	cfg := &Config{
+	cfg := &Configuration{
 		ConfigVersion: Version,
 		Generation:    genConfig,
 		Languages:     map[string]LanguageConfig{},
-		Features:      map[string]map[string]string{},
 		New:           map[string]bool{},
 	}
 
@@ -260,30 +237,6 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			ValidationMessage: pointer.To("Letters, numbers, or .-_ only"),
 		},
 		{
-			Name:         "tagNamespacingDisabled",
-			Required:     false,
-			DefaultValue: ptr(false),
-			Description:  pointer.To("All operations will be created under the root SDK class instead of being namespaced by tag"),
-		},
-		{
-			Name:         "singleTagPerOp",
-			Required:     false,
-			DefaultValue: ptr(false),
-			Description:  pointer.To("Operations with multiple tags will only generate methods namespaced by the first tag"),
-		},
-		{
-			Name:         "comments.disableComments",
-			Required:     false,
-			DefaultValue: ptr(false),
-			Description:  pointer.To("Disable generating comments from spec on the SDK"),
-		},
-		{
-			Name:         "comments.omitDescriptionIfSummaryPresent",
-			Required:     false,
-			DefaultValue: ptr(false),
-			Description:  pointer.To("Omit generating comment descriptions if spec provides a summary"),
-		},
-		{
 			Name:         "maintainOpenAPIOrder",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
@@ -310,7 +263,7 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 	}
 }
 
-func (c *Config) GetGenerationFieldsMap() (map[string]any, error) {
+func (c *Configuration) GetGenerationFieldsMap() (map[string]any, error) {
 	fields := map[string]any{}
 
 	// Yes the decoder can encode too :face_palm:
