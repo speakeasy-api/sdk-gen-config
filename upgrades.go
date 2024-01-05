@@ -172,6 +172,10 @@ func upgradeToV200(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 			delete(langCfg, "installationURL")
 		}
 
+		if version, ok := langCfg["version"]; ok {
+			management["releaseVersion"] = version
+		}
+
 		langCfg, err := uf(lang, v1, v2, langCfg)
 		if err != nil {
 			return "", nil, nil, err
