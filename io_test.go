@@ -106,6 +106,7 @@ func TestLoad_Success(t *testing.T) {
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
+						ReleaseVersion:   "1.3.0",
 					},
 					Features: make(map[string]map[string]string),
 				},
@@ -150,6 +151,7 @@ func TestLoad_Success(t *testing.T) {
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
+						ReleaseVersion:   "1.3.0",
 					},
 					Features: map[string]map[string]string{
 						"go": {
@@ -199,6 +201,7 @@ func TestLoad_Success(t *testing.T) {
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
+						ReleaseVersion:   "1.3.0",
 					},
 					Features: map[string]map[string]string{
 						"go": {
@@ -289,6 +292,7 @@ func TestLoad_Success(t *testing.T) {
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
+						ReleaseVersion:   "1.3.0",
 					},
 					Features: map[string]map[string]string{
 						"go": {
@@ -341,6 +345,7 @@ func TestLoad_Success(t *testing.T) {
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
+						ReleaseVersion:   "1.3.0",
 					},
 					Features: map[string]map[string]string{
 						"go": {
@@ -395,6 +400,7 @@ func TestLoad_Success(t *testing.T) {
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
 						DocVersion:       "0.3.0",
 						SpeakeasyVersion: "1.3.1",
+						ReleaseVersion:   "1.3.0",
 					},
 					Features: map[string]map[string]string{
 						"go": {

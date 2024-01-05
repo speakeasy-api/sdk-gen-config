@@ -63,6 +63,7 @@ func Test_upgrade_Success(t *testing.T) {
 					"docChecksum":      "123",
 					"docVersion":       "1.0.0",
 					"speakeasyVersion": "1.0.0",
+					"releaseVersion":   "0.0.1",
 				},
 			},
 		},
@@ -91,6 +92,9 @@ func Test_upgrade_Success(t *testing.T) {
 			wantLockFile: map[string]any{
 				"lockVersion": v2,
 				"id":          "123",
+				"management": map[string]any{
+					"releaseVersion": "0.0.1",
+				},
 			},
 		},
 		{
@@ -152,6 +156,7 @@ func Test_upgrade_Success(t *testing.T) {
 					"published":        true,
 					"installationURL":  "https://github.com/speakeasy-api/sdk",
 					"repoSubDirectory": "./go",
+					"releaseVersion":   "0.0.1",
 				},
 				"features": map[string]map[string]string{
 					"go": {
