@@ -140,3 +140,38 @@ func (p Publishing) Validate(target string) error {
 
 	return nil
 }
+
+func (p Publishing) IsPublished(target string) bool {
+	switch target {
+	case "typescript":
+		if p.NPM != nil && p.NPM.Token != "" {
+			return true
+		}
+	case "python":
+		if p.PyPi != nil && p.PyPi.Token != "" {
+			return true
+		}
+	case "php":
+		if p.Packagist != nil {
+			if p.Packagist.Username != "" && p.Packagist.Token != "" {
+				return true
+			}
+		}
+	case "java":
+		if p.Java != nil {
+			if p.Java.OSSRHUsername != "" && p.Java.OSSHRPassword != "" && p.Java.GPGSecretKey != "" && p.Java.GPGPassPhrase != "" {
+				return true
+			}
+		}
+	case "ruby":
+		if p.RubyGems != nil && p.RubyGems.Token != "" {
+			return true
+		}
+	case "csharp":
+		if p.Nuget != nil && p.Nuget.APIKey != "" {
+			return true
+		}
+	}
+
+	return false
+}

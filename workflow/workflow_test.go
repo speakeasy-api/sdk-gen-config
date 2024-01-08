@@ -88,6 +88,23 @@ func TestWorkflow_Validate(t *testing.T) {
 		wantErr error
 	}{
 		{
+			name: "simple workflow file successfully validates",
+			args: args{
+				supportedLangs: []string{"typescript"},
+				workflow: &workflow.Workflow{
+					Version: workflow.WorkflowVersion,
+					Targets: map[string]workflow.Target{
+						"typescript": {
+							Target: "typescript",
+							Source: "./openapi.yaml",
+						},
+					},
+				},
+				createSource: true,
+			},
+			wantErr: nil,
+		},
+		{
 			name: "workflow successfully validates",
 			args: args{
 				supportedLangs: []string{"typescript"},
@@ -187,10 +204,23 @@ func TestWorkflow_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.args.createSource {
-				for _, source := range tt.args.workflow.Sources {
-					workDir, err := createLocalFiles(source)
+				if len(tt.args.workflow.Sources) > 0 {
+					for _, source := range tt.args.workflow.Sources {
+						workDir, err := createLocalFiles(source)
+						require.NoError(t, err)
+						defer os.RemoveAll(workDir)
+
+						err = os.Chdir(workDir)
+						require.NoError(t, err)
+					}
+				} else {
+					workDir, err := os.MkdirTemp("", "workflow*")
 					require.NoError(t, err)
-					defer os.RemoveAll(workDir)
+
+					for _, target := range tt.args.workflow.Targets {
+						err = createEmptyFile(filepath.Join(workDir, target.Source))
+						require.NoError(t, err)
+					}
 
 					err = os.Chdir(workDir)
 					require.NoError(t, err)

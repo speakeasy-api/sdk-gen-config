@@ -3,7 +3,6 @@ package workflow
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"path/filepath"
 	"slices"
 )
@@ -86,7 +85,19 @@ func (s Source) GetOutputLocation() (string, error) {
 	}
 
 	// Otherwise output will go to a temp file
-	return filepath.Join(os.TempDir(), "speakeasy", fmt.Sprintf("output_%s%s", randStringBytes(10), ext)), nil
+	return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", randStringBytes(10), ext)), nil
+}
+
+func GetTempDir() string {
+	return filepath.Join(".speakeasy", "temp")
+}
+
+func (s Source) GetTempMergeLocation() string {
+	return filepath.Join(GetTempDir(), fmt.Sprintf("merge_%s.yaml", randStringBytes(10)))
+}
+
+func (s Source) GetTempOverlayLocation() string {
+	return filepath.Join(GetTempDir(), fmt.Sprintf("overlay_%s.yaml", randStringBytes(10)))
 }
 
 func (d Document) Validate() error {
@@ -105,6 +116,14 @@ func (d Document) Validate() error {
 	}
 
 	return nil
+}
+
+func (d Document) IsRemote() bool {
+	return getFileStatus(d.Location) == fileStatusRemote
+}
+
+func (d Document) GetTempDownloadPath(tempDir string) string {
+	return filepath.Join(tempDir, fmt.Sprintf("downloaded_%s%s", randStringBytes(10), filepath.Ext(d.Location)))
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

@@ -61,6 +61,20 @@ func (w Workflow) Validate(supportLangs []string) error {
 	return nil
 }
 
+func (w Workflow) GetTargetSource(target string) (*Source, string, error) {
+	t, ok := w.Targets[target]
+	if !ok {
+		return nil, "", fmt.Errorf("target %s not found", target)
+	}
+
+	s, ok := w.Sources[t.Source]
+	if ok {
+		return &s, "", nil
+	} else {
+		return nil, t.Source, nil
+	}
+}
+
 func findWorkflowFile(dir string) ([]byte, string, error) {
 	absPath, err := filepath.Abs(dir)
 	if err != nil {
