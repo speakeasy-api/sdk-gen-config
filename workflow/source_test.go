@@ -264,7 +264,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: "speakeasy/output_testrandomstring.json",
+			wantOutputLocation: ".speakeasy/temp/output_testrandomstring.json",
 		},
 		{
 			name: "simple remote source without extension returns auto-generated output location assumed to be yaml",
@@ -277,7 +277,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: "speakeasy/output_testrandomstring.yaml",
+			wantOutputLocation: ".speakeasy/temp/output_testrandomstring.yaml",
 		},
 		{
 			name: "source with multiple inputs returns specified output location",
@@ -310,7 +310,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: "speakeasy/output_testrandomstring.yaml",
+			wantOutputLocation: ".speakeasy/temp/output_testrandomstring.yaml",
 		},
 		{
 			name: "source with overlays returns specified output location",
@@ -347,7 +347,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: "speakeasy/output_testrandomstring.yaml",
+			wantOutputLocation: ".speakeasy/temp/output_testrandomstring.yaml",
 		},
 	}
 	for _, tt := range tests {
