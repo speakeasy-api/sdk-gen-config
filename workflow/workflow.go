@@ -61,8 +61,8 @@ func (w Workflow) Validate(supportLangs []string) error {
 		return fmt.Errorf("unsupported workflow version: %s", w.Version)
 	}
 
-	if len(w.Targets) == 0 {
-		return fmt.Errorf("no targets found")
+	if len(w.Sources) == 0 && len(w.Targets) == 0 {
+		return fmt.Errorf("no sources or targets found")
 	}
 
 	for targetID, target := range w.Targets {

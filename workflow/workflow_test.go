@@ -88,7 +88,7 @@ func TestWorkflow_Validate(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "simple workflow file successfully validates",
+			name: "simple workflow file with target successfully validates",
 			args: args{
 				supportedLangs: []string{"typescript"},
 				workflow: &workflow.Workflow{
@@ -97,6 +97,25 @@ func TestWorkflow_Validate(t *testing.T) {
 						"typescript": {
 							Target: "typescript",
 							Source: "./openapi.yaml",
+						},
+					},
+				},
+				createSource: true,
+			},
+			wantErr: nil,
+		},
+		{
+			name: "simple workflow file with source successfully validates",
+			args: args{
+				workflow: &workflow.Workflow{
+					Version: workflow.WorkflowVersion,
+					Sources: map[string]workflow.Source{
+						"testSource": {
+							Inputs: []workflow.Document{
+								{
+									Location: "./openapi.yaml",
+								},
+							},
 						},
 					},
 				},
@@ -141,14 +160,14 @@ func TestWorkflow_Validate(t *testing.T) {
 			wantErr: fmt.Errorf("unsupported workflow version: 0.0.0"),
 		},
 		{
-			name: "workflow fails to validate with no targets",
+			name: "workflow fails to validate with no targets or sources",
 			args: args{
 				supportedLangs: []string{"typescript"},
 				workflow: &workflow.Workflow{
 					Version: workflow.WorkflowVersion,
 				},
 			},
-			wantErr: fmt.Errorf("no targets found"),
+			wantErr: fmt.Errorf("no sources or targets found"),
 		},
 		{
 			name: "workflow fails if target is invalid",
