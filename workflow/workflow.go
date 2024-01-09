@@ -37,6 +37,25 @@ func Load(dir string) (*Workflow, string, error) {
 	return &workflow, path, nil
 }
 
+// Save the workflow to the given directory, dir should generally be the root of the project, and the workflow will be saved to ${projectRoot}/.speakeasy/workflow.yaml
+func Save(dir string, workflow *Workflow) error {
+	data, err := yaml.Marshal(workflow)
+	if err != nil {
+		return fmt.Errorf("failed to marshal workflow: %w", err)
+	}
+
+	if filepath.Base(dir) != ".speakeasy" {
+		dir = filepath.Join(dir, ".speakeasy")
+	}
+
+	path := filepath.Join(dir, "workflow.yaml")
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		return fmt.Errorf("failed to write workflow.yaml: %w", err)
+	}
+
+	return nil
+}
+
 func (w Workflow) Validate(supportLangs []string) error {
 	if w.Version != WorkflowVersion {
 		return fmt.Errorf("unsupported workflow version: %s", w.Version)
