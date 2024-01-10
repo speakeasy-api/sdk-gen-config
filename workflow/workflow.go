@@ -31,7 +31,10 @@ type Workflow struct {
 func Load(dir string) (*Workflow, string, error) {
 	data, path, err := findWorkflowFile(dir, "")
 	if err != nil {
-		return nil, "", err
+		if !errors.Is(err, ErrNotFound) {
+			return nil, "", err
+		}
+		return nil, "", fmt.Errorf("%w in %s", err, filepath.Join(dir, speakeasyFolder, "workflow.yaml"))
 	}
 
 	var workflow Workflow
