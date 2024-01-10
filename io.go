@@ -287,14 +287,18 @@ func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 	return nil
 }
 
-func SaveLockFile(dir, configFolder string, lockFile *LockFile, opts ...Option) error {
+func SaveLockFile(dir string, lockFile *LockFile, opts ...Option) error {
 	o := applyOptions(opts)
 
-	if configFolder == "" {
-		configFolder = speakeasyFolder
+	_, path, err := findLockFile(dir, "", o)
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		path = filepath.Join(dir, speakeasyFolder, "gen.lock")
 	}
 
-	if _, err := write(filepath.Join(dir, configFolder, "gen.lock"), lockFile, o); err != nil {
+	if _, err := write(path, lockFile, o); err != nil {
 		return err
 	}
 
