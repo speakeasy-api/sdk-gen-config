@@ -17,6 +17,11 @@ const (
 	WorkflowVersion = "1.0.0"
 )
 
+const (
+	speakeasyFolder = ".speakeasy"
+	genFolder       = ".gen"
+)
+
 type Workflow struct {
 	Version string            `yaml:"workflowVersion"`
 	Sources map[string]Source `yaml:"sources"`
@@ -24,7 +29,7 @@ type Workflow struct {
 }
 
 func Load(dir string) (*Workflow, string, error) {
-	data, path, err := findWorkflowFile(dir)
+	data, path, err := findWorkflowFile(dir, "")
 	if err != nil {
 		return nil, "", err
 	}
@@ -44,12 +49,15 @@ func Save(dir string, workflow *Workflow) error {
 		return fmt.Errorf("failed to marshal workflow: %w", err)
 	}
 
-	if filepath.Base(dir) != ".speakeasy" {
-		dir = filepath.Join(dir, ".speakeasy")
+	_, workflowFilePath, err := findWorkflowFile(dir, "")
+	if err != nil {
+		if !errors.Is(err, ErrNotFound) {
+			return err
+		}
+		workflowFilePath = filepath.Join(dir, speakeasyFolder, "workflow.yaml")
 	}
 
-	path := filepath.Join(dir, "workflow.yaml")
-	if err := os.WriteFile(path, data, 0o644); err != nil {
+	if err := os.WriteFile(workflowFilePath, data, 0o644); err != nil {
 		return fmt.Errorf("failed to write workflow.yaml: %w", err)
 	}
 
@@ -94,13 +102,17 @@ func (w Workflow) GetTargetSource(target string) (*Source, string, error) {
 	}
 }
 
-func findWorkflowFile(dir string) ([]byte, string, error) {
+func findWorkflowFile(dir, configDir string) ([]byte, string, error) {
+	if configDir == "" {
+		configDir = speakeasyFolder
+	}
+
 	absPath, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	path := filepath.Join(absPath, ".speakeasy", "workflow.yaml")
+	path := filepath.Join(absPath, configDir, "workflow.yaml")
 
 	for {
 		data, err := os.ReadFile(path)
@@ -114,11 +126,15 @@ func findWorkflowFile(dir string) ([]byte, string, error) {
 				// or `/` for `/some/absolute/path` in linux
 				// or `:\\` for `C:\\` in windows
 				if currentDir == "." || currentDir == "/" || currentDir[1:] == ":\\" {
+					if configDir == speakeasyFolder {
+						return findWorkflowFile(dir, genFolder)
+					}
+
 					return nil, "", ErrNotFound
 				}
 
 				// Get the parent directory of the current dir and append ".speakeasy" as we only check in side the .speakeasy dir
-				path = filepath.Join(filepath.Dir(currentDir), ".speakeasy", "workflow.yaml")
+				path = filepath.Join(filepath.Dir(currentDir), configDir, "workflow.yaml")
 				continue
 			}
 

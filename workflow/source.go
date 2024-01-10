@@ -3,6 +3,7 @@ package workflow
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"slices"
 )
@@ -89,7 +90,16 @@ func (s Source) GetOutputLocation() (string, error) {
 }
 
 func GetTempDir() string {
-	return filepath.Join(".speakeasy", "temp")
+	path := filepath.Join(speakeasyFolder, "temp")
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		path = filepath.Join(genFolder, "temp")
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			path = filepath.Join(speakeasyFolder, "temp")
+		}
+	}
+
+	return path
 }
 
 func (s Source) GetTempMergeLocation() string {
