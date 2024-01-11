@@ -16,6 +16,11 @@ import (
 
 var ErrNotFound = errors.New("could not find gen.yaml")
 
+const (
+	speakeasyFolder = ".speakeasy"
+	genFolder       = ".gen"
+)
+
 type Config struct {
 	Config   *Configuration
 	LockFile *LockFile
@@ -77,10 +82,10 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	newForLang := map[string]bool{}
 
 	// Find existing config file
-	configData, configPath, err := findConfigFile(dir, o)
+	configData, configPath, err := findConfigFile(dir, "", o)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			configPath = filepath.Join(dir, ".speakeasy", "gen.yaml")
+			configPath = filepath.Join(dir, speakeasyFolder, "gen.yaml")
 			newConfig = true
 
 			for _, lang := range o.langs {
@@ -91,10 +96,18 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 	}
 
-	lockFilePath := filepath.Join(dir, ".speakeasy", "gen.lock")
-	lockFileData, err := o.readFileFunc(lockFilePath)
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return nil, fmt.Errorf("could not read gen.lock: %w", err)
+	// Make sure to look in the same config folder for the lock file
+	configDir := filepath.Base(filepath.Dir(configPath))
+	if configDir != speakeasyFolder && configDir != genFolder {
+		configDir = speakeasyFolder
+	}
+
+	lockFileData, lockFilePath, err := findLockFile(dir, configDir, o)
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return nil, fmt.Errorf("could not read gen.lock: %w", err)
+		}
+		lockFilePath = filepath.Join(dir, configDir, "gen.lock")
 	}
 
 	if !newConfig {
@@ -258,10 +271,10 @@ func Load(dir string, opts ...Option) (*Config, error) {
 func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 	o := applyOptions(opts)
 
-	_, path, err := findConfigFile(dir, o)
+	_, path, err := findConfigFile(dir, "", o)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			path = filepath.Join(dir, "gen.yaml")
+			path = filepath.Join(dir, speakeasyFolder, "gen.yaml")
 		} else {
 			return err
 		}
@@ -277,7 +290,15 @@ func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 func SaveLockFile(dir string, lockFile *LockFile, opts ...Option) error {
 	o := applyOptions(opts)
 
-	if _, err := write(filepath.Join(dir, ".speakeasy", "gen.lock"), lockFile, o); err != nil {
+	_, path, err := findLockFile(dir, "", o)
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		path = filepath.Join(dir, speakeasyFolder, "gen.lock")
+	}
+
+	if _, err := write(path, lockFile, o); err != nil {
 		return err
 	}
 
@@ -287,7 +308,7 @@ func SaveLockFile(dir string, lockFile *LockFile, opts ...Option) error {
 func GetConfigChecksum(dir string, opts ...Option) (string, error) {
 	o := applyOptions(opts)
 
-	data, _, err := findConfigFile(dir, o)
+	data, _, err := findConfigFile(dir, "", o)
 	if err != nil {
 		return "", err
 	}
@@ -296,13 +317,17 @@ func GetConfigChecksum(dir string, opts ...Option) (string, error) {
 	return hex.EncodeToString(hash[:]), nil
 }
 
-func findConfigFile(dir string, o *options) ([]byte, string, error) {
+func findConfigFile(dir, configDir string, o *options) ([]byte, string, error) {
+	if configDir == "" {
+		configDir = speakeasyFolder
+	}
+
 	absPath, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	path := filepath.Join(absPath, ".speakeasy", "gen.yaml")
+	path := filepath.Join(absPath, configDir, "gen.yaml")
 
 	for {
 		data, err := o.readFileFunc(path)
@@ -314,12 +339,16 @@ func findConfigFile(dir string, o *options) ([]byte, string, error) {
 				// or `/` for `/some/absolute/path` in linux
 				// or `:\\` for `C:\\` in windows
 				if currentDir == "." || currentDir == "/" || currentDir[1:] == ":\\" {
+					if configDir == speakeasyFolder {
+						return findConfigFile(dir, genFolder, o)
+					}
+
 					return nil, "", ErrNotFound
 				}
 				parentDir := filepath.Dir(currentDir)
-				if filepath.Base(currentDir) != ".speakeasy" {
+				if filepath.Base(currentDir) != configDir {
 					// Check the speakeasy dir in the parent dir first
-					parentDir = filepath.Join(parentDir, ".speakeasy")
+					parentDir = filepath.Join(parentDir, configDir)
 				}
 
 				path = filepath.Join(parentDir, "gen.yaml")
@@ -331,6 +360,27 @@ func findConfigFile(dir string, o *options) ([]byte, string, error) {
 
 		return data, path, nil
 	}
+}
+
+func findLockFile(dir, configDir string, o *options) ([]byte, string, error) {
+	if configDir == "" {
+		configDir = speakeasyFolder
+	}
+
+	lockFilePath := filepath.Join(dir, configDir, "gen.lock")
+	lockFileData, err := o.readFileFunc(lockFilePath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			if configDir == speakeasyFolder {
+				return findLockFile(dir, genFolder, o)
+			}
+
+			return nil, "", err
+		}
+		return nil, "", fmt.Errorf("could not read gen.lock: %w", err)
+	}
+
+	return lockFileData, lockFilePath, nil
 }
 
 func write(path string, cfg any, o *options) ([]byte, error) {
