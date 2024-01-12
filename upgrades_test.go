@@ -177,7 +177,7 @@ func Test_upgrade_Success(t *testing.T) {
 	}
 }
 
-func testUpdateLang(lang, oldVersion, newVersion string, cfg map[string]any) (map[string]any, error) {
+func testUpdateLang(lang, template, oldVersion, newVersion string, cfg map[string]any) (map[string]any, error) {
 	if oldVersion == "" {
 		switch lang {
 		case "go":

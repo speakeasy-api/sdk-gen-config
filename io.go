@@ -268,6 +268,40 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	return config, nil
 }
 
+func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
+	o := applyOptions(opts)
+
+	configData, _, err := findConfigFile(dir, "", o)
+	if err != nil {
+		if !errors.Is(err, ErrNotFound) {
+			return "", err
+		}
+
+		return "", nil
+	}
+
+	cfg := &Configuration{}
+	if err := yaml.Unmarshal(configData, cfg); err != nil {
+		return "", fmt.Errorf("could not unmarshal gen.yaml: %w", err)
+	}
+
+	if cfg.Languages == nil {
+		return "", nil
+	}
+
+	langCfg, ok := cfg.Languages[target]
+	if !ok {
+		return "", nil
+	}
+
+	tv, ok := langCfg.Cfg["templateVersion"]
+	if !ok {
+		return "", nil
+	}
+
+	return tv.(string), nil
+}
+
 func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 	o := applyOptions(opts)
 

@@ -7,7 +7,7 @@ import (
 
 var ErrFailedUpgrade = errors.New("failed to upgrade config")
 
-type UpgradeFunc func(lang, oldVersion, newVersion string, cfg map[string]any) (map[string]any, error)
+type UpgradeFunc func(target, template, oldVersion, newVersion string, cfg map[string]any) (map[string]any, error)
 
 func upgrade(currentVersion string, cfg map[string]any, lockFile map[string]any, uf UpgradeFunc) (map[string]any, map[string]any, error) {
 	if currentVersion == "" {
@@ -94,7 +94,7 @@ func upgradeToV100(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 			return "", nil, fmt.Errorf("%w: %s is not a map", ErrFailedUpgrade, lang)
 		}
 
-		langCfg, err := uf(lang, "", v1, langCfg)
+		langCfg, err := uf(lang, lang, "", v1, langCfg)
 		if err != nil {
 			return "", nil, err
 		}
@@ -176,7 +176,7 @@ func upgradeToV200(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 			management["releaseVersion"] = version
 		}
 
-		langCfg, err := uf(lang, v1, v2, langCfg)
+		langCfg, err := uf(lang, lang, v1, v2, langCfg)
 		if err != nil {
 			return "", nil, nil, err
 		}
