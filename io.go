@@ -82,7 +82,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	newForLang := map[string]bool{}
 
 	// Find existing config file
-	configData, configPath, err := findConfigFile(dir, "", o)
+	configData, configPath, err := findConfigFile(dir, o)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			configPath = filepath.Join(dir, speakeasyFolder, "gen.yaml")
@@ -271,7 +271,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
 	o := applyOptions(opts)
 
-	configData, _, err := findConfigFile(dir, "", o)
+	configData, _, err := findConfigFile(dir, o)
 	if err != nil {
 		if !errors.Is(err, ErrNotFound) {
 			return "", err
@@ -305,7 +305,7 @@ func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
 func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 	o := applyOptions(opts)
 
-	_, path, err := findConfigFile(dir, "", o)
+	_, path, err := findConfigFile(dir, o)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
 			path = filepath.Join(dir, speakeasyFolder, "gen.yaml")
@@ -342,7 +342,7 @@ func SaveLockFile(dir string, lockFile *LockFile, opts ...Option) error {
 func GetConfigChecksum(dir string, opts ...Option) (string, error) {
 	o := applyOptions(opts)
 
-	data, _, err := findConfigFile(dir, "", o)
+	data, _, err := findConfigFile(dir, o)
 	if err != nil {
 		return "", err
 	}
@@ -351,41 +351,44 @@ func GetConfigChecksum(dir string, opts ...Option) (string, error) {
 	return hex.EncodeToString(hash[:]), nil
 }
 
-func findConfigFile(dir, configDir string, o *options) ([]byte, string, error) {
-	if configDir == "" {
-		configDir = speakeasyFolder
-	}
-
+func findConfigFile(dir string, o *options) ([]byte, string, error) {
 	absPath, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	path := filepath.Join(absPath, configDir, "gen.yaml")
+	path := filepath.Join(absPath, "gen.yaml")
 
 	for {
 		data, err := o.readFileFunc(path)
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				currentDir := filepath.Dir(path)
-				// Check for the root of the filesystem or path
-				// ie `.` for `./something`
-				// or `/` for `/some/absolute/path` in linux
-				// or `:\\` for `C:\\` in windows
-				if currentDir == "." || currentDir == "/" || currentDir[1:] == ":\\" {
-					if configDir == speakeasyFolder {
-						return findConfigFile(dir, genFolder, o)
+
+				switch {
+				case filepath.Base(currentDir) == speakeasyFolder:
+					// Check gen dir next
+					path = filepath.Join(filepath.Dir(currentDir), genFolder, "gen.yaml")
+				case filepath.Base(currentDir) == genFolder:
+					parentDir := filepath.Dir(filepath.Dir(currentDir))
+
+					// If the current dir parent is the same as the parent dir we have likely hit the root
+					if filepath.Dir(currentDir) == parentDir {
+						// Check for the root of the filesystem or path
+						// ie `.` for `./something`
+						// or `/` for `/some/absolute/path` in linux
+						// or `:\\` for `C:\\` in windows
+						if parentDir == "." || parentDir == "/" || parentDir[1:] == ":\\" {
+							return nil, "", ErrNotFound
+						}
 					}
 
-					return nil, "", ErrNotFound
+					// Go up a dir
+					path = filepath.Join(parentDir, "gen.yaml")
+				default:
+					// Check speakeasy dir next
+					path = filepath.Join(currentDir, speakeasyFolder, "gen.yaml")
 				}
-				parentDir := filepath.Dir(currentDir)
-				if filepath.Base(currentDir) != configDir {
-					// Check the speakeasy dir in the parent dir first
-					parentDir = filepath.Join(parentDir, configDir)
-				}
-
-				path = filepath.Join(parentDir, "gen.yaml")
 				continue
 			}
 
