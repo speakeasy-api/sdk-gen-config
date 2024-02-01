@@ -494,6 +494,77 @@ func TestLoad_Success(t *testing.T) {
 	}
 }
 
+func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
+	getUUID = func() string {
+		return "123"
+	}
+
+	// Create new config file in .speakeasy dir
+	speakeasyDir := filepath.Join(os.TempDir(), testDir, speakeasyFolder)
+	err := createTempFile(speakeasyDir, "gen.yaml", readTestFile(t, "v200-gen.yaml"))
+	require.NoError(t, err)
+
+	// Create old config file in root dir
+	rootDir := filepath.Join(os.TempDir(), testDir)
+	err = createTempFile(rootDir, "gen.yaml", readTestFile(t, "v100-gen.yaml"))
+	require.NoError(t, err)
+
+	defer os.RemoveAll(speakeasyDir)
+	defer os.RemoveAll(rootDir)
+
+	opts := []Option{
+		WithUpgradeFunc(testUpdateLang),
+	}
+
+	opts = append(opts, WithLanguages("go"))
+
+	cfg, err := Load(rootDir, opts...)
+	assert.NoError(t, err)
+	assert.Equal(t, &Config{
+		Config: &Configuration{
+			ConfigVersion: Version,
+			Languages: map[string]LanguageConfig{
+				"go": {
+					Version: "1.3.0",
+					Cfg: map[string]any{
+						"packageName": "github.com/speakeasy-api/speakeasy-client-sdk-go",
+					},
+				},
+			},
+			Generation: Generation{
+				BaseServerURL: "https://api.prod.speakeasyapi.dev",
+				SDKClassName:  "speakeasy",
+				UsageSnippets: &UsageSnippets{
+					OptionalPropertyRendering: "withExample",
+				},
+				Fixes: &Fixes{
+					NameResolutionDec2023: false,
+				},
+			},
+			New: map[string]bool{},
+		},
+		LockFile: &LockFile{
+			LockVersion: Version,
+			ID:          "123",
+			Management: Management{
+				DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
+				DocVersion:       "0.3.0",
+				SpeakeasyVersion: "1.3.1",
+				ReleaseVersion:   "1.3.0",
+			},
+			Features: map[string]map[string]string{
+				"go": {
+					"core": "2.90.0",
+				},
+			},
+		},
+	}, cfg)
+	_, err = os.Stat(filepath.Join(rootDir, "gen.yaml"))
+	assert.NoError(t, err)
+	_, err = os.Stat(filepath.Join(speakeasyDir, "gen.lock"))
+	assert.NoError(t, err)
+}
+
 func createTempFile(dir string, fileName, contents string) error {
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		return err
