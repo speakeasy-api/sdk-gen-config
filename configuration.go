@@ -39,8 +39,9 @@ type UsageSnippets struct {
 }
 
 type Fixes struct {
-	NameResolutionDec2023 bool           `yaml:"nameResolutionDec2023"`
-	AdditionalProperties  map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	NameResolutionDec2023    bool           `yaml:"nameResolutionDec2023"`
+	ParameterOrderingFeb2024 bool           `yaml:"parameterOrderingFeb2024"`
+	AdditionalProperties     map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type Generation struct {
@@ -259,6 +260,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables a number of breaking changes introduced in December 2023, that improve name resolution for inline schemas and reduce chances of name collisions"),
+		},
+		{
+			Name:         "fixes.parameterOrderingFeb2024",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Enables fixes to the ordering of parameters for an operation if they include multiple types of parameters (ie header, query, path) to match the order they are defined in the OpenAPI spec"),
 		},
 	}
 }

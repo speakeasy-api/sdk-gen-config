@@ -52,7 +52,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: true,
+							NameResolutionDec2023:    true,
+							ParameterOrderingFeb2024: true,
 						},
 						UseClassNamesForArrayFields: true,
 					},
@@ -94,7 +95,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: false,
+							NameResolutionDec2023:    false,
+							ParameterOrderingFeb2024: false,
 						},
 					},
 					New: map[string]bool{},
@@ -139,7 +141,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: false,
+							NameResolutionDec2023:    false,
+							ParameterOrderingFeb2024: false,
 						},
 					},
 					New: map[string]bool{},
@@ -189,7 +192,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: false,
+							NameResolutionDec2023:    false,
+							ParameterOrderingFeb2024: false,
 						},
 					},
 					New: map[string]bool{},
@@ -238,7 +242,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: false,
+							NameResolutionDec2023:    false,
+							ParameterOrderingFeb2024: false,
 						},
 					},
 					New: map[string]bool{
@@ -280,7 +285,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: false,
+							NameResolutionDec2023:    false,
+							ParameterOrderingFeb2024: false,
 						},
 					},
 					New: map[string]bool{
@@ -322,7 +328,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: false,
+							NameResolutionDec2023:    false,
+							ParameterOrderingFeb2024: false,
 						},
 					},
 					New: map[string]bool{},
@@ -373,7 +380,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: false,
+							NameResolutionDec2023:    false,
+							ParameterOrderingFeb2024: false,
 						},
 					},
 					New: map[string]bool{
@@ -428,7 +436,8 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023: false,
+							NameResolutionDec2023:    false,
+							ParameterOrderingFeb2024: false,
 						},
 					},
 					New: map[string]bool{
@@ -538,7 +547,8 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 					OptionalPropertyRendering: "withExample",
 				},
 				Fixes: &Fixes{
-					NameResolutionDec2023: false,
+					NameResolutionDec2023:    false,
+					ParameterOrderingFeb2024: false,
 				},
 			},
 			New: map[string]bool{},
