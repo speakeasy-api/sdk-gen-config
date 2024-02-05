@@ -82,6 +82,10 @@ func (t Target) Validate(supportedLangs []string, sources map[string]Source) err
 	return nil
 }
 
+func (t Target) IsPublished() bool {
+	return t.Publishing != nil && t.Publishing.IsPublished(t.Target)
+}
+
 func (p Publishing) Validate(target string) error {
 	switch target {
 	case "typescript":
