@@ -62,6 +62,7 @@ func TestLoad_Success(t *testing.T) {
 						"go": true,
 					},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
@@ -103,6 +104,7 @@ func TestLoad_Success(t *testing.T) {
 					},
 					New: map[string]bool{},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, "gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
@@ -150,6 +152,7 @@ func TestLoad_Success(t *testing.T) {
 					},
 					New: map[string]bool{},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
@@ -202,6 +205,7 @@ func TestLoad_Success(t *testing.T) {
 					},
 					New: map[string]bool{},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
@@ -255,6 +259,7 @@ func TestLoad_Success(t *testing.T) {
 						"go": true,
 					},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
@@ -299,6 +304,7 @@ func TestLoad_Success(t *testing.T) {
 						"go": true,
 					},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, ".gen/gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
@@ -341,6 +347,7 @@ func TestLoad_Success(t *testing.T) {
 					},
 					New: map[string]bool{},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), filepath.Dir(testDir), "gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
@@ -396,6 +403,7 @@ func TestLoad_Success(t *testing.T) {
 						"typescript": true,
 					},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, "gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "123",
@@ -453,6 +461,7 @@ func TestLoad_Success(t *testing.T) {
 						"typescript": true,
 					},
 				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
 					LockVersion: Version,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
@@ -563,6 +572,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 			},
 			New: map[string]bool{},
 		},
+		ConfigPath: filepath.Join(os.TempDir(), testDir, "gen.yaml"),
 		LockFile: &LockFile{
 			LockVersion: Version,
 			ID:          "123",

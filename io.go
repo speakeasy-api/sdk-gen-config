@@ -22,8 +22,9 @@ const (
 )
 
 type Config struct {
-	Config   *Configuration
-	LockFile *LockFile
+	Config     *Configuration
+	ConfigPath string
+	LockFile   *LockFile
 }
 
 type Option func(*options)
@@ -244,8 +245,9 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	}
 
 	config := &Config{
-		Config:   cfg,
-		LockFile: &lockFile,
+		Config:     cfg,
+		ConfigPath: configPath,
+		LockFile:   &lockFile,
 	}
 
 	if o.transformerFunc != nil {
