@@ -106,16 +106,16 @@ type Push struct {
 
 type GenerateWorkflow struct {
 	Name        string      `yaml:"name"`
-	Permissions Permissions `yaml:"permissions"`
+	Permissions Permissions `yaml:"permissions,omitempty"`
 	On          GenerateOn  `yaml:"on"`
 	Jobs        Jobs        `yaml:"jobs"`
 }
 
 type Permissions struct {
-	Checks       string `yaml:"checks"`
+	Checks       string `yaml:"checks,omitempty"`
 	Contents     string `yaml:"contents,omitempty"`
 	PullRequests string `yaml:"pull-requests,omitempty"`
-	Statuses     string `yaml:"statuses"`
+	Statuses     string `yaml:"statuses,omitempty"`
 }
 
 type GenerateOn struct {
