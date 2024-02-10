@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"errors"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -16,7 +17,7 @@ const (
 )
 
 func getFileStatus(filePath string) fileStatus {
-	if _, err := os.Stat(sanitizeFilePath(filePath)); err == nil {
+	if _, err := os.Stat(sanitizeFilePath(filePath)); err == nil || !errors.Is(err, os.ErrNotExist) {
 		return fileStatusLocal
 	}
 
