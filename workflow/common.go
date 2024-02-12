@@ -17,7 +17,7 @@ const (
 )
 
 func getFileStatus(filePath string) fileStatus {
-	if _, err := os.Stat(sanitizeFilePath(filePath)); err == nil || !errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(SanitizeFilePath(filePath)); err == nil || !errors.Is(err, os.ErrNotExist) {
 		return fileStatusLocal
 	}
 
@@ -28,7 +28,7 @@ func getFileStatus(filePath string) fileStatus {
 	return fileStatusNotExists
 }
 
-func sanitizeFilePath(path string) string {
+func SanitizeFilePath(path string) string {
 	sanitizedPath := path
 	if strings.HasPrefix(path, "~/") {
 		homeDir, err := os.UserHomeDir()
