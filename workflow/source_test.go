@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/AlekSi/pointer"
@@ -29,6 +30,32 @@ func TestSource_Validate(t *testing.T) {
 					Inputs: []workflow.Document{
 						{
 							Location: "openapi.yaml",
+						},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "simple source of reference path successfully validates",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "~/openapi.yaml",
+						},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "simple source of absolute path",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "/openapi.yaml",
 						},
 					},
 				},
@@ -377,9 +404,15 @@ func createLocalFiles(s workflow.Source) (string, error) {
 	}
 
 	for _, input := range s.Inputs {
+		var filePath string
+		if strings.HasPrefix(input.Location, "~/") {
+			filePath = workflow.SanitizeFilePath(input.Location)
+		} else {
+			filePath = filepath.Join(tmpDir, input.Location)
+		}
 		_, err := url.ParseRequestURI(input.Location)
 		if err != nil {
-			if err := createEmptyFile(filepath.Join(tmpDir, input.Location)); err != nil {
+			if err := createEmptyFile(filePath); err != nil {
 				return "", err
 			}
 		}
