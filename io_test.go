@@ -56,6 +56,9 @@ func TestLoad_Success(t *testing.T) {
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
 						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: true,
+						},
 						UseClassNamesForArrayFields: true,
 					},
 					New: map[string]bool{
@@ -100,6 +103,9 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                false,
 							ParameterOrderingFeb2024:             false,
 							RequestResponseComponentNamesFeb2024: false,
+						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: false,
 						},
 					},
 					New: map[string]bool{},
@@ -148,6 +154,9 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                false,
 							ParameterOrderingFeb2024:             false,
 							RequestResponseComponentNamesFeb2024: false,
+						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: false,
 						},
 					},
 					New: map[string]bool{},
@@ -202,6 +211,9 @@ func TestLoad_Success(t *testing.T) {
 							ParameterOrderingFeb2024:             false,
 							RequestResponseComponentNamesFeb2024: false,
 						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: false,
+						},
 					},
 					New: map[string]bool{},
 				},
@@ -250,10 +262,15 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023:                false,
-							ParameterOrderingFeb2024:             false,
-							RequestResponseComponentNamesFeb2024: false,
+							NameResolutionDec2023:                true,
+							ParameterOrderingFeb2024:             true,
+							RequestResponseComponentNamesFeb2024: true,
 						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: true,
+						},
+						MaintainOpenAPIOrder:        true,
+						UseClassNamesForArrayFields: true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -295,10 +312,15 @@ func TestLoad_Success(t *testing.T) {
 							OptionalPropertyRendering: "withExample",
 						},
 						Fixes: &Fixes{
-							NameResolutionDec2023:                false,
-							ParameterOrderingFeb2024:             false,
-							RequestResponseComponentNamesFeb2024: false,
+							NameResolutionDec2023:                true,
+							ParameterOrderingFeb2024:             true,
+							RequestResponseComponentNamesFeb2024: true,
 						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: true,
+						},
+						MaintainOpenAPIOrder:        true,
+						UseClassNamesForArrayFields: true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -343,6 +365,9 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                false,
 							ParameterOrderingFeb2024:             false,
 							RequestResponseComponentNamesFeb2024: false,
+						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: false,
 						},
 					},
 					New: map[string]bool{},
@@ -397,6 +422,9 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                false,
 							ParameterOrderingFeb2024:             false,
 							RequestResponseComponentNamesFeb2024: false,
+						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: false,
 						},
 					},
 					New: map[string]bool{
@@ -455,6 +483,9 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                false,
 							ParameterOrderingFeb2024:             false,
 							RequestResponseComponentNamesFeb2024: false,
+						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: false,
 						},
 					},
 					New: map[string]bool{
@@ -568,6 +599,9 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 					NameResolutionDec2023:                false,
 					ParameterOrderingFeb2024:             false,
 					RequestResponseComponentNamesFeb2024: false,
+				},
+				Auth: &Auth{
+					OAuth2ClientCredentialsEnabled: false,
 				},
 			},
 			New: map[string]bool{},

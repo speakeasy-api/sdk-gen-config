@@ -80,6 +80,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	o := applyOptions(opts)
 
 	newConfig := false
+	newSDK := false
 	newForLang := map[string]bool{}
 
 	// Find existing config file
@@ -88,6 +89,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		if errors.Is(err, ErrNotFound) {
 			configPath = filepath.Join(dir, speakeasyFolder, "gen.yaml")
 			newConfig = true
+			newSDK = true
 
 			for _, lang := range o.langs {
 				newForLang[lang] = true
@@ -103,12 +105,15 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		configDir = speakeasyFolder
 	}
 
+	newLockFile := false
+
 	lockFileData, lockFilePath, err := findLockFile(dir, configDir, o)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, fmt.Errorf("could not read gen.lock: %w", err)
 		}
 		lockFilePath = filepath.Join(dir, configDir, "gen.lock")
+		newLockFile = true
 	}
 
 	if !newConfig {
@@ -135,6 +140,11 @@ func Load(dir string, opts ...Option) (*Config, error) {
 			if !ok {
 				version = ""
 			}
+		}
+
+		// If we aren't upgrading we assume if we are missing a lock file then this is a new SDK
+		if version == Version {
+			newSDK = newSDK || newLockFile
 		}
 
 		if version != Version && o.UpgradeFunc != nil {
@@ -182,17 +192,17 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		requiredDefaults[lang] = newForLang[lang]
 	}
 
-	defaultCfg, err := GetDefaultConfig(newConfig, o.getLanguageDefaultFunc, requiredDefaults)
+	defaultCfg, err := GetDefaultConfig(newSDK, o.getLanguageDefaultFunc, requiredDefaults)
 	if err != nil {
 		return nil, err
 	}
 
-	cfg, err := GetDefaultConfig(newConfig, o.getLanguageDefaultFunc, requiredDefaults)
+	cfg, err := GetDefaultConfig(newSDK, o.getLanguageDefaultFunc, requiredDefaults)
 	if err != nil {
 		return nil, err
 	}
 
-	// We only write the config files out if upgrading is enabled otherwise we just want to read the new values
+	// If this is a totally new config, we need to write out to disk for following operations
 	if newConfig && o.UpgradeFunc != nil {
 		// Write new cfg
 		configData, err = write(configPath, cfg, o)

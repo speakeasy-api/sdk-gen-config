@@ -45,6 +45,10 @@ type Fixes struct {
 	AdditionalProperties                 map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
+type Auth struct {
+	OAuth2ClientCredentialsEnabled bool `yaml:"oAuth2ClientCredentialsEnabled"`
+}
+
 type Generation struct {
 	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
 	BaseServerURL               string         `yaml:"baseServerUrl,omitempty"`
@@ -53,6 +57,7 @@ type Generation struct {
 	UsageSnippets               *UsageSnippets `yaml:"usageSnippets,omitempty"`
 	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty"`
 	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
+	Auth                        *Auth          `yaml:"auth,omitempty"`
 
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
@@ -273,6 +278,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables fixes that will name inline schemas within request and response components with the component name of the parent if only one content type is defined"),
+		},
+		{
+			Name:         "auth.oAuth2ClientCredentialsEnabled",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Enables support for OAuth2 client credentials grant type (Enterprise tier only)"),
 		},
 	}
 }
