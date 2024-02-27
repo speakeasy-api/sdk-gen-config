@@ -35,10 +35,11 @@ type Packagist struct {
 }
 
 type Java struct {
-	OSSRHUsername string `yaml:"ossrhUsername"`
-	OSSHRPassword string `yaml:"ossrhPassword"`
-	GPGSecretKey  string `yaml:"gpgSecretKey"`
-	GPGPassPhrase string `yaml:"gpgPassPhrase"`
+	OSSRHUsername     string `yaml:"ossrhUsername"`
+	OSSHRPassword     string `yaml:"ossrhPassword"`
+	GPGSecretKey      string `yaml:"gpgSecretKey"`
+	GPGPassPhrase     string `yaml:"gpgPassPhrase"`
+	UseSonatypeLegacy bool   `yaml:"useSonatypeLegacy,omitempty"`
 }
 
 type RubyGems struct {
