@@ -135,8 +135,8 @@ type Jobs struct {
 
 type Job struct {
 	Uses    string            `yaml:"uses"`
-	With    map[string]any    `yaml:"with"`
-	Secrets map[string]string `yaml:"secrets"`
+	With    map[string]any    `yaml:"with,omitempty"`
+	Secrets map[string]string `yaml:"secrets,omitempty"`
 }
 
 type WorkflowDispatch struct {
