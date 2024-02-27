@@ -19,6 +19,7 @@ type Publishing struct {
 	Java      *Java      `yaml:"java,omitempty"`
 	RubyGems  *RubyGems  `yaml:"rubygems,omitempty"`
 	Nuget     *Nuget     `yaml:"nuget,omitempty"`
+	Terraform *Terraform `yaml:"terraform,omitempty"`
 }
 
 type NPM struct {
@@ -35,10 +36,11 @@ type Packagist struct {
 }
 
 type Java struct {
-	OSSRHUsername string `yaml:"ossrhUsername"`
-	OSSHRPassword string `yaml:"ossrhPassword"`
-	GPGSecretKey  string `yaml:"gpgSecretKey"`
-	GPGPassPhrase string `yaml:"gpgPassPhrase"`
+	OSSRHUsername     string `yaml:"ossrhUsername"`
+	OSSHRPassword     string `yaml:"ossrhPassword"`
+	GPGSecretKey      string `yaml:"gpgSecretKey"`
+	GPGPassPhrase     string `yaml:"gpgPassPhrase"`
+	UseSonatypeLegacy bool   `yaml:"useSonatypeLegacy,omitempty"`
 }
 
 type RubyGems struct {
@@ -47,6 +49,10 @@ type RubyGems struct {
 
 type Nuget struct {
 	APIKey string `yaml:"apiKey"`
+}
+
+type Terraform struct {
+	GPGFingerprint string `yaml:"gpgFingerprint"`
 }
 
 func (t Target) Validate(supportedLangs []string, sources map[string]Source) error {
@@ -140,6 +146,12 @@ func (p Publishing) Validate(target string) error {
 				return fmt.Errorf("failed to validate nuget api key: %w", err)
 			}
 		}
+	case "terraform":
+		if p.Terraform != nil && p.Terraform.GPGFingerprint != "" {
+			if err := validateSecret(p.Terraform.GPGFingerprint); err != nil {
+				return fmt.Errorf("failed to validate terraform gpg fingerprint: %w", err)
+			}
+		}
 	}
 
 	return nil
@@ -173,6 +185,10 @@ func (p Publishing) IsPublished(target string) bool {
 		}
 	case "csharp":
 		if p.Nuget != nil && p.Nuget.APIKey != "" {
+			return true
+		}
+	case "terraform":
+		if p.Terraform != nil && p.Terraform.GPGFingerprint != "" {
 			return true
 		}
 	}
