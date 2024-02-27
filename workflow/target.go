@@ -19,7 +19,6 @@ type Publishing struct {
 	Java      *Java      `yaml:"java,omitempty"`
 	RubyGems  *RubyGems  `yaml:"rubygems,omitempty"`
 	Nuget     *Nuget     `yaml:"nuget,omitempty"`
-	Terraform *Terraform `yaml:"terraform,omitempty"`
 }
 
 type NPM struct {
@@ -146,12 +145,6 @@ func (p Publishing) Validate(target string) error {
 				return fmt.Errorf("failed to validate nuget api key: %w", err)
 			}
 		}
-	case "terraform":
-		if p.Terraform != nil && p.Terraform.GPGFingerprint != "" {
-			if err := validateSecret(p.Terraform.GPGFingerprint); err != nil {
-				return fmt.Errorf("failed to validate terraform gpg fingerprint: %w", err)
-			}
-		}
 	}
 
 	return nil
@@ -185,10 +178,6 @@ func (p Publishing) IsPublished(target string) bool {
 		}
 	case "csharp":
 		if p.Nuget != nil && p.Nuget.APIKey != "" {
-			return true
-		}
-	case "terraform":
-		if p.Terraform != nil && p.Terraform.GPGFingerprint != "" {
 			return true
 		}
 	}
