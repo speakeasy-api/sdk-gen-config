@@ -50,10 +50,6 @@ type Nuget struct {
 	APIKey string `yaml:"apiKey"`
 }
 
-type Terraform struct {
-	GPGFingerprint string `yaml:"gpgFingerprint"`
-}
-
 func (t Target) Validate(supportedLangs []string, sources map[string]Source) error {
 	if t.Target == "" {
 		return fmt.Errorf("target is required")
