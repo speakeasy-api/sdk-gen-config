@@ -22,9 +22,10 @@ const (
 )
 
 type Config struct {
-	Config     *Configuration
-	ConfigPath string
-	LockFile   *LockFile
+	Config        *Configuration
+	ConfigPath    string
+	LockFile      *LockFile
+	IsNewLockFile bool
 }
 
 type Option func(*options)
@@ -255,9 +256,10 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	}
 
 	config := &Config{
-		Config:     cfg,
-		ConfigPath: configPath,
-		LockFile:   &lockFile,
+		Config:        cfg,
+		ConfigPath:    configPath,
+		LockFile:      &lockFile,
+		IsNewLockFile: newLockFile,
 	}
 
 	if o.transformerFunc != nil {
