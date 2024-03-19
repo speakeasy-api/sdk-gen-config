@@ -34,7 +34,7 @@ type Lint struct {
 }
 
 func Load(dir string) (*Lint, string, error) {
-	data, path, err := findValidationFile(dir, "")
+	data, path, err := findLintFile(dir, "")
 	if err != nil {
 		if !errors.Is(err, ErrNotFound) {
 			return nil, "", err
@@ -55,15 +55,15 @@ func Load(dir string) (*Lint, string, error) {
 		return nil, "", fmt.Errorf("unsupported lint version: %s", header.Version)
 	}
 
-	var validation Lint
-	if err := yaml.Unmarshal(data, &validation); err != nil {
+	var lint Lint
+	if err := yaml.Unmarshal(data, &lint); err != nil {
 		return nil, "", fmt.Errorf("failed to unmarshal lint.yaml: %w", err)
 	}
 
-	return &validation, path, nil
+	return &lint, path, nil
 }
 
-func findValidationFile(dir, configDir string) ([]byte, string, error) {
+func findLintFile(dir, configDir string) ([]byte, string, error) {
 	if configDir == "" {
 		configDir = speakeasyFolder
 	}
@@ -88,7 +88,7 @@ func findValidationFile(dir, configDir string) ([]byte, string, error) {
 				// or `:\\` for `C:\\` in windows
 				if currentDir == "." || currentDir == "/" || currentDir[1:] == ":\\" {
 					if configDir == speakeasyFolder {
-						return findValidationFile(dir, genFolder)
+						return findLintFile(dir, genFolder)
 					}
 
 					return nil, "", ErrNotFound
