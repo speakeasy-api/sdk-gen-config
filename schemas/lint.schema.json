@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Speakeasy Validation Configuration Schema",
+  "title": "Speakeasy Lint Configuration Schema",
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "validationVersion": {
+    "lintVersion": {
       "type": "string",
       "const": "1.0.0"
     },
@@ -18,7 +18,7 @@
       }
     }
   },
-  "required": ["validationVersion", "defaultRuleset", "rulesets"],
+  "required": ["lintVersion", "defaultRuleset", "rulesets"],
   "$defs": {
     "ruleset": {
       "type": "object",
