@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Speakeasy Workflow Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "workflowVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "targets": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/target"
+      }
+    }
+  },
+  "required": ["workflowVersion"],
+  "$defs": {
+    "source": {
+      "type": "object",
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/document"
+          }
+        },
+        "overlays": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/document"
+          }
+        },
+        "output": {
+          "type": "string"
+        }
+      },
+      "required": ["inputs"]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "type": "string",
+          "enum": [
+            "csharp",
+            "go",
+            "java",
+            "php",
+            "python",
+            "ruby",
+            "swift",
+            "terraform",
+            "typescript",
+            "unity"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "output": {
+          "type": "string"
+        },
+        "publish": {
+          "$ref": "#/$defs/publishing"
+        }
+      },
+      "required": ["target", "source"]
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "type": "string"
+        },
+        "auth": {
+          "$ref": "#/$defs/auth"
+        }
+      },
+      "required": ["location"]
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "header": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        }
+      },
+      "required": ["header", "secret"]
+    },
+    "publishing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "npm": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "token": {
+              "type": "string"
+            }
+          },
+          "required": ["token"]
+        },
+        "pypi": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "token": {
+              "type": "string"
+            }
+          },
+          "required": ["token"]
+        },
+        "packagist": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "token": {
+              "type": "string"
+            }
+          },
+          "required": ["username", "token"]
+        },
+        "java": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ossrhUsername": {
+              "type": "string"
+            },
+            "ossrhPassword": {
+              "type": "string"
+            },
+            "gpgSecretKey": {
+              "type": "string"
+            },
+            "gpgPassPhrase": {
+              "type": "string"
+            },
+            "useSonatypeLegacy": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "ossrhUsername",
+            "ossrhPassword",
+            "gpgSecretKey",
+            "gpgPassPhrase",
+            "useSonatypeLegacy"
+          ]
+        },
+        "rubygems": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "token": {
+              "type": "string"
+            }
+          },
+          "required": ["token"]
+        },
+        "nuget": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "apiKey": {
+              "type": "string"
+            }
+          },
+          "required": ["apiKey"]
+        }
+      }
+    }
+  }
+}
