@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Speakeasy Validation Configuration Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "validationVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "defaultRuleset": {
+      "type": "string"
+    },
+    "rulesets": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/ruleset"
+      }
+    }
+  },
+  "required": ["validationVersion", "defaultRuleset", "rulesets"],
+  "$defs": {
+    "ruleset": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rules": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/rule"
+          }
+        },
+        "rulesets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "given": {
+          "type": "string"
+        },
+        "then": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/then"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/then"
+              }
+            }
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warn", "info", "hint", "off"]
+        },
+        "message": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "formats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["oas3", "oas3_0", "oas3_1"]
+          }
+        },
+        "resolved": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "then": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "function": {
+          "type": "string"
+        },
+        "functionOptions": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
