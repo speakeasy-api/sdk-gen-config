@@ -2,14 +2,16 @@ package workflow
 
 import (
 	"fmt"
+	"path/filepath"
 	"slices"
 )
 
 type Target struct {
-	Target     string      `yaml:"target"`
-	Source     string      `yaml:"source"`
-	Output     *string     `yaml:"output,omitempty"`
-	Publishing *Publishing `yaml:"publish,omitempty"`
+	Target      string       `yaml:"target"`
+	Source      string       `yaml:"source"`
+	Output      *string      `yaml:"output,omitempty"`
+	Publishing  *Publishing  `yaml:"publish,omitempty"`
+	CodeSamples *CodeSamples `yaml:"codeSamples,omitempty"`
 }
 
 type Publishing struct {
@@ -19,6 +21,10 @@ type Publishing struct {
 	Java      *Java      `yaml:"java,omitempty"`
 	RubyGems  *RubyGems  `yaml:"rubygems,omitempty"`
 	Nuget     *Nuget     `yaml:"nuget,omitempty"`
+}
+
+type CodeSamples struct {
+	Output string `yaml:"output"`
 }
 
 type NPM struct {
@@ -77,6 +83,13 @@ func (t Target) Validate(supportedLangs []string, sources map[string]Source) err
 	if t.Publishing != nil {
 		if err := t.Publishing.Validate(t.Target); err != nil {
 			return fmt.Errorf("failed to validate publish: %w", err)
+		}
+	}
+
+	if t.CodeSamples != nil {
+		ext := filepath.Ext(t.CodeSamples.Output)
+		if !slices.Contains([]string{".yaml", ".yml"}, ext) {
+			return fmt.Errorf("failed to validate target: code samples output must be a yaml file")
 		}
 	}
 
