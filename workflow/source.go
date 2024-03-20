@@ -12,6 +12,7 @@ type Source struct {
 	Inputs   []Document `yaml:"inputs"`
 	Overlays []Document `yaml:"overlays,omitempty"`
 	Output   *string    `yaml:"output,omitempty"`
+	Ruleset  *string    `yaml:"ruleset,omitempty"`
 }
 
 type Document struct {

@@ -59,7 +59,7 @@ rulesets:
 			err = createTempFile(filepath.Join(basePath, tt.args.lintLocation), "lint.yaml", tt.args.lintContents)
 			require.NoError(t, err)
 
-			workflowFile, workflowPath, err := lint.Load(filepath.Join(basePath, tt.args.workingDir))
+			workflowFile, workflowPath, err := lint.Load([]string{filepath.Join(basePath, tt.args.workingDir)})
 			require.NoError(t, err)
 
 			assert.Equal(t, tt.want, workflowFile)

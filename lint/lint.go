@@ -33,13 +33,22 @@ type Lint struct {
 	Rulesets       map[string]Ruleset `yaml:"rulesets"`
 }
 
-func Load(dir string) (*Lint, string, error) {
-	data, path, err := findLintFile(dir, "")
-	if err != nil {
-		if !errors.Is(err, ErrNotFound) {
-			return nil, "", err
+func Load(searchDirs []string) (*Lint, string, error) {
+	var data []byte
+	var path string
+	for _, dir := range searchDirs {
+		var err error
+		data, path, err = findLintFile(dir, "")
+		if err != nil {
+			if !errors.Is(err, ErrNotFound) {
+				return nil, "", err
+			}
+			continue
 		}
-		return nil, "", fmt.Errorf("%w in %s", err, filepath.Join(dir, speakeasyFolder, "lint.yaml"))
+		break
+	}
+	if data == nil {
+		return nil, "", ErrNotFound
 	}
 
 	type lintHeader struct {

@@ -40,6 +40,9 @@
         },
         "output": {
           "type": "string"
+        },
+        "ruleset": {
+          "type": "string"
         }
       },
       "required": ["inputs"]
