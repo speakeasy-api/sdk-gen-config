@@ -56,8 +56,8 @@ func (s Source) GetOutputLocation() (string, error) {
 		output := *s.Output
 
 		ext := filepath.Ext(output)
-		if (len(s.Inputs) > 1 || len(s.Overlays) > 0) && !slices.Contains([]string{".yaml", ".yml"}, ext) {
-			return "", fmt.Errorf("when using multiple inputs or overlays, output must be a yaml file")
+		if len(s.Inputs) > 1 && !slices.Contains([]string{".yaml", ".yml"}, ext) {
+			return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
 		}
 
 		if (len(s.Inputs) == 0 || (len(s.Inputs) == 1 && output != s.Inputs[0].Location)) && len(s.Overlays) == 0 {
