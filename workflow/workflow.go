@@ -22,6 +22,7 @@ const (
 	genFolder       = ".gen"
 )
 
+// Ensure your update schema/workflow.schema.json on changes
 type Workflow struct {
 	Version string            `yaml:"workflowVersion"`
 	Sources map[string]Source `yaml:"sources"`

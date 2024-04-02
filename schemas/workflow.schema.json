@@ -74,6 +74,9 @@
         },
         "publish": {
           "$ref": "#/$defs/publishing"
+        },
+        "codeSamples": {
+          "$ref": "#/$defs/codeSamples"
         }
       },
       "required": ["target", "source"]
@@ -103,6 +106,16 @@
         }
       },
       "required": ["header", "secret"]
+    },
+    "codeSamples": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "output": {
+          "type": "string"
+        }
+      },
+      "required": ["output"]
     },
     "publishing": {
       "type": "object",

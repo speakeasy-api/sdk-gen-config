@@ -8,6 +8,7 @@ import (
 	"slices"
 )
 
+// Ensure your update schema/workflow.schema.json on changes
 type Source struct {
 	Inputs   []Document `yaml:"inputs"`
 	Overlays []Document `yaml:"overlays,omitempty"`
