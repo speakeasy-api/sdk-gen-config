@@ -61,10 +61,6 @@ func (s Source) GetOutputLocation() (string, error) {
 			return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
 		}
 
-		if (len(s.Inputs) == 0 || (len(s.Inputs) == 1 && output != s.Inputs[0].Location)) && len(s.Overlays) == 0 {
-			return "", fmt.Errorf("when using a single input, output should not be specified")
-		}
-
 		return output, nil
 	}
 
