@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 )
 
 // Ensure your update schema/workflow.schema.json on changes
@@ -14,6 +15,7 @@ type Source struct {
 	Overlays []Document `yaml:"overlays,omitempty"`
 	Output   *string    `yaml:"output,omitempty"`
 	Ruleset  *string    `yaml:"ruleset,omitempty"`
+	Publish  *Publish   `yaml:"publish,omitempty"`
 }
 
 type Document struct {
@@ -24,6 +26,11 @@ type Document struct {
 type Auth struct {
 	Header string `yaml:"authHeader,omitempty"`
 	Secret string `yaml:"authSecret,omitempty"`
+}
+
+type Publish struct {
+	Location string   `yaml:"location"`
+	Tags     []string `yaml:"tags,omitempty"`
 }
 
 func (s Source) Validate() error {
@@ -40,6 +47,12 @@ func (s Source) Validate() error {
 	for i, overlay := range s.Overlays {
 		if err := overlay.Validate(); err != nil {
 			return fmt.Errorf("failed to validate overlay %d: %w", i, err)
+		}
+	}
+
+	if s.Publish != nil {
+		if err := s.Publish.Validate(); err != nil {
+			return fmt.Errorf("failed to validate publish: %w", err)
 		}
 	}
 
@@ -132,6 +145,22 @@ func (d Document) IsRemote() bool {
 
 func (d Document) GetTempDownloadPath(tempDir string) string {
 	return filepath.Join(tempDir, fmt.Sprintf("downloaded_%s%s", randStringBytes(10), filepath.Ext(d.Location)))
+}
+
+func (p Publish) Validate() error {
+	if p.Location == "" {
+		return fmt.Errorf("location is required")
+	}
+
+	if !strings.HasPrefix(p.Location, "speakeasy://") {
+		return fmt.Errorf("publish location must begin with speakeasy://")
+	}
+
+	if strings.Count(strings.TrimPrefix(p.Location, "speakeasy://"), "/") != 2 {
+		return fmt.Errorf("publish location should look like speakeasy://<org>/<workspace>/<image>")
+	}
+
+	return nil
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
