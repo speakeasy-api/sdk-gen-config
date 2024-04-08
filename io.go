@@ -374,7 +374,7 @@ func SaveLockFile(dir string, lf *LockFile, opts ...Option) error {
 		}
 	}
 
-	if _, err := write(lockFileRes.Path, lockFile, o); err != nil {
+	if _, err := write(lockFileRes.Path, lf, o); err != nil {
 		return err
 	}
 
