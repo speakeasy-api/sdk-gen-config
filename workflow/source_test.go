@@ -90,20 +90,6 @@ func TestSource_Validate(t *testing.T) {
 			wantErr: fmt.Errorf("failed to get output location: input file openapi.yaml does not exist"),
 		},
 		{
-			name: "simple source fails if output is set to a different value when no modifications will be made",
-			args: args{
-				source: workflow.Source{
-					Inputs: []workflow.Document{
-						{
-							Location: "openapi.yaml",
-						},
-					},
-					Output: pointer.ToString("openapi_out.yaml"),
-				},
-			},
-			wantErr: fmt.Errorf("failed to get output location: when using a single input, output should not be specified"),
-		},
-		{
 			name: "source with multiple documents successfully validates",
 			args: args{
 				source: workflow.Source{
@@ -256,6 +242,51 @@ func TestSource_Validate(t *testing.T) {
 				},
 			},
 			wantErr: fmt.Errorf("failed to validate overlay 0: location is required"),
+		},
+		{
+			name: "publish success",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Publish: &workflow.Publish{
+						Location: "speakeasy://org/workspace/image",
+					},
+				},
+			},
+		},
+		{
+			name: "publish fails with invalid location",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Publish: &workflow.Publish{
+						Location: "speakeasy://not-enough-parts",
+					},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: publish location should look like speakeasy://<org>/<workspace>/<image>"),
+		},
+		{
+			name: "publish fails with no location",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Publish: &workflow.Publish{},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: location is required"),
 		},
 	}
 	for _, tt := range tests {
