@@ -11,14 +11,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
 )
 
-var ErrNotFound = errors.New("could not find gen.yaml")
-
 const (
-	speakeasyFolder = ".speakeasy"
-	genFolder       = ".gen"
+	configFile = "gen.yaml"
+	lockFile   = "gen.lock"
 )
 
 type Config struct {
@@ -27,28 +26,37 @@ type Config struct {
 	LockFile   *LockFile
 }
 
+type FS interface {
+	fs.ReadFileFS
+	fs.StatFS
+	WriteFile(name string, data []byte, perm os.FileMode) error
+}
+
 type Option func(*options)
 
 type (
-	ReadFileFunc           func(filename string) ([]byte, error)
-	WriteFileFunc          func(filename string, data []byte, perm os.FileMode) error
 	GetLanguageDefaultFunc func(string, bool) (*LanguageConfig, error)
 	TransformerFunc        func(*Config) (*Config, error)
 )
 
 type options struct {
-	readFileFunc           ReadFileFunc
-	writeFileFunc          WriteFileFunc
+	FS                     FS
 	UpgradeFunc            UpgradeFunc
 	getLanguageDefaultFunc GetLanguageDefaultFunc
 	langs                  []string
 	transformerFunc        TransformerFunc
+	dontWrite              bool
 }
 
-func WithFileSystemFuncs(rf ReadFileFunc, wf WriteFileFunc) Option {
+func WithFileSystem(fs FS) Option {
 	return func(o *options) {
-		o.readFileFunc = rf
-		o.writeFileFunc = wf
+		o.FS = fs
+	}
+}
+
+func WithDontWrite() Option {
+	return func(o *options) {
+		o.dontWrite = true
 	}
 }
 
@@ -76,6 +84,26 @@ func WithTransformerFunc(f TransformerFunc) Option {
 	}
 }
 
+func FindConfigFile(dir string, fileSystem FS) (*workspace.FindWorkspaceResult, error) {
+	configRes, err := workspace.FindWorkspace(dir, workspace.FindWorkspaceOptions{
+		FindFile:     configFile,
+		AllowOutside: true,
+		Recursive:    true,
+		FS:           fileSystem,
+	})
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			configRes = &workspace.FindWorkspaceResult{
+				Path: filepath.Join(dir, workspace.SpeakeasyFolder, configFile),
+			}
+		} else {
+			return nil, err
+		}
+	}
+
+	return configRes, nil
+}
+
 func Load(dir string, opts ...Option) (*Config, error) {
 	o := applyOptions(opts)
 
@@ -84,10 +112,12 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	newForLang := map[string]bool{}
 
 	// Find existing config file
-	configData, configPath, err := findConfigFile(dir, o)
+	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
-		if errors.Is(err, ErrNotFound) {
-			configPath = filepath.Join(dir, speakeasyFolder, "gen.yaml")
+		if errors.Is(err, fs.ErrNotExist) {
+			configRes = &workspace.FindWorkspaceResult{
+				Path: filepath.Join(dir, workspace.SpeakeasyFolder, configFile),
+			}
 			newConfig = true
 			newSDK = true
 
@@ -99,34 +129,38 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 	}
 
-	// Make sure to look in the same config folder for the lock file
-	configDir := filepath.Base(filepath.Dir(configPath))
-	if configDir != speakeasyFolder && configDir != genFolder {
-		configDir = speakeasyFolder
+	// Make sure to use the same workspace dir type as the config file
+	workspaceDir := filepath.Base(filepath.Dir(configRes.Path))
+	if workspaceDir != workspace.SpeakeasyFolder && workspaceDir != workspace.GenFolder {
+		workspaceDir = workspace.SpeakeasyFolder
 	}
 
 	newLockFile := false
-
-	lockFileData, lockFilePath, err := findLockFile(dir, configDir, o)
+	lockFileRes, err := workspace.FindWorkspace(filepath.Join(dir, workspaceDir), workspace.FindWorkspaceOptions{
+		FindFile: lockFile,
+		FS:       o.FS,
+	})
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, fmt.Errorf("could not read gen.lock: %w", err)
 		}
-		lockFilePath = filepath.Join(dir, configDir, "gen.lock")
+		lockFileRes = &workspace.FindWorkspaceResult{
+			Path: filepath.Join(dir, workspaceDir, lockFile),
+		}
 		newLockFile = true
 	}
 
 	if !newConfig {
 		// Unmarshal config file and check version
 		cfgMap := map[string]any{}
-		if err := yaml.Unmarshal(configData, &cfgMap); err != nil {
+		if err := yaml.Unmarshal(configRes.Data, &cfgMap); err != nil {
 			return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
 		}
 
 		var lockFileMap map[string]any
 		lockFilePresent := false
-		if lockFileData != nil {
-			if err := yaml.Unmarshal(lockFileData, &lockFileMap); err != nil {
+		if lockFileRes.Data != nil {
+			if err := yaml.Unmarshal(lockFileRes.Data, &lockFileMap); err != nil {
 				return nil, fmt.Errorf("could not unmarshal gen.lock: %w", err)
 			}
 			lockFilePresent = true
@@ -155,13 +189,13 @@ func Load(dir string, opts ...Option) (*Config, error) {
 			}
 
 			// Write back out to disk and update data
-			configData, err = write(configPath, cfgMap, o)
+			configRes.Data, err = write(configRes.Path, cfgMap, o)
 			if err != nil {
 				return nil, err
 			}
 
 			if lockFileMap != nil {
-				lockFileData, err = write(lockFilePath, lockFileMap, o)
+				lockFileRes.Data, err = write(lockFileRes.Path, lockFileMap, o)
 				if err != nil {
 					return nil, err
 				}
@@ -205,27 +239,27 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	// If this is a totally new config, we need to write out to disk for following operations
 	if newConfig && o.UpgradeFunc != nil {
 		// Write new cfg
-		configData, err = write(configPath, cfg, o)
+		configRes.Data, err = write(configRes.Path, cfg, o)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if lockFileData == nil && o.UpgradeFunc != nil {
+	if lockFileRes.Data == nil && o.UpgradeFunc != nil {
 		lockFile := NewLockFile()
-		lockFileData, err = write(lockFilePath, lockFile, o)
+		lockFileRes.Data, err = write(lockFileRes.Path, lockFile, o)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// Okay finally able to unmarshal the config file into expected struct
-	if err := yaml.Unmarshal(configData, cfg); err != nil {
+	if err := yaml.Unmarshal(configRes.Data, cfg); err != nil {
 		return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
 	}
 
 	var lockFile LockFile
-	if err := yaml.Unmarshal(lockFileData, &lockFile); err != nil {
+	if err := yaml.Unmarshal(lockFileRes.Data, &lockFile); err != nil {
 		return nil, fmt.Errorf("could not unmarshal gen.lock: %w", err)
 	}
 
@@ -256,7 +290,7 @@ func Load(dir string, opts ...Option) (*Config, error) {
 
 	config := &Config{
 		Config:     cfg,
-		ConfigPath: configPath,
+		ConfigPath: configRes.Path,
 		LockFile:   &lockFile,
 	}
 
@@ -269,10 +303,10 @@ func Load(dir string, opts ...Option) (*Config, error) {
 
 	if o.UpgradeFunc != nil {
 		// Finally write out the files to solidfy any defaults, upgrades or transformations
-		if _, err := write(configPath, config.Config, o); err != nil {
+		if _, err := write(configRes.Path, config.Config, o); err != nil {
 			return nil, err
 		}
-		if _, err := write(lockFilePath, config.LockFile, o); err != nil {
+		if _, err := write(lockFileRes.Path, config.LockFile, o); err != nil {
 			return nil, err
 		}
 	}
@@ -283,9 +317,9 @@ func Load(dir string, opts ...Option) (*Config, error) {
 func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
 	o := applyOptions(opts)
 
-	configData, _, err := findConfigFile(dir, o)
+	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
-		if !errors.Is(err, ErrNotFound) {
+		if !errors.Is(err, fs.ErrNotExist) {
 			return "", err
 		}
 
@@ -293,7 +327,7 @@ func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
 	}
 
 	cfg := &Configuration{}
-	if err := yaml.Unmarshal(configData, cfg); err != nil {
+	if err := yaml.Unmarshal(configRes.Data, cfg); err != nil {
 		return "", fmt.Errorf("could not unmarshal gen.yaml: %w", err)
 	}
 
@@ -317,34 +351,41 @@ func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
 func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 	o := applyOptions(opts)
 
-	_, path, err := findConfigFile(dir, o)
+	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
-		if errors.Is(err, ErrNotFound) {
-			path = filepath.Join(dir, speakeasyFolder, "gen.yaml")
+		if errors.Is(err, fs.ErrNotExist) {
+			configRes = &workspace.FindWorkspaceResult{
+				Path: filepath.Join(dir, workspace.SpeakeasyFolder, configFile),
+			}
 		} else {
 			return err
 		}
 	}
 
-	if _, err := write(path, cfg, o); err != nil {
+	if _, err := write(configRes.Path, cfg, o); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func SaveLockFile(dir string, lockFile *LockFile, opts ...Option) error {
+func SaveLockFile(dir string, lf *LockFile, opts ...Option) error {
 	o := applyOptions(opts)
 
-	_, path, err := findLockFile(dir, "", o)
+	lockFileRes, err := workspace.FindWorkspace(dir, workspace.FindWorkspaceOptions{
+		FindFile: lockFile,
+		FS:       o.FS,
+	})
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return err
 		}
-		path = filepath.Join(dir, speakeasyFolder, "gen.lock")
+		lockFileRes = &workspace.FindWorkspaceResult{
+			Path: filepath.Join(dir, workspace.SpeakeasyFolder, lockFile),
+		}
 	}
 
-	if _, err := write(path, lockFile, o); err != nil {
+	if _, err := write(lockFileRes.Path, lockFile, o); err != nil {
 		return err
 	}
 
@@ -354,82 +395,13 @@ func SaveLockFile(dir string, lockFile *LockFile, opts ...Option) error {
 func GetConfigChecksum(dir string, opts ...Option) (string, error) {
 	o := applyOptions(opts)
 
-	data, _, err := findConfigFile(dir, o)
+	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
 		return "", err
 	}
 
-	hash := md5.Sum(data)
+	hash := md5.Sum(configRes.Data)
 	return hex.EncodeToString(hash[:]), nil
-}
-
-func findConfigFile(dir string, o *options) ([]byte, string, error) {
-	absPath, err := filepath.Abs(dir)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to get absolute path: %w", err)
-	}
-
-	path := filepath.Join(absPath, "gen.yaml")
-
-	for {
-		data, err := o.readFileFunc(path)
-		if err != nil {
-			if errors.Is(err, fs.ErrNotExist) {
-				currentDir := filepath.Dir(path)
-
-				switch {
-				case filepath.Base(currentDir) == speakeasyFolder:
-					// Check gen dir next
-					path = filepath.Join(filepath.Dir(currentDir), genFolder, "gen.yaml")
-				case filepath.Base(currentDir) == genFolder:
-					parentDir := filepath.Dir(filepath.Dir(currentDir))
-
-					// If the current dir parent is the same as the parent dir we have likely hit the root
-					if filepath.Dir(currentDir) == parentDir {
-						// Check for the root of the filesystem or path
-						// ie `.` for `./something`
-						// or `/` for `/some/absolute/path` in linux
-						// or `:\\` for `C:\\` in windows
-						if parentDir == "." || parentDir == "/" || parentDir[1:] == ":\\" {
-							return nil, "", ErrNotFound
-						}
-					}
-
-					// Go up a dir
-					path = filepath.Join(parentDir, "gen.yaml")
-				default:
-					// Check speakeasy dir next
-					path = filepath.Join(currentDir, speakeasyFolder, "gen.yaml")
-				}
-				continue
-			}
-
-			return nil, "", fmt.Errorf("could not read gen.yaml: %w", err)
-		}
-
-		return data, path, nil
-	}
-}
-
-func findLockFile(dir, configDir string, o *options) ([]byte, string, error) {
-	if configDir == "" {
-		configDir = speakeasyFolder
-	}
-
-	lockFilePath := filepath.Join(dir, configDir, "gen.lock")
-	lockFileData, err := o.readFileFunc(lockFilePath)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			if configDir == speakeasyFolder {
-				return findLockFile(dir, genFolder, o)
-			}
-
-			return nil, "", err
-		}
-		return nil, "", fmt.Errorf("could not read gen.lock: %w", err)
-	}
-
-	return lockFileData, lockFilePath, nil
 }
 
 func write(path string, cfg any, o *options) ([]byte, error) {
@@ -448,7 +420,16 @@ func write(path string, cfg any, o *options) ([]byte, error) {
 
 	data := b.Bytes()
 
-	if err := o.writeFileFunc(path, data, os.ModePerm); err != nil {
+	if o.dontWrite {
+		return data, nil
+	}
+
+	writeFileFunc := os.WriteFile
+	if o.FS != nil {
+		writeFileFunc = o.FS.WriteFile
+	}
+
+	if err := writeFileFunc(path, data, os.ModePerm); err != nil {
 		return nil, fmt.Errorf("could not write gen.yaml: %w", err)
 	}
 
@@ -457,21 +438,12 @@ func write(path string, cfg any, o *options) ([]byte, error) {
 
 func applyOptions(opts []Option) *options {
 	o := &options{
-		readFileFunc:  os.ReadFile,
-		writeFileFunc: writeFile,
-		langs:         []string{},
+		FS:    nil,
+		langs: []string{},
 	}
 	for _, opt := range opts {
 		opt(o)
 	}
 
 	return o
-}
-
-func writeFile(filename string, data []byte, perm os.FileMode) error {
-	if err := os.MkdirAll(filepath.Dir(filename), os.ModePerm); err != nil {
-		return err
-	}
-
-	return os.WriteFile(filename, data, perm)
 }
