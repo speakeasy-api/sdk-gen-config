@@ -114,18 +114,14 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	// Find existing config file
 	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			configRes = &workspace.FindWorkspaceResult{
-				Path: filepath.Join(dir, workspace.SpeakeasyFolder, configFile),
-			}
-			newConfig = true
-			newSDK = true
+		return nil, err
+	}
+	if configRes.Data == nil {
+		newConfig = true
+		newSDK = true
 
-			for _, lang := range o.langs {
-				newForLang[lang] = true
-			}
-		} else {
-			return nil, err
+		for _, lang := range o.langs {
+			newForLang[lang] = true
 		}
 	}
 
@@ -319,10 +315,9 @@ func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
 
 	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
-		if !errors.Is(err, fs.ErrNotExist) {
-			return "", err
-		}
-
+		return "", err
+	}
+	if configRes.Data == nil {
 		return "", nil
 	}
 
@@ -353,13 +348,7 @@ func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 
 	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			configRes = &workspace.FindWorkspaceResult{
-				Path: filepath.Join(dir, workspace.SpeakeasyFolder, configFile),
-			}
-		} else {
-			return err
-		}
+		return err
 	}
 
 	if _, err := write(configRes.Path, cfg, o); err != nil {
@@ -398,6 +387,9 @@ func GetConfigChecksum(dir string, opts ...Option) (string, error) {
 	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
 		return "", err
+	}
+	if configRes.Data == nil {
+		return "", nil
 	}
 
 	hash := md5.Sum(configRes.Data)
