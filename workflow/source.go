@@ -2,21 +2,21 @@ package workflow
 
 import (
 	"fmt"
+	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
-	"github.com/speakeasy-api/sdk-gen-config/workspace"
 )
 
 // Ensure your update schema/workflow.schema.json on changes
 type Source struct {
-	Inputs   []Document `yaml:"inputs"`
-	Overlays []Document `yaml:"overlays,omitempty"`
-	Output   *string    `yaml:"output,omitempty"`
-	Ruleset  *string    `yaml:"ruleset,omitempty"`
-	Publish  *Publish   `yaml:"publish,omitempty"`
+	Inputs   []Document        `yaml:"inputs"`
+	Overlays []Document        `yaml:"overlays,omitempty"`
+	Output   *string           `yaml:"output,omitempty"`
+	Ruleset  *string           `yaml:"ruleset,omitempty"`
+	Publish  *SourcePublishing `yaml:"publish,omitempty"`
 }
 
 type Document struct {
@@ -29,8 +29,9 @@ type Auth struct {
 	Secret string `yaml:"authSecret,omitempty"`
 }
 
-type Publish struct {
-	Location string   `yaml:"location"`
+type Location string
+type SourcePublishing struct {
+	Location Location `yaml:"location"`
 	Tags     []string `yaml:"tags,omitempty"`
 }
 
@@ -141,20 +142,41 @@ func (d Document) GetTempDownloadPath(tempDir string) string {
 	return filepath.Join(tempDir, fmt.Sprintf("downloaded_%s%s", randStringBytes(10), filepath.Ext(d.Location)))
 }
 
-func (p Publish) Validate() error {
+const namespacePrefix = "@"
+
+func (p SourcePublishing) Validate() error {
 	if p.Location == "" {
 		return fmt.Errorf("location is required")
 	}
 
-	if !strings.HasPrefix(p.Location, "speakeasy://") {
-		return fmt.Errorf("publish location must begin with speakeasy://")
+	if !strings.HasPrefix(p.Location.String(), namespacePrefix) {
+		return fmt.Errorf("publish location must begin with %s", namespacePrefix)
 	}
 
-	if strings.Count(strings.TrimPrefix(p.Location, "speakeasy://"), "/") != 2 {
-		return fmt.Errorf("publish location should look like speakeasy://<org>/<workspace>/<image>")
+	if strings.Count(p.Location.Namespace(), "/") != 2 {
+		return fmt.Errorf("publish location should look like %s<org>/<workspace>/<image>", namespacePrefix)
 	}
 
 	return nil
+}
+
+func (p SourcePublishing) SetNamespace(namespace string) error {
+	p.Location = Location(namespacePrefix + namespace)
+	return p.Validate()
+}
+
+// @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
+func (n Location) Namespace() string {
+	return strings.TrimPrefix(n.String(), namespacePrefix)
+}
+
+// @<org>/<workspace>/<image> => <namespace_name>
+func (n Location) NamespaceName() string {
+	return n.Namespace()[strings.LastIndex(n.Namespace(), "/")+1:]
+}
+
+func (n Location) String() string {
+	return string(n)
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
