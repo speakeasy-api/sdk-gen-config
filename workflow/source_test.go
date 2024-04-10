@@ -252,8 +252,8 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Publish: &workflow.Publish{
-						Location: "speakeasy://org/workspace/image",
+					Publish: &workflow.SourcePublishing{
+						Location: "@org/workspace/image",
 					},
 				},
 			},
@@ -267,12 +267,12 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Publish: &workflow.Publish{
-						Location: "speakeasy://not-enough-parts",
+					Publish: &workflow.SourcePublishing{
+						Location: "@not-enough-parts",
 					},
 				},
 			},
-			wantErr: fmt.Errorf("failed to validate publish: publish location should look like speakeasy://<org>/<workspace>/<image>"),
+			wantErr: fmt.Errorf("failed to validate publish: publish location should look like @<org>/<workspace>/<image>"),
 		},
 		{
 			name: "publish fails with no location",
@@ -283,7 +283,7 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Publish: &workflow.Publish{},
+					Publish: &workflow.SourcePublishing{},
 				},
 			},
 			wantErr: fmt.Errorf("failed to validate publish: location is required"),
