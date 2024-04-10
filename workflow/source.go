@@ -170,7 +170,7 @@ func (n SourcePublishLocation) Namespace() string {
 	return strings.TrimPrefix(n.String(), namespacePrefix)
 }
 
-// @<org>/<workspace>/<image> => <namespace_name>
+// @<org>/<workspace>/<namespace_name> => <namespace_name>
 func (n SourcePublishLocation) NamespaceName() string {
 	return n.Namespace()[strings.LastIndex(n.Namespace(), "/")+1:]
 }
