@@ -6,7 +6,7 @@ toolchain go1.22.0
 
 require (
 	github.com/AlekSi/pointer v1.2.0
-	github.com/daveshanley/vacuum v0.9.10
+	github.com/daveshanley/vacuum v0.9.12
 	github.com/google/uuid v1.5.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.9.0

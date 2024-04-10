@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -558,7 +559,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 	}
 
 	// Create new config file in .speakeasy dir
-	speakeasyDir := filepath.Join(os.TempDir(), testDir, speakeasyFolder)
+	speakeasyDir := filepath.Join(os.TempDir(), testDir, workspace.SpeakeasyFolder)
 	err := createTempFile(speakeasyDir, "gen.yaml", readTestFile(t, "v200-gen.yaml"))
 	require.NoError(t, err)
 

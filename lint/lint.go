@@ -5,21 +5,18 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 
 	"github.com/daveshanley/vacuum/model"
+	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
 )
-
-var ErrNotFound = errors.New("could not find lint.yaml")
 
 const (
 	LintVersion = "1.0.0"
 )
 
 const (
-	speakeasyFolder = ".speakeasy"
-	genFolder       = ".gen"
+	lintFile = "lint.yaml"
 )
 
 type Ruleset struct {
@@ -34,21 +31,38 @@ type Lint struct {
 }
 
 func Load(searchDirs []string) (*Lint, string, error) {
-	var data []byte
-	var path string
+	var res *workspace.FindWorkspaceResult
+
+	dirsToSearch := map[string]bool{}
+
 	for _, dir := range searchDirs {
+		dirsToSearch[dir] = true
+	}
+
+	// Allow searching in the user's home directory
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		dirsToSearch[homeDir] = false
+	}
+
+	for dir, allowRecursive := range dirsToSearch {
 		var err error
-		data, path, err = findLintFile(dir, "")
+
+		res, err = workspace.FindWorkspace(dir, workspace.FindWorkspaceOptions{
+			FindFile:  lintFile,
+			Recursive: allowRecursive,
+		})
 		if err != nil {
-			if !errors.Is(err, ErrNotFound) {
+			if !errors.Is(err, fs.ErrNotExist) {
 				return nil, "", err
 			}
 			continue
 		}
+
 		break
 	}
-	if data == nil {
-		return nil, "", ErrNotFound
+	if res == nil || res.Data == nil {
+		return nil, "", fs.ErrNotExist
 	}
 
 	type lintHeader struct {
@@ -56,7 +70,7 @@ func Load(searchDirs []string) (*Lint, string, error) {
 	}
 
 	var header lintHeader
-	if err := yaml.Unmarshal(data, &header); err != nil {
+	if err := yaml.Unmarshal(res.Data, &header); err != nil {
 		return nil, "", fmt.Errorf("failed to unmarshal lint.yaml: %w", err)
 	}
 
@@ -65,52 +79,9 @@ func Load(searchDirs []string) (*Lint, string, error) {
 	}
 
 	var lint Lint
-	if err := yaml.Unmarshal(data, &lint); err != nil {
+	if err := yaml.Unmarshal(res.Data, &lint); err != nil {
 		return nil, "", fmt.Errorf("failed to unmarshal lint.yaml: %w", err)
 	}
 
-	return &lint, path, nil
-}
-
-func findLintFile(dir, configDir string) ([]byte, string, error) {
-	if configDir == "" {
-		configDir = speakeasyFolder
-	}
-
-	absPath, err := filepath.Abs(dir)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to get absolute path: %w", err)
-	}
-
-	path := filepath.Join(absPath, configDir, "lint.yaml")
-
-	for {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			if errors.Is(err, fs.ErrNotExist) {
-				// Get the parent directory of the .speakeasy dir
-				currentDir := filepath.Dir(filepath.Dir(path))
-
-				// Check for the root of the filesystem or path
-				// ie `.` for `./something`
-				// or `/` for `/some/absolute/path` in linux
-				// or `:\\` for `C:\\` in windows
-				if currentDir == "." || currentDir == "/" || currentDir[1:] == ":\\" {
-					if configDir == speakeasyFolder {
-						return findLintFile(dir, genFolder)
-					}
-
-					return nil, "", ErrNotFound
-				}
-
-				// Get the parent directory of the current dir and append ".speakeasy" as we only check in side the .speakeasy dir
-				path = filepath.Join(filepath.Dir(currentDir), configDir, "lint.yaml")
-				continue
-			}
-
-			return nil, "", fmt.Errorf("could not read lint.yaml: %w", err)
-		}
-
-		return data, path, nil
-	}
+	return &lint, res.Path, nil
 }

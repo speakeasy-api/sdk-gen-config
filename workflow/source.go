@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"github.com/speakeasy-api/sdk-gen-config/workspace"
 )
 
 // Ensure your update schema/workflow.schema.json on changes
@@ -101,16 +102,9 @@ func (s Source) GetOutputLocation() (string, error) {
 }
 
 func GetTempDir() string {
-	path := filepath.Join(speakeasyFolder, "temp")
+	wd, _ := os.Getwd()
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		path = filepath.Join(genFolder, "temp")
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			path = filepath.Join(speakeasyFolder, "temp")
-		}
-	}
-
-	return path
+	return workspace.FindWorkspaceTempDir(wd, workspace.FindWorkspaceOptions{})
 }
 
 func (s Source) GetTempMergeLocation() string {
