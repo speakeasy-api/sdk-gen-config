@@ -29,10 +29,10 @@ type Auth struct {
 	Secret string `yaml:"authSecret,omitempty"`
 }
 
-type Location string
+type SourcePublishLocation string
 type SourcePublishing struct {
-	Location Location `yaml:"location"`
-	Tags     []string `yaml:"tags,omitempty"`
+	Location SourcePublishLocation `yaml:"location"`
+	Tags     []string              `yaml:"tags,omitempty"`
 }
 
 func (s Source) Validate() error {
@@ -161,21 +161,21 @@ func (p SourcePublishing) Validate() error {
 }
 
 func (p SourcePublishing) SetNamespace(namespace string) error {
-	p.Location = Location(namespacePrefix + namespace)
+	p.Location = SourcePublishLocation(namespacePrefix + namespace)
 	return p.Validate()
 }
 
 // @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
-func (n Location) Namespace() string {
+func (n SourcePublishLocation) Namespace() string {
 	return strings.TrimPrefix(n.String(), namespacePrefix)
 }
 
 // @<org>/<workspace>/<image> => <namespace_name>
-func (n Location) NamespaceName() string {
+func (n SourcePublishLocation) NamespaceName() string {
 	return n.Namespace()[strings.LastIndex(n.Namespace(), "/")+1:]
 }
 
-func (n Location) String() string {
+func (n SourcePublishLocation) String() string {
 	return string(n)
 }
 
