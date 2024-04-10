@@ -22,10 +22,13 @@ const (
 
 // Ensure your update schema/workflow.schema.json on changes
 type Workflow struct {
-	Version string            `yaml:"workflowVersion"`
-	Sources map[string]Source `yaml:"sources"`
-	Targets map[string]Target `yaml:"targets"`
+	Version          string            `yaml:"workflowVersion"`
+	SpeakeasyVersion Version           `yaml:"speakeasyVersion,omitempty"`
+	Sources          map[string]Source `yaml:"sources"`
+	Targets          map[string]Target `yaml:"targets"`
 }
+
+type Version string
 
 func Load(dir string) (*Workflow, string, error) {
 	res, err := workspace.FindWorkspace(dir, workspace.FindWorkspaceOptions{
@@ -118,4 +121,16 @@ func validateSecret(secret string) error {
 	}
 
 	return nil
+}
+
+func (v Version) String() string {
+	if v == "" || v == "latest" {
+		return "latest"
+	}
+
+	if !strings.HasPrefix(string(v), "v") {
+		return "v" + string(v)
+	}
+
+	return string(v)
 }
