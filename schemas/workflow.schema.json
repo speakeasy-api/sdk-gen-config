@@ -8,6 +8,12 @@
       "type": "string",
       "const": "1.0.0"
     },
+    "speakeasyVersion": {
+      "type": "string"
+    },
+    "versionLocked": {
+      "type": "boolean"
+    },
     "sources": {
       "type": "object",
       "additionalProperties": {
