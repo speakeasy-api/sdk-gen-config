@@ -14,16 +14,14 @@ import (
 
 const (
 	WorkflowVersion = "1.0.0"
-)
-
-const (
-	workflowFile = "workflow.yaml"
+	workflowFile    = "workflow.yaml"
 )
 
 // Ensure your update schema/workflow.schema.json on changes
 type Workflow struct {
 	Version          string            `yaml:"workflowVersion"`
 	SpeakeasyVersion Version           `yaml:"speakeasyVersion,omitempty"`
+	VersionLocked    bool              `yaml:"versionLocked,omitempty"`
 	Sources          map[string]Source `yaml:"sources"`
 	Targets          map[string]Target `yaml:"targets"`
 }
