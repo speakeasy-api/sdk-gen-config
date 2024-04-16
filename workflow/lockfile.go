@@ -22,7 +22,7 @@ type LockFile struct {
 
 type SourceLock struct {
 	SourceRevisionDigest string   `yaml:"sourceRevisionDigest,omitempty"`
-	SourceNamespaceName  string   `yaml:"sourceNamespaceName,omitempty"`
+	SourceNamespace      string   `yaml:"sourceNamespace,omitempty"`
 	Tags                 []string `yaml:"tags,omitempty"`
 }
 
