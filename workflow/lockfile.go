@@ -27,8 +27,10 @@ type SourceLock struct {
 }
 
 type TargetLock struct {
-	Source          string `yaml:"source,omitempty"`
-	GenLockLocation string `yaml:"genLockLocation,omitempty"`
+	Source               string `yaml:"source"`
+	SourceRevisionDigest string `yaml:"sourceRevisionDigest,omitempty"`
+	SourceNamespace      string `yaml:"sourceNamespace,omitempty"`
+	OutLocation          string `yaml:"outLocation,omitempty"`
 }
 
 func LoadLockfile(dir string) (*LockFile, error) {
