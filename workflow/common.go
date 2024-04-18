@@ -14,9 +14,13 @@ const (
 	fileStatusLocal fileStatus = iota
 	fileStatusNotExists
 	fileStatusRemote
+	fileStatusRegistry
 )
 
 func getFileStatus(filePath string) fileStatus {
+	if strings.Contains(filePath, "registry.speakeasyapi.dev") {
+		return fileStatusRegistry
+	}
 	if _, err := os.Stat(SanitizeFilePath(filePath)); err == nil || !errors.Is(err, os.ErrNotExist) {
 		return fileStatusLocal
 	}

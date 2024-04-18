@@ -2,12 +2,14 @@ package workflow
 
 import (
 	"fmt"
-	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"math/rand"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/speakeasy-api/sdk-gen-config/workspace"
 )
 
 // Ensure your update schema/workflow.schema.json on changes
@@ -22,6 +24,12 @@ type Source struct {
 type Document struct {
 	Location string `yaml:"location"`
 	Auth     *Auth  `yaml:",inline"`
+}
+
+type SpeakeasyRegistryDocument struct {
+	NamespaceID string
+	// Reference could be tag or revision hash sha256:...
+	Reference string
 }
 
 type Auth struct {
@@ -138,8 +146,39 @@ func (d Document) IsRemote() bool {
 	return getFileStatus(d.Location) == fileStatusRemote
 }
 
+func (d Document) IsSpeakeasyRegistry() bool {
+	return strings.Contains(d.Location, "registry.speakeasyapi.dev")
+}
+
+// ParseSpeakeasyRegistryReference Exposed utility that can be used outside of purely documents
+func ParseSpeakeasyRegistryReference(location string) *SpeakeasyRegistryDocument {
+	registryDocument := &SpeakeasyRegistryDocument{}
+	subPath := strings.Split(location, "registry.speakeasyapi.dev/")[1]
+	// Attempt to split the reference for a revision @sha256:...
+	components := strings.SplitN(subPath, "@sha256", 2)
+	if len(components) == 2 {
+		registryDocument.NamespaceID = path.Base(components[0])
+		registryDocument.Reference = "sha256" + components[1]
+	} else {
+		components = strings.SplitN(subPath, ":", 2)
+		if len(components) == 2 {
+			registryDocument.NamespaceID = path.Base(components[0])
+			registryDocument.Reference = components[1]
+		} else { // no tag or revision was found default to latest
+			registryDocument.NamespaceID = path.Base(strings.TrimSuffix(subPath, "/"))
+			registryDocument.Reference = "latest"
+		}
+	}
+
+	return registryDocument
+}
+
 func (d Document) GetTempDownloadPath(tempDir string) string {
 	return filepath.Join(tempDir, fmt.Sprintf("downloaded_%s%s", randStringBytes(10), filepath.Ext(d.Location)))
+}
+
+func (d Document) GetTempRegistryDir(tempDir string) string {
+	return filepath.Join(tempDir, fmt.Sprintf("registry_%s", randStringBytes(10)))
 }
 
 const namespacePrefix = "@"
