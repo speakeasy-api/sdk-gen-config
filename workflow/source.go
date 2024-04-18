@@ -2,12 +2,14 @@ package workflow
 
 import (
 	"fmt"
-	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"math/rand"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/speakeasy-api/sdk-gen-config/workspace"
 )
 
 // Ensure your update schema/workflow.schema.json on changes
@@ -22,6 +24,14 @@ type Source struct {
 type Document struct {
 	Location string `yaml:"location"`
 	Auth     *Auth  `yaml:",inline"`
+}
+
+type SpeakeasyRegistryDocument struct {
+	OrgSlug       string
+	WorkspaceSlug string
+	NamespaceName string
+	// Reference could be tag or revision hash sha256:...
+	Reference string
 }
 
 type Auth struct {
@@ -136,6 +146,37 @@ func (d Document) Validate() error {
 
 func (d Document) IsRemote() bool {
 	return getFileStatus(d.Location) == fileStatusRemote
+}
+
+func (d Document) IsSpeakeasyRegistry() bool {
+	return strings.Contains(d.Location, "registry.speakeasyapi.dev")
+}
+
+func (d Document) ParseSpeakeasyRegistry() *SpeakeasyRegistryDocument {
+	if !d.IsSpeakeasyRegistry() {
+		return nil
+	}
+
+	registryDocument := &SpeakeasyRegistryDocument{}
+	subPath := strings.Split(d.Location, "registry.speakeasyapi.dev/")[1]
+	components := strings.Split(subPath, "/")
+	registryDocument.OrgSlug = components[0]
+	registryDocument.WorkspaceSlug = components[1]
+
+	endComponent := strings.SplitN(components[2], ":", 2)
+	registryDocument.NamespaceName = endComponent[0]
+	reference := endComponent[1]
+	// If the reference is a revision it's expected to be formatted with sha256:...
+	if !strings.HasPrefix(reference, "sha256:") && isLikelyRevision(reference) {
+		reference = "sha256:" + reference
+	}
+	registryDocument.Reference = reference
+	return registryDocument
+}
+
+func isLikelyRevision(reference string) bool {
+	sha256Regex := regexp.MustCompile(`^[a-fA-F0-9]{64}$`)
+	return sha256Regex.MatchString(reference)
 }
 
 func (d Document) GetTempDownloadPath(tempDir string) string {
