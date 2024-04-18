@@ -152,7 +152,7 @@ func (d Document) IsSpeakeasyRegistry() bool {
 	return strings.Contains(d.Location, "registry.speakeasyapi.dev")
 }
 
-func (d Document) ParseSpeakeasyRegistry() *SpeakeasyRegistryDocument {
+func (d Document) ParseSpeakeasyRegistryReference() *SpeakeasyRegistryDocument {
 	if !d.IsSpeakeasyRegistry() {
 		return nil
 	}
