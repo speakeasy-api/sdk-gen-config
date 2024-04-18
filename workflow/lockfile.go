@@ -21,15 +21,17 @@ type LockFile struct {
 }
 
 type SourceLock struct {
-	SourceRevisionDigest string   `yaml:"sourceRevisionDigest,omitempty"`
 	SourceNamespace      string   `yaml:"sourceNamespace,omitempty"`
+	SourceRevisionDigest string   `yaml:"sourceRevisionDigest,omitempty"`
+	SourceBlobDigest     string   `yaml:"sourceBlobDigest,omitempty"`
 	Tags                 []string `yaml:"tags,omitempty"`
 }
 
 type TargetLock struct {
 	Source               string `yaml:"source"`
-	SourceRevisionDigest string `yaml:"sourceRevisionDigest,omitempty"`
 	SourceNamespace      string `yaml:"sourceNamespace,omitempty"`
+	SourceRevisionDigest string `yaml:"sourceRevisionDigest,omitempty"`
+	SourceBlobDigest     string `yaml:"sourceBlobDigest,omitempty"`
 	OutLocation          string `yaml:"outLocation,omitempty"`
 }
 
