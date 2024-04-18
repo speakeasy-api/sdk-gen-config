@@ -179,6 +179,10 @@ func (d Document) GetTempDownloadPath(tempDir string) string {
 	return filepath.Join(tempDir, fmt.Sprintf("downloaded_%s%s", randStringBytes(10), filepath.Ext(d.Location)))
 }
 
+func (d Document) GetTempRegistryDir(tempDir string) string {
+	return filepath.Join(tempDir, fmt.Sprintf("registry_%s", randStringBytes(10)))
+}
+
 const namespacePrefix = "@"
 
 func (p SourcePublishing) Validate() error {
