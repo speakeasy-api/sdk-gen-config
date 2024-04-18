@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -149,25 +150,22 @@ func (d Document) IsSpeakeasyRegistry() bool {
 	return strings.Contains(d.Location, "registry.speakeasyapi.dev")
 }
 
-func (d Document) ParseSpeakeasyRegistryReference() *SpeakeasyRegistryDocument {
-	if !d.IsSpeakeasyRegistry() {
-		return nil
-	}
-
+// ParseSpeakeasyRegistryReference Exposed utility that can be used outside of purely documents
+func ParseSpeakeasyRegistryReference(location string) *SpeakeasyRegistryDocument {
 	registryDocument := &SpeakeasyRegistryDocument{}
-	path := strings.Split(d.Location, "registry.speakeasyapi.dev/")[1]
+	subPath := strings.Split(location, "registry.speakeasyapi.dev/")[1]
 	// Attempt to split the reference for a revision @sha256:...
-	components := strings.SplitN(path, "@sha256", 1)
+	components := strings.SplitN(subPath, "@sha256", 2)
 	if len(components) == 2 {
-		registryDocument.NamespaceID = components[0]
+		registryDocument.NamespaceID = path.Base(components[0])
 		registryDocument.Reference = "sha256" + components[1]
 	} else {
-		components = strings.SplitN(path, ":", 1)
+		components = strings.SplitN(subPath, ":", 2)
 		if len(components) == 2 {
-			registryDocument.NamespaceID = components[0]
+			registryDocument.NamespaceID = path.Base(components[0])
 			registryDocument.Reference = components[1]
 		} else { // no tag or revision was found default to latest
-			registryDocument.NamespaceID = strings.TrimSuffix(path, "/")
+			registryDocument.NamespaceID = path.Base(strings.TrimSuffix(subPath, "/"))
 			registryDocument.Reference = "latest"
 		}
 	}
