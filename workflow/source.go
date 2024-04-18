@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 
@@ -27,9 +26,7 @@ type Document struct {
 }
 
 type SpeakeasyRegistryDocument struct {
-	OrgSlug       string
-	WorkspaceSlug string
-	NamespaceName string
+	NamespaceID string
 	// Reference could be tag or revision hash sha256:...
 	Reference string
 }
@@ -158,25 +155,24 @@ func (d Document) ParseSpeakeasyRegistryReference() *SpeakeasyRegistryDocument {
 	}
 
 	registryDocument := &SpeakeasyRegistryDocument{}
-	subPath := strings.Split(d.Location, "registry.speakeasyapi.dev/")[1]
-	components := strings.Split(subPath, "/")
-	registryDocument.OrgSlug = components[0]
-	registryDocument.WorkspaceSlug = components[1]
-
-	endComponent := strings.SplitN(components[2], ":", 2)
-	registryDocument.NamespaceName = endComponent[0]
-	reference := endComponent[1]
-	// If the reference is a revision it's expected to be formatted with sha256:...
-	if !strings.HasPrefix(reference, "sha256:") && isLikelyRevision(reference) {
-		reference = "sha256:" + reference
+	path := strings.Split(d.Location, "registry.speakeasyapi.dev/")[1]
+	// Attempt to split the reference for a revision @sha256:...
+	components := strings.SplitN(path, "@sha256", 1)
+	if len(components) == 2 {
+		registryDocument.NamespaceID = components[0]
+		registryDocument.Reference = "sha256" + components[1]
+	} else {
+		components = strings.SplitN(path, ":", 1)
+		if len(components) == 2 {
+			registryDocument.NamespaceID = components[0]
+			registryDocument.Reference = components[1]
+		} else { // no tag or revision was found default to latest
+			registryDocument.NamespaceID = strings.TrimSuffix(path, "/")
+			registryDocument.Reference = "latest"
+		}
 	}
-	registryDocument.Reference = reference
-	return registryDocument
-}
 
-func isLikelyRevision(reference string) bool {
-	sha256Regex := regexp.MustCompile(`^[a-fA-F0-9]{64}$`)
-	return sha256Regex.MatchString(reference)
+	return registryDocument
 }
 
 func (d Document) GetTempDownloadPath(tempDir string) string {
