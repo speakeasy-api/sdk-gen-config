@@ -94,6 +94,8 @@ func (s Source) GetOutputLocation() (string, error) {
 		inputFile := s.Inputs[0].Location
 
 		switch getFileStatus(inputFile) {
+		case fileStatusRegistry:
+			return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s", randStringBytes(10))), nil
 		case fileStatusLocal:
 			return inputFile, nil
 		case fileStatusNotExists:
