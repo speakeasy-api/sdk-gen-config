@@ -253,7 +253,7 @@ func TestSource_Validate(t *testing.T) {
 						},
 					},
 					Publish: &workflow.SourcePublishing{
-						Location: "@org/workspace/image",
+						Location: "registry.speakeasyapi.dev/org/workspace/image",
 					},
 				},
 			},
@@ -268,11 +268,11 @@ func TestSource_Validate(t *testing.T) {
 						},
 					},
 					Publish: &workflow.SourcePublishing{
-						Location: "@not-enough-parts",
+						Location: "registry.speakeasyapi.dev/not-enough-parts",
 					},
 				},
 			},
-			wantErr: fmt.Errorf("failed to validate publish: publish location should look like @<org>/<workspace>/<image>"),
+			wantErr: fmt.Errorf("failed to validate publish: publish location should look like registry.speakeasyapi.dev/<org>/<workspace>/<image>"),
 		},
 		{
 			name: "publish fails with no location",
