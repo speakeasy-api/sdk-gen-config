@@ -211,6 +211,22 @@ func (p *SourcePublishing) SetNamespace(namespace string) error {
 	return p.Validate()
 }
 
+func (p *SourcePublishing) ParseRegistryLocation() (string, string, string, error) {
+	if err := p.Validate(); err != nil {
+		return "", "", "", err
+	}
+
+	location := p.Location.String()
+	// perfectly valid for someone to add http prefixes
+	location = strings.TrimPrefix(location, "https://")
+	location = strings.TrimPrefix(location, "http://")
+
+	subParts := strings.Split(location, namespacePrefix)
+	components := strings.Split(strings.TrimSuffix(subParts[1], "/"), "/")
+	return components[0], components[1], components[2], nil
+
+}
+
 // @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
 func (n SourcePublishLocation) Namespace() string {
 	location := string(n)
