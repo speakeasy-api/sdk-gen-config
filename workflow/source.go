@@ -206,7 +206,7 @@ func (p SourcePublishing) Validate() error {
 	return nil
 }
 
-func (p SourcePublishing) SetNamespace(namespace string) error {
+func (p *SourcePublishing) SetNamespace(namespace string) error {
 	p.Location = SourcePublishLocation(namespacePrefix + namespace)
 	return p.Validate()
 }
