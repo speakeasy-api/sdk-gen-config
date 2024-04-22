@@ -183,14 +183,19 @@ func (d Document) GetTempRegistryDir(tempDir string) string {
 	return filepath.Join(tempDir, fmt.Sprintf("registry_%s", randStringBytes(10)))
 }
 
-const namespacePrefix = "@"
+const namespacePrefix = "registry.speakeasyapi.dev/"
 
 func (p SourcePublishing) Validate() error {
 	if p.Location == "" {
 		return fmt.Errorf("location is required")
 	}
 
-	if !strings.HasPrefix(p.Location.String(), namespacePrefix) {
+	location := p.Location.String()
+	// perfectly valid for someone to add http prefixes
+	location = strings.TrimPrefix(location, "https://")
+	location = strings.TrimPrefix(location, "http://")
+
+	if !strings.HasPrefix(location, namespacePrefix) {
 		return fmt.Errorf("publish location must begin with %s", namespacePrefix)
 	}
 
@@ -208,7 +213,11 @@ func (p SourcePublishing) SetNamespace(namespace string) error {
 
 // @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
 func (n SourcePublishLocation) Namespace() string {
-	return strings.TrimPrefix(n.String(), namespacePrefix)
+	location := string(n)
+	// perfectly valid for someone to add http prefixes
+	location = strings.TrimPrefix(location, "https://")
+	location = strings.TrimPrefix(location, "http://")
+	return strings.TrimPrefix(location, namespacePrefix)
 }
 
 // @<org>/<workspace>/<namespace_name> => <namespace_name>
