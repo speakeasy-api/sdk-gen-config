@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -27,7 +26,10 @@ type Document struct {
 }
 
 type SpeakeasyRegistryDocument struct {
-	NamespaceID string
+	OrganizationSlug string
+	WorkspaceSlug    string
+	NamespaceID      string
+	NamespaceName    string
 	// Reference could be tag or revision hash sha256:...
 	Reference string
 }
@@ -152,27 +154,51 @@ func (d Document) IsSpeakeasyRegistry() bool {
 	return strings.Contains(d.Location, "registry.speakeasyapi.dev")
 }
 
-// ParseSpeakeasyRegistryReference Exposed utility that can be used outside of purely documents
+// Parse the location to extract the namespace ID, namespace name, and reference
+// The location should be in the format registry.speakeasyapi.dev/org/workspace/name[:tag|@sha256:digest]
 func ParseSpeakeasyRegistryReference(location string) *SpeakeasyRegistryDocument {
-	registryDocument := &SpeakeasyRegistryDocument{}
-	subPath := strings.Split(location, "registry.speakeasyapi.dev/")[1]
-	// Attempt to split the reference for a revision @sha256:...
-	components := strings.SplitN(subPath, "@sha256", 2)
-	if len(components) == 2 {
-		registryDocument.NamespaceID = path.Base(components[0])
-		registryDocument.Reference = "sha256" + components[1]
-	} else {
-		components = strings.SplitN(subPath, ":", 2)
-		if len(components) == 2 {
-			registryDocument.NamespaceID = path.Base(components[0])
-			registryDocument.Reference = components[1]
-		} else { // no tag or revision was found default to latest
-			registryDocument.NamespaceID = path.Base(strings.TrimSuffix(subPath, "/"))
-			registryDocument.Reference = "latest"
-		}
+	// Parse the location to extract the organization, workspace, namespace, and reference
+	// Examples:
+	// registry.speakeasyapi.dev/org/workspace/name (default reference: latest)
+	// registry.speakeasyapi.dev/org/workspace/name@sha256:1234567890abcdef
+	// registry.speakeasyapi.dev/org/workspace/name:tag
+
+	// Assert it starts with the registry prefix
+	if !strings.HasPrefix(location, "registry.speakeasyapi.dev/") {
+		return nil
 	}
 
-	return registryDocument
+	// Extract the organization, workspace, and namespace
+	parts := strings.Split(strings.TrimPrefix(location, "registry.speakeasyapi.dev/"), "/")
+	if len(parts) != 3 {
+		return nil
+	}
+
+	organizationSlug := parts[0]
+	workspaceSlug := parts[1]
+	suffix := parts[2]
+
+	reference := "latest"
+	namespaceName := suffix
+
+	// Check if the suffix contains a reference
+	if strings.Contains(suffix, "@") {
+		// Reference is a digest
+		reference = suffix[strings.Index(suffix, "@")+1:]
+		namespaceName = suffix[:strings.Index(suffix, "@")]
+	} else if strings.Contains(suffix, ":") {
+		// Reference is a tag
+		reference = suffix[strings.Index(suffix, ":")+1:]
+		namespaceName = suffix[:strings.Index(suffix, ":")]
+	}
+
+	return &SpeakeasyRegistryDocument{
+		OrganizationSlug: organizationSlug,
+		WorkspaceSlug:    workspaceSlug,
+		NamespaceID:      organizationSlug + "/" + workspaceSlug + "/" + namespaceName,
+		NamespaceName:    namespaceName,
+		Reference:        reference,
+	}
 }
 
 func (d Document) GetTempDownloadPath(tempDir string) string {

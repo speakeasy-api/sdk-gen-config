@@ -453,6 +453,84 @@ func TestSource_GetOutputLocation(t *testing.T) {
 	}
 }
 
+func TestSource_ParseSpeakeasyRegistryReference(t *testing.T) {
+	// Examples:
+	// registry.speakeasyapi.dev/org/workspace/name
+	// registry.speakeasyapi.dev/org/workspace/name@sha256:1234567890abcdef
+	// registry.speakeasyapi.dev/org/workspace/name:tag
+	// Expected output:
+	// NamespaceID: org/workspace/name, Reference: latest, NamespaceName: name
+
+	type args struct {
+		location string
+	}
+	tests := []struct {
+		name string
+		args args
+		want *workflow.SpeakeasyRegistryDocument
+	}{
+		{
+			name: "simple reference",
+			args: args{
+				location: "registry.speakeasyapi.dev/org/workspace/name",
+			},
+			want: &workflow.SpeakeasyRegistryDocument{
+				NamespaceID:      "org/workspace/name",
+				OrganizationSlug: "org",
+				WorkspaceSlug:    "workspace",
+				NamespaceName:    "name",
+				Reference:        "latest",
+			},
+		},
+		{
+			name: "reference with sha256",
+			args: args{
+				location: "registry.speakeasyapi.dev/org/workspace/name@sha256:1234567890abcdef",
+			},
+			want: &workflow.SpeakeasyRegistryDocument{
+				OrganizationSlug: "org",
+				WorkspaceSlug:    "workspace",
+				NamespaceID:      "org/workspace/name",
+				NamespaceName:    "name",
+				Reference:        "sha256:1234567890abcdef",
+			},
+		},
+		{
+			name: "reference with tag",
+			args: args{
+				location: "registry.speakeasyapi.dev/org/workspace/name:tag",
+			},
+			want: &workflow.SpeakeasyRegistryDocument{
+				OrganizationSlug: "org",
+				WorkspaceSlug:    "workspace",
+				NamespaceID:      "org/workspace/name",
+				NamespaceName:    "name",
+				Reference:        "tag",
+			},
+		},
+		{
+			name: "reference with invalid format",
+			args: args{
+				location: "registry.speakeasyapi.dev/org/workspace",
+			},
+			want: nil,
+		},
+		{
+			name: "reference with invalid format",
+			args: args{
+				location: "reg.speakeasyapi.dev/org/workspace/name",
+			},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			registryDocument := workflow.ParseSpeakeasyRegistryReference(tt.args.location)
+			assert.Equal(t, tt.want, registryDocument)
+		})
+	}
+}
+
 func createLocalFiles(s workflow.Source) (string, error) {
 	tmpDir, err := os.MkdirTemp("", "workflow*")
 	if err != nil {
