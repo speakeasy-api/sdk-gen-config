@@ -13,11 +13,11 @@ import (
 
 // Ensure your update schema/workflow.schema.json on changes
 type Source struct {
-	Inputs   []Document        `yaml:"inputs"`
-	Overlays []Document        `yaml:"overlays,omitempty"`
-	Output   *string           `yaml:"output,omitempty"`
-	Ruleset  *string           `yaml:"ruleset,omitempty"`
-	Publish  *SourcePublishing `yaml:"publish,omitempty"`
+	Inputs   []Document      `yaml:"inputs"`
+	Overlays []Document      `yaml:"overlays,omitempty"`
+	Output   *string         `yaml:"output,omitempty"`
+	Ruleset  *string         `yaml:"ruleset,omitempty"`
+	Registry *SourceRegistry `yaml:"registry,omitempty"`
 }
 
 type Document struct {
@@ -39,10 +39,10 @@ type Auth struct {
 	Secret string `yaml:"authSecret,omitempty"`
 }
 
-type SourcePublishLocation string
-type SourcePublishing struct {
-	Location SourcePublishLocation `yaml:"location"`
-	Tags     []string              `yaml:"tags,omitempty"`
+type SourceRegistryLocation string
+type SourceRegistry struct {
+	Location SourceRegistryLocation `yaml:"location"`
+	Tags     []string               `yaml:"tags,omitempty"`
 }
 
 func (s Source) Validate() error {
@@ -62,9 +62,9 @@ func (s Source) Validate() error {
 		}
 	}
 
-	if s.Publish != nil {
-		if err := s.Publish.Validate(); err != nil {
-			return fmt.Errorf("failed to validate publish: %w", err)
+	if s.Registry != nil {
+		if err := s.Registry.Validate(); err != nil {
+			return fmt.Errorf("failed to validate registry: %w", err)
 		}
 	}
 
@@ -211,7 +211,7 @@ func (d Document) GetTempRegistryDir(tempDir string) string {
 
 const namespacePrefix = "registry.speakeasyapi.dev/"
 
-func (p SourcePublishing) Validate() error {
+func (p SourceRegistry) Validate() error {
 	if p.Location == "" {
 		return fmt.Errorf("location is required")
 	}
@@ -222,22 +222,22 @@ func (p SourcePublishing) Validate() error {
 	location = strings.TrimPrefix(location, "http://")
 
 	if !strings.HasPrefix(location, namespacePrefix) {
-		return fmt.Errorf("publish location must begin with %s", namespacePrefix)
+		return fmt.Errorf("registry location must begin with %s", namespacePrefix)
 	}
 
 	if strings.Count(p.Location.Namespace(), "/") != 2 {
-		return fmt.Errorf("publish location should look like %s<org>/<workspace>/<image>", namespacePrefix)
+		return fmt.Errorf("registry location should look like %s<org>/<workspace>/<image>", namespacePrefix)
 	}
 
 	return nil
 }
 
-func (p *SourcePublishing) SetNamespace(namespace string) error {
-	p.Location = SourcePublishLocation(namespacePrefix + namespace)
+func (p *SourceRegistry) SetNamespace(namespace string) error {
+	p.Location = SourceRegistryLocation(namespacePrefix + namespace)
 	return p.Validate()
 }
 
-func (p *SourcePublishing) ParseRegistryLocation() (string, string, string, error) {
+func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, error) {
 	if err := p.Validate(); err != nil {
 		return "", "", "", err
 	}
@@ -254,7 +254,7 @@ func (p *SourcePublishing) ParseRegistryLocation() (string, string, string, erro
 }
 
 // @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
-func (n SourcePublishLocation) Namespace() string {
+func (n SourceRegistryLocation) Namespace() string {
 	location := string(n)
 	// perfectly valid for someone to add http prefixes
 	location = strings.TrimPrefix(location, "https://")
@@ -263,11 +263,11 @@ func (n SourcePublishLocation) Namespace() string {
 }
 
 // @<org>/<workspace>/<namespace_name> => <namespace_name>
-func (n SourcePublishLocation) NamespaceName() string {
+func (n SourceRegistryLocation) NamespaceName() string {
 	return n.Namespace()[strings.LastIndex(n.Namespace(), "/")+1:]
 }
 
-func (n SourcePublishLocation) String() string {
+func (n SourceRegistryLocation) String() string {
 	return string(n)
 }
 
