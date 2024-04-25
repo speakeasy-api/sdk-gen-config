@@ -244,7 +244,7 @@ func TestSource_Validate(t *testing.T) {
 			wantErr: fmt.Errorf("failed to validate overlay 0: location is required"),
 		},
 		{
-			name: "publish success",
+			name: "registry success",
 			args: args{
 				source: workflow.Source{
 					Inputs: []workflow.Document{
@@ -252,14 +252,14 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Publish: &workflow.SourcePublishing{
+					Registry: &workflow.SourceRegistry{
 						Location: "registry.speakeasyapi.dev/org/workspace/image",
 					},
 				},
 			},
 		},
 		{
-			name: "publish fails with invalid location",
+			name: "registry fails with invalid location",
 			args: args{
 				source: workflow.Source{
 					Inputs: []workflow.Document{
@@ -267,15 +267,15 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Publish: &workflow.SourcePublishing{
+					Registry: &workflow.SourceRegistry{
 						Location: "registry.speakeasyapi.dev/not-enough-parts",
 					},
 				},
 			},
-			wantErr: fmt.Errorf("failed to validate publish: publish location should look like registry.speakeasyapi.dev/<org>/<workspace>/<image>"),
+			wantErr: fmt.Errorf("failed to validate registry: registry location should look like registry.speakeasyapi.dev/<org>/<workspace>/<image>"),
 		},
 		{
-			name: "publish fails with no location",
+			name: "registry fails with no location",
 			args: args{
 				source: workflow.Source{
 					Inputs: []workflow.Document{
@@ -283,10 +283,10 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Publish: &workflow.SourcePublishing{},
+					Registry: &workflow.SourceRegistry{},
 				},
 			},
-			wantErr: fmt.Errorf("failed to validate publish: location is required"),
+			wantErr: fmt.Errorf("failed to validate registry: location is required"),
 		},
 	}
 	for _, tt := range tests {
