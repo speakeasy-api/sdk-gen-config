@@ -95,9 +95,10 @@ type Configuration struct {
 }
 
 type PublishWorkflow struct {
-	Name string    `yaml:"name"`
-	On   PublishOn `yaml:"on"`
-	Jobs Jobs      `yaml:"jobs"`
+	Name        string      `yaml:"name"`
+	Permissions Permissions `yaml:"permissions,omitempty"`
+	On          PublishOn   `yaml:"on"`
+	Jobs        Jobs        `yaml:"jobs"`
 }
 
 type PublishOn struct {
