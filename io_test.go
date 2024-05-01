@@ -56,7 +56,6 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                true,
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
-							MethodSignaturesApr2024:              true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
@@ -267,7 +266,6 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                true,
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
-							MethodSignaturesApr2024:              true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
@@ -318,7 +316,6 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                true,
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
-							MethodSignaturesApr2024:              true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
