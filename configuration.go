@@ -42,7 +42,6 @@ type Fixes struct {
 	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023"`
 	ParameterOrderingFeb2024             bool           `yaml:"parameterOrderingFeb2024"`
 	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024"`
-	MethodSignaturesApr2024              bool           `yaml:"methodSignaturesApr2024"`
 	AdditionalProperties                 map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
