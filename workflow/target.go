@@ -25,7 +25,8 @@ type Publishing struct {
 }
 
 type CodeSamples struct {
-	Output string `yaml:"output"`
+	Output   string          `yaml:"output"`
+	Registry *SourceRegistry `yaml:"registry,omitempty"`
 }
 
 type NPM struct {
