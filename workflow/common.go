@@ -8,20 +8,21 @@ import (
 	"strings"
 )
 
-type fileStatus int
+type FileStatus int
 
 const (
-	fileStatusLocal fileStatus = iota
+	fileStatusLocal FileStatus = iota
 	fileStatusNotExists
 	fileStatusRemote
 	fileStatusRegistry
 )
 
-func getFileStatus(filePath string) fileStatus {
+func GetFileStatus(filePath string) FileStatus {
 	if strings.Contains(filePath, "registry.speakeasyapi.dev") {
 		return fileStatusRegistry
 	}
 	if _, err := os.Stat(SanitizeFilePath(filePath)); err == nil || !errors.Is(err, os.ErrNotExist) {
+		println("STAT ERROR: ", err.Error())
 		return fileStatusLocal
 	}
 
