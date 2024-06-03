@@ -95,7 +95,7 @@ func (s Source) GetOutputLocation() (string, error) {
 	if len(s.Inputs) == 1 && len(s.Overlays) == 0 {
 		inputFile := s.Inputs[0].Location
 
-		switch GetFileStatus(inputFile) {
+		switch getFileStatus(inputFile) {
 		case fileStatusRegistry:
 			return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s", randStringBytes(10))), nil
 		case fileStatusLocal:
@@ -134,7 +134,7 @@ func (d Document) Validate() error {
 	}
 
 	if d.Auth != nil {
-		if GetFileStatus(d.Location) != fileStatusRemote {
+		if getFileStatus(d.Location) != fileStatusRemote {
 			return fmt.Errorf("auth is only supported for remote documents")
 		}
 
@@ -147,7 +147,7 @@ func (d Document) Validate() error {
 }
 
 func (d Document) IsRemote() bool {
-	return GetFileStatus(d.Location) == fileStatusRemote
+	return getFileStatus(d.Location) == fileStatusRemote
 }
 
 func (d Document) IsSpeakeasyRegistry() bool {

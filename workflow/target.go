@@ -82,7 +82,7 @@ func (t Target) Validate(supportedLangs []string, sources map[string]Source) err
 			return fmt.Errorf("failed to validate source %s: %w", t.Source, err)
 		}
 	} else {
-		switch GetFileStatus(t.Source) {
+		switch getFileStatus(t.Source) {
 		case fileStatusNotExists:
 			return fmt.Errorf("source %s does not exist", t.Source)
 		}

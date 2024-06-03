@@ -7,16 +7,16 @@ import (
 	"strings"
 )
 
-type FileStatus int
+type fileStatus int
 
 const (
-	fileStatusLocal FileStatus = iota
+	fileStatusLocal fileStatus = iota
 	fileStatusNotExists
 	fileStatusRemote
 	fileStatusRegistry
 )
 
-func GetFileStatus(filePath string) FileStatus {
+func getFileStatus(filePath string) fileStatus {
 	if strings.Contains(filePath, "registry.speakeasyapi.dev") {
 		return fileStatusRegistry
 	}
