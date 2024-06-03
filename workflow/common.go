@@ -21,7 +21,7 @@ func GetFileStatus(filePath string) FileStatus {
 		return fileStatusRegistry
 	}
 
-	if file, err := os.Stat(SanitizeFilePath(filePath)); err == nil || file.Size() > 0 {
+	if file, err := os.Stat(SanitizeFilePath(filePath)); err == nil || (file != nil && file.Size() > 0) {
 		return fileStatusLocal
 	}
 
