@@ -130,7 +130,7 @@
           "required": ["location"]
         }
       },
-      "required": ["output"]
+      "required": []
     },
     "publishing": {
       "type": "object",
