@@ -119,6 +119,15 @@
       "properties": {
         "output": {
           "type": "string"
+        },
+        "registry": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string"
+            }
+          },
+          "required": ["location"]
         }
       },
       "required": ["output"]
