@@ -1,7 +1,6 @@
 package workflow
 
 import (
-	"errors"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -21,7 +20,8 @@ func getFileStatus(filePath string) fileStatus {
 	if strings.Contains(filePath, "registry.speakeasyapi.dev") {
 		return fileStatusRegistry
 	}
-	if _, err := os.Stat(SanitizeFilePath(filePath)); err == nil || !errors.Is(err, os.ErrNotExist) {
+
+	if file, err := os.Stat(SanitizeFilePath(filePath)); err == nil || (file != nil && file.Size() > 0) {
 		return fileStatusLocal
 	}
 
