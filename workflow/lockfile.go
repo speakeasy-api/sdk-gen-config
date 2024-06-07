@@ -3,11 +3,12 @@ package workflow
 import (
 	"errors"
 	"fmt"
-	"github.com/speakeasy-api/sdk-gen-config/workspace"
-	"gopkg.in/yaml.v3"
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/speakeasy-api/sdk-gen-config/workspace"
+	"gopkg.in/yaml.v3"
 )
 
 const workflowLockfile = "workflow.lock"
@@ -28,11 +29,14 @@ type SourceLock struct {
 }
 
 type TargetLock struct {
-	Source               string `yaml:"source"`
-	SourceNamespace      string `yaml:"sourceNamespace,omitempty"`
-	SourceRevisionDigest string `yaml:"sourceRevisionDigest,omitempty"`
-	SourceBlobDigest     string `yaml:"sourceBlobDigest,omitempty"`
-	OutLocation          string `yaml:"outLocation,omitempty"`
+	Source                    string `yaml:"source"`
+	SourceNamespace           string `yaml:"sourceNamespace,omitempty"`
+	SourceRevisionDigest      string `yaml:"sourceRevisionDigest,omitempty"`
+	SourceBlobDigest          string `yaml:"sourceBlobDigest,omitempty"`
+	CodeSamplesNamespace      string `yaml:"codeSamplesNamespace,omitempty"`
+	CodeSamplesRevisionDigest string `yaml:"codeSamplesRevisionDigest,omitempty"`
+	CodeSamplesBlobDigest     string `yaml:"codeSamplesBlobDigest,omitempty"`
+	OutLocation               string `yaml:"outLocation,omitempty"`
 }
 
 func LoadLockfile(dir string) (*LockFile, error) {
