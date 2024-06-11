@@ -95,9 +95,12 @@ func (t Target) Validate(supportedLangs []string, sources map[string]Source) err
 	}
 
 	if t.CodeSamples != nil {
-		ext := filepath.Ext(t.CodeSamples.Output)
-		if !slices.Contains([]string{".yaml", ".yml"}, ext) {
-			return fmt.Errorf("failed to validate target: code samples output must be a yaml file")
+		// Output only needed if registry location is unset
+		if t.CodeSamples.Registry == nil {
+			ext := filepath.Ext(t.CodeSamples.Output)
+			if !slices.Contains([]string{".yaml", ".yml"}, ext) {
+				return fmt.Errorf("failed to validate target: code samples output must be a yaml file")
+			}
 		}
 	}
 
