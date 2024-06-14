@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/AlekSi/pointer"
@@ -15,14 +16,16 @@ const (
 	GithubWritePermission = "write"
 
 	// Constants to be used as keys in the config files
-	Languages            = "languages"
-	Mode                 = "mode"
-	GithubAccessToken    = "github_access_token"
-	SpeakeasyApiKey      = "speakeasy_api_key"
-	SpeakeasyServerURL   = "speakeasy_server_url"
-	OpenAPIDocAuthHeader = "openapi_doc_auth_header"
-	OpenAPIDocAuthToken  = "openapi_doc_auth_token"
-	OpenAPIDocs          = "openapi_docs"
+	Languages                        = "languages"
+	Mode                             = "mode"
+	GithubAccessToken                = "github_access_token"
+	SpeakeasyApiKey                  = "speakeasy_api_key"
+	SpeakeasyServerURL               = "speakeasy_server_url"
+	OpenAPIDocAuthHeader             = "openapi_doc_auth_header"
+	OpenAPIDocAuthToken              = "openapi_doc_auth_token"
+	OpenAPIDocs                      = "openapi_docs"
+	DefaultGithubTokenSecretName     = "GITHUB_TOKEN"
+	DefaultSpeakeasyAPIKeySecretName = "SPEAKEASY_API_KEY"
 )
 
 type OptionalPropertyRenderingOption string
@@ -316,4 +319,57 @@ func (c *Configuration) GetGenerationFieldsMap() (map[string]any, error) {
 
 func ptr(a any) *any {
 	return &a
+}
+
+func DefaultGenerationFile() *GenerateWorkflow {
+	secrets := make(map[string]string)
+	secrets[GithubAccessToken] = FormatGithubSecretName(DefaultGithubTokenSecretName)
+	secrets[SpeakeasyApiKey] = FormatGithubSecretName(DefaultSpeakeasyAPIKeySecretName)
+	return &GenerateWorkflow{
+		Name: "Generate",
+		On: GenerateOn{
+			WorkflowDispatch: WorkflowDispatch{
+				Inputs: Inputs{
+					Force: Force{
+						Description: "Force generation of SDKs",
+						Type:        "boolean",
+						Default:     false,
+					},
+				},
+			},
+			Schedule: []Schedule{
+				{
+					Cron: "0 0 * * *",
+				},
+			},
+		},
+		Jobs: Jobs{
+			Generate: Job{
+				Uses: "speakeasy-api/sdk-generation-action/.github/workflows/workflow-executor.yaml@v15",
+				With: map[string]any{
+					"speakeasy_version": "latest",
+					"force":             "${{ github.event.inputs.force }}",
+					Mode:                "pr",
+				},
+				Secrets: secrets,
+			},
+		},
+		Permissions: Permissions{
+			Checks:       GithubWritePermission,
+			Statuses:     GithubWritePermission,
+			Contents:     GithubWritePermission,
+			PullRequests: GithubWritePermission,
+		},
+	}
+}
+
+func FormatGithubSecretName(name string) string {
+	return fmt.Sprintf("${{ secrets.%s }}", strings.ToUpper(formatGithubSecret(name)))
+}
+
+func FormatGithubSecret(secret string) string {
+	if secret != "" && secret[0] == '$' {
+		secret = secret[1:]
+	}
+	return strings.ToLower(secret)
 }
