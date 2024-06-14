@@ -364,7 +364,7 @@ func DefaultGenerationFile() *GenerateWorkflow {
 }
 
 func FormatGithubSecretName(name string) string {
-	return fmt.Sprintf("${{ secrets.%s }}", strings.ToUpper(formatGithubSecret(name)))
+	return fmt.Sprintf("${{ secrets.%s }}", strings.ToUpper(FormatGithubSecret(name)))
 }
 
 func FormatGithubSecret(secret string) string {
