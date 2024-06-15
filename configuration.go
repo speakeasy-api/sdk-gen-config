@@ -109,8 +109,8 @@ type PublishOn struct {
 }
 
 type TagOn struct {
-	Push             Push             `yaml:"push"`
-	WorkflowDispatch WorkflowDispatch `yaml:"workflow_dispatch"`
+	Push             Push                    `yaml:"push"`
+	WorkflowDispatch WorkflowDispatchTagging `yaml:"workflow_dispatch"`
 }
 
 type Push struct {
@@ -158,6 +158,9 @@ type Job struct {
 
 type WorkflowDispatch struct {
 	Inputs Inputs `yaml:"inputs"`
+}
+
+type WorkflowDispatchTagging struct {
 }
 
 type Schedule struct {
