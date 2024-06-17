@@ -108,6 +108,11 @@ type PublishOn struct {
 	Push Push `yaml:"push"`
 }
 
+type TagOn struct {
+	Push             Push                    `yaml:"push"`
+	WorkflowDispatch WorkflowDispatchTagging `yaml:"workflow_dispatch"`
+}
+
 type Push struct {
 	Branches []string `yaml:"branches"`
 	Paths    []string `yaml:"paths"`
@@ -117,6 +122,13 @@ type GenerateWorkflow struct {
 	Name        string      `yaml:"name"`
 	Permissions Permissions `yaml:"permissions,omitempty"`
 	On          GenerateOn  `yaml:"on"`
+	Jobs        Jobs        `yaml:"jobs"`
+}
+
+type TaggingWorkflow struct {
+	Name        string      `yaml:"name"`
+	Permissions Permissions `yaml:"permissions,omitempty"`
+	On          TagOn       `yaml:"on"`
 	Jobs        Jobs        `yaml:"jobs"`
 }
 
@@ -135,6 +147,7 @@ type GenerateOn struct {
 type Jobs struct {
 	Generate Job `yaml:"generate,omitempty"`
 	Publish  Job `yaml:"publish,omitempty"`
+	Tag      Job `yaml:"tag,omitempty"`
 }
 
 type Job struct {
@@ -147,15 +160,25 @@ type WorkflowDispatch struct {
 	Inputs Inputs `yaml:"inputs"`
 }
 
+type WorkflowDispatchTagging struct {
+}
+
 type Schedule struct {
 	Cron string `yaml:"cron"`
 }
 
 type Inputs struct {
-	Force Force `yaml:"force"`
+	Force               Force                `yaml:"force"`
+	PushCodeSamplesOnly *PushCodeSamplesOnly `yaml:"push_code_samples_only,omitempty"`
 }
 
 type Force struct {
+	Description string `yaml:"description"`
+	Type        string `yaml:"type"`
+	Default     bool   `yaml:"default"`
+}
+
+type PushCodeSamplesOnly struct {
 	Description string `yaml:"description"`
 	Type        string `yaml:"type"`
 	Default     bool   `yaml:"default"`
