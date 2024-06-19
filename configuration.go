@@ -170,6 +170,7 @@ type Schedule struct {
 type Inputs struct {
 	Force               Force                `yaml:"force"`
 	PushCodeSamplesOnly *PushCodeSamplesOnly `yaml:"push_code_samples_only,omitempty"`
+	SetVersion          *SetVersion          `yaml:"set_version,omitempty"`
 }
 
 type Force struct {
@@ -182,6 +183,11 @@ type PushCodeSamplesOnly struct {
 	Description string `yaml:"description"`
 	Type        string `yaml:"type"`
 	Default     bool   `yaml:"default"`
+}
+
+type SetVersion struct {
+	Description string `yaml:"description"`
+	Type        string `yaml:"type"`
 }
 
 func GetDefaultConfig(newSDK bool, getLangDefaultFunc GetLanguageDefaultFunc, langs map[string]bool) (*Configuration, error) {
