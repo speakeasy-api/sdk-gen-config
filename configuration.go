@@ -171,6 +171,7 @@ type Inputs struct {
 	Force               Force                `yaml:"force"`
 	PushCodeSamplesOnly *PushCodeSamplesOnly `yaml:"push_code_samples_only,omitempty"`
 	SetVersion          *SetVersion          `yaml:"set_version,omitempty"`
+	Target              *Target              `yaml:"target,omitempty"`
 }
 
 type Force struct {
@@ -186,6 +187,11 @@ type PushCodeSamplesOnly struct {
 }
 
 type SetVersion struct {
+	Description string `yaml:"description"`
+	Type        string `yaml:"type"`
+}
+
+type Target struct {
 	Description string `yaml:"description"`
 	Type        string `yaml:"type"`
 }
