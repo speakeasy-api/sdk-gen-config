@@ -67,8 +67,16 @@ func (s Source) Validate() error {
 	}
 
 	for i, overlay := range s.Overlays {
-		if err := overlay.Validate(); err != nil {
-			return fmt.Errorf("failed to validate overlay %d: %w", i, err)
+		if overlay.Document != nil {
+			if err := overlay.Document.Validate(); err != nil {
+				return fmt.Errorf("failed to validate overlay document %d: %w", i, err)
+			}
+		}
+
+		if overlay.FallbackCodeSamples != nil {
+			if overlay.FallbackCodeSamples.FallbackCodeSamplesLanguage == "" {
+				return fmt.Errorf("fallbackCodeSamplesLanguage is required")
+			}
 		}
 	}
 
