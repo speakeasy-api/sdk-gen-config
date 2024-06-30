@@ -14,10 +14,20 @@ import (
 // Ensure your update schema/workflow.schema.json on changes
 type Source struct {
 	Inputs   []Document      `yaml:"inputs"`
-	Overlays []Document      `yaml:"overlays,omitempty"`
+	Overlays []Overlay       `yaml:"overlays,omitempty"`
 	Output   *string         `yaml:"output,omitempty"`
 	Ruleset  *string         `yaml:"ruleset,omitempty"`
 	Registry *SourceRegistry `yaml:"registry,omitempty"`
+}
+
+// Either FallBackCodeSamples or Document
+type Overlay struct {
+	FallbackCodeSamples *FallbackCodeSamples `yaml:"fallbackCodeSamples,omitempty"`
+	Document            *Document            `yaml:"document,omitempty"`
+}
+
+type FallbackCodeSamples struct {
+	FallbackCodeSamplesLanguage string `yaml:"fallbackCodeSamplesLanguage,omitempty"`
 }
 
 type Document struct {
