@@ -26,6 +26,34 @@ type Overlay struct {
 	Document            *Document            `yaml:"document,omitempty"`
 }
 
+func (o *Overlay) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var doc Document
+	if err := unmarshal(&doc); err == nil {
+		o.Document = &doc
+		return nil
+	}
+
+	var fallback FallbackCodeSamples
+	if err := unmarshal(&fallback); err == nil {
+		o.FallbackCodeSamples = &fallback
+		return nil
+	}
+
+	return fmt.Errorf("failed to unmarshal Overlay")
+}
+
+func (o Overlay) MarshalYAML() (interface{}, error) {
+	if o.Document != nil {
+		return o.Document, nil
+	}
+
+	if o.FallbackCodeSamples != nil {
+		return o.FallbackCodeSamples, nil
+	}
+
+	return nil, fmt.Errorf("failed to marshal Overlay")
+}
+
 type FallbackCodeSamples struct {
 	FallbackCodeSamplesLanguage string `yaml:"fallbackCodeSamplesLanguage,omitempty"`
 }
