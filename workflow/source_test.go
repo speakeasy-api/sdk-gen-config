@@ -12,6 +12,7 @@ import (
 	"github.com/speakeasy-api/sdk-gen-config/workflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
 
 func TestSource_Validate(t *testing.T) {
@@ -111,13 +112,9 @@ func TestSource_Validate(t *testing.T) {
 							},
 						},
 					},
-					Overlays: []workflow.Document{
-						{
-							Location: "overlay.yaml",
-						},
-						{
-							Location: "http://example.com/overlay.yaml",
-						},
+					Overlays: []workflow.Overlay{
+						{Document: &workflow.Document{Location: "overlay.yaml"}},
+						{Document: &workflow.Document{Location: "http://example.com/overlay.yaml"}},
 					},
 					Output: pointer.ToString("openapi.yaml"),
 				},
@@ -133,13 +130,9 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Overlays: []workflow.Document{
-						{
-							Location: "overlay.yaml",
-						},
-						{
-							Location: "overlay.yaml",
-						},
+					Overlays: []workflow.Overlay{
+						{Document: &workflow.Document{Location: "overlay.yaml"}},
+						{Document: &workflow.Document{Location: "overlay.yaml"}},
 					},
 					Output: pointer.ToString("openapi.json"),
 				},
@@ -158,10 +151,8 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Overlays: []workflow.Document{
-						{
-							Location: "overlay.yaml",
-						},
+					Overlays: []workflow.Overlay{
+						{Document: &workflow.Document{Location: "overlay.yaml"}},
 					},
 					Output: pointer.ToString("openapi.json"),
 				},
@@ -173,10 +164,8 @@ func TestSource_Validate(t *testing.T) {
 			args: args{
 				source: workflow.Source{
 					Inputs: []workflow.Document{},
-					Overlays: []workflow.Document{
-						{
-							Location: "overlay.yaml",
-						},
+					Overlays: []workflow.Overlay{
+						{Document: &workflow.Document{Location: "overlay.yaml"}},
 					},
 				},
 			},
@@ -236,12 +225,45 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Overlays: []workflow.Document{
-						{},
-					},
+					Overlays: []workflow.Overlay{{
+						Document: &workflow.Document{},
+					}},
 				},
 			},
-			wantErr: fmt.Errorf("failed to validate overlay 0: location is required"),
+			wantErr: fmt.Errorf("failed to validate overlay 0: failed to validate overlay document: location is required"),
+		},
+		{
+			name: "overlay fails with no fallbackCodeSamplesLanguage",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Overlays: []workflow.Overlay{{
+						FallbackCodeSamples: &workflow.FallbackCodeSamples{},
+					}},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate overlay 0: failed to validate overlay fallbackCodeSamples: fallbackCodeSamplesLanguage is required"),
+		},
+		{
+			name: "overlay with fallbackCodeSamplesLanguage",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Overlays: []workflow.Overlay{{
+						FallbackCodeSamples: &workflow.FallbackCodeSamples{
+							FallbackCodeSamplesLanguage: "python",
+						},
+					}},
+				},
+			},
 		},
 		{
 			name: "registry success",
@@ -304,6 +326,29 @@ func TestSource_Validate(t *testing.T) {
 			if tt.wantErr != nil {
 				assert.EqualError(t, err, tt.wantErr.Error())
 			} else {
+				assert.NoError(t, err)
+			}
+
+			if tt.wantErr == nil {
+				// Marshal to yaml
+				w := workflow.Workflow{
+					Version:          workflow.WorkflowVersion,
+					SpeakeasyVersion: "latest",
+					Sources: map[string]workflow.Source{
+						"source": tt.args.source,
+					},
+				}
+				data, err := yaml.Marshal(w)
+				require.NoError(t, err)
+
+				// Unmarshal yaml
+				var w2 workflow.Workflow
+				err = yaml.Unmarshal(data, &w2)
+				require.NoError(t, err)
+
+				// Validate
+				err = w2.Validate([]string{})
+
 				assert.NoError(t, err)
 			}
 		})
@@ -404,10 +449,8 @@ func TestSource_GetOutputLocation(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Overlays: []workflow.Document{
-						{
-							Location: "overlay.yaml",
-						},
+					Overlays: []workflow.Overlay{
+						{Document: &workflow.Document{Location: "overlay.yaml"}},
 					},
 					Output: pointer.ToString("processed.yaml"),
 				},
@@ -423,10 +466,8 @@ func TestSource_GetOutputLocation(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Overlays: []workflow.Document{
-						{
-							Location: "overlay.yaml",
-						},
+					Overlays: []workflow.Overlay{
+						{Document: &workflow.Document{Location: "overlay.yaml"}},
 					},
 				},
 			},
@@ -553,10 +594,12 @@ func createLocalFiles(s workflow.Source) (string, error) {
 	}
 
 	for _, overlay := range s.Overlays {
-		_, err := url.ParseRequestURI(overlay.Location)
-		if err != nil {
-			if err := createEmptyFile(filepath.Join(tmpDir, overlay.Location)); err != nil {
-				return "", err
+		if overlay.Document != nil {
+			_, err := url.ParseRequestURI(overlay.Document.Location)
+			if err != nil {
+				if err := createEmptyFile(filepath.Join(tmpDir, overlay.Document.Location)); err != nil {
+					return "", err
+				}
 			}
 		}
 	}

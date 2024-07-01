@@ -27,15 +27,29 @@ type Overlay struct {
 }
 
 func (o *Overlay) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var doc Document
-	if err := unmarshal(&doc); err == nil {
-		o.Document = &doc
+	// Overlay is flat, so we need to unmarshal it into a map to determine if it's a document or fallbackCodeSamples
+	var overlayMap map[string]interface{}
+	if err := unmarshal(&overlayMap); err != nil {
+		return err
+	}
+
+	if _, ok := overlayMap["fallbackCodeSamplesLanguage"]; ok {
+		var fallbackCodeSamples FallbackCodeSamples
+		if err := unmarshal(&fallbackCodeSamples); err != nil {
+			return err
+		}
+
+		o.FallbackCodeSamples = &fallbackCodeSamples
 		return nil
 	}
 
-	var fallback FallbackCodeSamples
-	if err := unmarshal(&fallback); err == nil {
-		o.FallbackCodeSamples = &fallback
+	if _, ok := overlayMap["location"]; ok {
+		var document Document
+		if err := unmarshal(&document); err != nil {
+			return err
+		}
+
+		o.Document = &document
 		return nil
 	}
 
@@ -95,16 +109,8 @@ func (s Source) Validate() error {
 	}
 
 	for i, overlay := range s.Overlays {
-		if overlay.Document != nil {
-			if err := overlay.Document.Validate(); err != nil {
-				return fmt.Errorf("failed to validate overlay document %d: %w", i, err)
-			}
-		}
-
-		if overlay.FallbackCodeSamples != nil {
-			if overlay.FallbackCodeSamples.FallbackCodeSamplesLanguage == "" {
-				return fmt.Errorf("fallbackCodeSamplesLanguage is required")
-			}
+		if err := overlay.Validate(); err != nil {
+			return fmt.Errorf("failed to validate overlay %d: %w", i, err)
 		}
 	}
 
@@ -198,6 +204,34 @@ func (d Document) IsRemote() bool {
 
 func (d Document) IsSpeakeasyRegistry() bool {
 	return strings.Contains(d.Location, "registry.speakeasyapi.dev")
+}
+
+func (f FallbackCodeSamples) Validate() error {
+	if f.FallbackCodeSamplesLanguage == "" {
+		return fmt.Errorf("fallbackCodeSamplesLanguage is required")
+	}
+
+	return nil
+}
+
+func (o Overlay) Validate() error {
+	if o.Document != nil {
+		if err := o.Document.Validate(); err != nil {
+			return fmt.Errorf("failed to validate overlay document: %w", err)
+		}
+	}
+
+	if o.FallbackCodeSamples != nil {
+		if err := o.FallbackCodeSamples.Validate(); err != nil {
+			return fmt.Errorf("failed to validate overlay fallbackCodeSamples: %w", err)
+		}
+	}
+
+	if o.Document == nil && o.FallbackCodeSamples == nil {
+		return fmt.Errorf("overlay must have either a document or fallbackCodeSamples")
+	}
+
+	return nil
 }
 
 // Parse the location to extract the namespace ID, namespace name, and reference
