@@ -41,7 +41,20 @@
         "overlays": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/document"
+            "oneOf": [
+              {
+                "$ref": "#/$defs/document"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "fallbackCodeSamplesLanguage": {
+                    "type": "string"
+                  }
+                },
+                "required": ["fallbackCodeSamplesLanguage"]
+              }
+            ]
           }
         },
         "output": {
