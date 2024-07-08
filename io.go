@@ -37,6 +37,7 @@ type Option func(*options)
 type (
 	GetLanguageDefaultFunc func(string, bool) (*LanguageConfig, error)
 	TransformerFunc        func(*Config) (*Config, error)
+	ValidateFunc           func(Config) error
 )
 
 type options struct {
@@ -45,6 +46,7 @@ type options struct {
 	getLanguageDefaultFunc GetLanguageDefaultFunc
 	langs                  []string
 	transformerFunc        TransformerFunc
+	validateFunc           ValidateFunc
 	dontWrite              bool
 }
 
@@ -81,6 +83,12 @@ func WithLanguages(langs ...string) Option {
 func WithTransformerFunc(f TransformerFunc) Option {
 	return func(o *options) {
 		o.transformerFunc = f
+	}
+}
+
+func WithValidateFunc(f ValidateFunc) Option {
+	return func(o *options) {
+		o.validateFunc = f
 	}
 }
 
@@ -303,6 +311,12 @@ func Load(dir string, opts ...Option) (*Config, error) {
 			return nil, err
 		}
 		if _, err := write(lockFileRes.Path, config.LockFile, o); err != nil {
+			return nil, err
+		}
+	}
+
+	if o.validateFunc != nil {
+		if err := o.validateFunc(*config); err != nil {
 			return nil, err
 		}
 	}
