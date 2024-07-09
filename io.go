@@ -435,7 +435,7 @@ func write(path string, cfg any, o *options) ([]byte, error) {
 		writeFileFunc = o.FS.WriteFile
 	}
 
-	if err := writeFileFunc(path, data, os.ModePerm); err != nil {
+	if err := writeFileFunc(path, data, 0666); err != nil {
 		return nil, fmt.Errorf("could not write gen.yaml: %w", err)
 	}
 

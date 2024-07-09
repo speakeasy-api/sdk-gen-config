@@ -1,6 +1,7 @@
 package config
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -628,6 +629,123 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 	assert.NoError(t, err)
 	_, err = os.Stat(filepath.Join(speakeasyDir, "gen.lock"))
 	assert.NoError(t, err)
+}
+
+func TestSaveConfig(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		cfg      *Configuration
+		opts     []Option
+		expected []byte
+	}{
+		"no-options": {
+			cfg: &Configuration{
+				ConfigVersion: "0.0.0",
+			},
+			expected: []byte("configVersion: 0.0.0\ngeneration: {}\n"),
+		},
+		"option-dontwrite": {
+			cfg: &Configuration{
+				ConfigVersion: Version,
+			},
+			opts: []Option{WithDontWrite()},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			tempDir := t.TempDir()
+			speakeasyPath := filepath.Join(tempDir, ".speakeasy")
+			configPath := filepath.Join(speakeasyPath, "gen.yaml")
+
+			err := os.Mkdir(speakeasyPath, 0755)
+			assert.NoError(t, err)
+
+			err = SaveConfig(tempDir, testCase.cfg, testCase.opts...)
+			assert.NoError(t, err)
+
+			fileInfo, err := os.Stat(configPath)
+
+			if len(testCase.expected) == 0 {
+				assert.ErrorIs(t, err, fs.ErrNotExist)
+
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, false, fileInfo.IsDir())
+			assert.Equal(t, fs.FileMode(0644), fileInfo.Mode())
+
+			contents, err := os.ReadFile(configPath)
+			assert.NoError(t, err)
+			assert.Equal(t, testCase.expected, contents)
+		})
+	}
+}
+
+func TestSaveLockFile(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		lf       *LockFile
+		opts     []Option
+		expected []byte
+	}{
+		"no-options": {
+			lf: &LockFile{
+				LockVersion: "0.0.0",
+			},
+			expected: []byte(`lockVersion: 0.0.0
+id: ""
+management: {}
+`),
+		},
+		"option-dontwrite": {
+			lf: &LockFile{
+				LockVersion: v2,
+			},
+			opts: []Option{WithDontWrite()},
+		},
+	}
+
+	for name, testCase := range testCases {
+		name, testCase := name, testCase
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			tempDir := t.TempDir()
+			speakeasyPath := filepath.Join(tempDir, ".speakeasy")
+			configPath := filepath.Join(speakeasyPath, "gen.lock")
+
+			err := os.Mkdir(speakeasyPath, 0755)
+			assert.NoError(t, err)
+
+			err = SaveLockFile(tempDir, testCase.lf, testCase.opts...)
+			assert.NoError(t, err)
+
+			fileInfo, err := os.Stat(configPath)
+
+			if len(testCase.expected) == 0 {
+				assert.ErrorIs(t, err, fs.ErrNotExist)
+
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, false, fileInfo.IsDir())
+			assert.Equal(t, fs.FileMode(0644), fileInfo.Mode())
+
+			contents, err := os.ReadFile(configPath)
+			assert.NoError(t, err)
+			assert.Equal(t, testCase.expected, contents)
+		})
+	}
 }
 
 func createTempFile(dir string, fileName, contents string) error {
