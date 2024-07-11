@@ -28,6 +28,7 @@ type Publishing struct {
 type CodeSamples struct {
 	Output   string          `yaml:"output"`
 	Registry *SourceRegistry `yaml:"registry,omitempty"`
+	Style    *string         `yaml:"style,omitempty"` // Oneof "standard", "readme" (default: standard) (see codesamples.go)
 }
 
 type NPM struct {
@@ -100,6 +101,12 @@ func (t Target) Validate(supportedLangs []string, sources map[string]Source) err
 			ext := filepath.Ext(t.CodeSamples.Output)
 			if !slices.Contains([]string{".yaml", ".yml"}, ext) {
 				return fmt.Errorf("failed to validate target: code samples output must be a yaml file")
+			}
+		}
+
+		if t.CodeSamples.Style != nil {
+			if !slices.Contains([]string{"standard", "readme"}, *t.CodeSamples.Style) {
+				return fmt.Errorf("failed to validate target: code samples style must be one of 'standard', 'readme'")
 			}
 		}
 	}
