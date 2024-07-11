@@ -28,6 +28,7 @@ type Publishing struct {
 type CodeSamples struct {
 	Output   string          `yaml:"output"`
 	Registry *SourceRegistry `yaml:"registry,omitempty"`
+	Style    *string         `yaml:"style,omitempty"` // Oneof "standard", "readme" (default: standard) (see codesamples.go)
 }
 
 type NPM struct {
