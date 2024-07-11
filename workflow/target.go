@@ -103,6 +103,12 @@ func (t Target) Validate(supportedLangs []string, sources map[string]Source) err
 				return fmt.Errorf("failed to validate target: code samples output must be a yaml file")
 			}
 		}
+
+		if t.CodeSamples.Style != nil {
+			if !slices.Contains([]string{"standard", "readme"}, *t.CodeSamples.Style) {
+				return fmt.Errorf("failed to validate target: code samples style must be one of 'standard', 'readme'")
+			}
+		}
 	}
 
 	return nil
