@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Speakeasy Tests Configuration Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "testsVersion": {
+      "type": "string",
+      "const": "0.0.1"
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/test"
+      }
+    }
+  },
+  "required": ["testsVersion", "tests"],
+  "$defs": {
+    "test": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "server": {
+          "type": "string"
+        },
+        "security": {
+          "type": "object"
+        },
+        "parameters": {
+          "$ref": "#/$defs/parameters"
+        },
+        "requestBody": {
+          "type": "object"
+        },
+        "responses": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        }
+      },
+      "required": ["name"]
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "object"
+        },
+        "query": {
+          "type": "object"
+        },
+        "header": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
