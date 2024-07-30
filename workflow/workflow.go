@@ -36,12 +36,12 @@ func Load(dir string) (*Workflow, string, error) {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, "", err
 		}
-		return nil, "", fmt.Errorf("%w in %s", err, filepath.Join(dir, workspace.SpeakeasyFolder, "workflow.yaml"))
+		return nil, "", fmt.Errorf("%w in %s", err, filepath.Join(dir, workspace.SpeakeasyFolder, workflowFile))
 	}
 
 	var workflow Workflow
 	if err := yaml.Unmarshal(res.Data, &workflow); err != nil {
-		return nil, "", fmt.Errorf("failed to unmarshal workflow.yaml: %w", err)
+		return nil, "", fmt.Errorf("failed to unmarshal %s: %w", workflowFile, err)
 	}
 
 	return &workflow, res.Path, nil
