@@ -6,22 +6,33 @@
   "properties": {
     "workflowVersion": {
       "type": "string",
-      "const": "1.0.0"
+      "const": "1.0.0",
+      "description": "The version of the workflow schema"
     },
     "speakeasyVersion": {
-      "type": "string"
-    },
-    "versionLocked": {
-      "type": "boolean"
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "latest",
+          "description": "The latest version of the speakeasy CLI"
+        },
+        {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "A semver version of the speakeasy CLI, corresponding to https://github.com/speakeasy-api/speakeasy/releases"
+        }
+      ]
     },
     "sources": {
       "type": "object",
+      "description": "A map of source names to source configurations, where the output is an OpenAPI document",
       "additionalProperties": {
         "$ref": "#/$defs/source"
       }
     },
     "targets": {
       "type": "object",
+      "description": "A map of target names to target configurations, where the output is a speakeasy generation target",
       "additionalProperties": {
         "$ref": "#/$defs/target"
       }
@@ -31,15 +42,19 @@
   "$defs": {
     "source": {
       "type": "object",
+      "description": "A source configuration",
       "properties": {
         "inputs": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/document"
-          }
+          },
+          "minItems": 1,
+          "description": "A list of input documents (OpenAPI Specifications). These will be merged together"
         },
         "overlays": {
           "type": "array",
+          "description": "A list of overlay files (OpenAPI Overlay Specification)",
           "items": {
             "oneOf": [
               {
@@ -58,10 +73,27 @@
           }
         },
         "output": {
-          "type": "string"
+          "type": "string",
+          "description": "The output file name (optional)"
         },
         "ruleset": {
-          "type": "string"
+          "type": "string",
+          "description": "The linting ruleset to use (optional)"
+        },
+        "registry": {
+          "type": "object",
+          "description": "The openapi registry configuration",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "The registry location to use (for snapshotting/change tracking)"
+            },
+            "tags": {
+              "type": "array",
+              "description": "The list of tags to use for the registry"
+            }
+          },
+          "required": ["location"]
         }
       },
       "required": ["inputs"]
@@ -103,9 +135,12 @@
     "document": {
       "type": "object",
       "additionalProperties": false,
+      "description": "A local or remote document.",
       "properties": {
         "location": {
-          "type": "string"
+          "type": "string",
+          "description": "The location to resolve the document at. E.g. a file name, relative location, or a HTTP URL",
+          "minLength": 1
         },
         "auth": {
           "$ref": "#/$defs/auth"
@@ -115,13 +150,16 @@
     },
     "auth": {
       "type": "object",
+      "description": "Authentication information for the document (optional)",
       "additionalProperties": false,
       "properties": {
         "header": {
-          "type": "string"
+          "type": "string",
+          "description": "A HTTP Header Name"
         },
         "secret": {
-          "type": "string"
+          "type": "string",
+          "description": "A HTTP Header Value"
         }
       },
       "required": ["header", "secret"]
@@ -129,12 +167,15 @@
     "codeSamples": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Code samples configuration. See https://www.speakeasy.com/guides/openapi/x-codesamples",
       "properties": {
         "output": {
-          "type": "string"
+          "type": "string",
+          "description": "The output file name"
         },
         "registry": {
           "type": "object",
+          "description": "The output registry location.",
           "properties": {
             "location": {
               "type": "string"
@@ -148,10 +189,12 @@
     "publishing": {
       "type": "object",
       "additionalProperties": false,
+      "description": "The publishing configuration. See https://www.speakeasy.com/docs/workflow-reference/publishing-reference",
       "properties": {
         "npm": {
           "type": "object",
           "additionalProperties": false,
+          "description": "NPM (Typescript) publishing configuration.",
           "properties": {
             "token": {
               "type": "string"
@@ -162,6 +205,7 @@
         "pypi": {
           "type": "object",
           "additionalProperties": false,
+          "description": "PyPI (Python)publishing configuration.",
           "properties": {
             "token": {
               "type": "string"
@@ -172,6 +216,7 @@
         "packagist": {
           "type": "object",
           "additionalProperties": false,
+          "description": "Packagist (PHP) publishing configuration.",
           "properties": {
             "username": {
               "type": "string"
@@ -185,6 +230,7 @@
         "java": {
           "type": "object",
           "additionalProperties": false,
+          "description": "Maven (Java) publishing configuration.",
           "properties": {
             "ossrhUsername": {
               "type": "string"
@@ -213,6 +259,7 @@
         "rubygems": {
           "type": "object",
           "additionalProperties": false,
+          "description": "Rubygems (Ruby) publishing configuration.",
           "properties": {
             "token": {
               "type": "string"
@@ -222,6 +269,7 @@
         },
         "nuget": {
           "type": "object",
+          "description": "NuGet (C#) publishing configuration.",
           "additionalProperties": false,
           "properties": {
             "apiKey": {
