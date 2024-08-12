@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,24 +22,25 @@ type Tests struct {
 }
 
 type Test struct {
-	Name        string                          `yaml:"name"`
-	Description string                          `yaml:"description,omitempty"`
-	Targets     []string                        `yaml:"targets,omitempty"`
-	Server      string                          `yaml:"server,omitempty"`
-	Security    yaml.Node                       `yaml:"security,omitempty"`
-	Parameters  *Parameters                     `yaml:"parameters,omitempty"`
-	RequestBody map[string]yaml.Node            `yaml:"requestBody,omitempty"`
-	Responses   map[string]map[string]yaml.Node `yaml:"responses,omitempty"`
+	Name        string                                                                    `yaml:"name"`
+	Description string                                                                    `yaml:"description,omitempty"`
+	Targets     []string                                                                  `yaml:"targets,omitempty"`
+	Server      string                                                                    `yaml:"server,omitempty"`
+	Security    yaml.Node                                                                 `yaml:"security,omitempty"`
+	Parameters  *Parameters                                                               `yaml:"parameters,omitempty"`
+	RequestBody *orderedmap.OrderedMap[string, yaml.Node]                                 `yaml:"requestBody,omitempty"`
+	Responses   *orderedmap.OrderedMap[string, *orderedmap.OrderedMap[string, yaml.Node]] `yaml:"responses,omitempty"`
 
 	// Internal use only
-	InternalID string   `yaml:"internalId,omitempty"`
-	TestGroups []string `yaml:"testGroups,omitempty"`
+	InternalID      string                                 `yaml:"internalId,omitempty"`
+	TestGroups      []string                               `yaml:"testGroups,omitempty"`
+	InternalEnvVars *orderedmap.OrderedMap[string, string] `yaml:"internalEnvVars,omitempty"`
 }
 
 type Parameters struct {
-	Path   map[string]yaml.Node `yaml:"path,omitempty"`
-	Query  map[string]yaml.Node `yaml:"query,omitempty"`
-	Header map[string]yaml.Node `yaml:"header,omitempty"`
+	Path   *orderedmap.OrderedMap[string, yaml.Node] `yaml:"path,omitempty"`
+	Query  *orderedmap.OrderedMap[string, yaml.Node] `yaml:"query,omitempty"`
+	Header *orderedmap.OrderedMap[string, yaml.Node] `yaml:"header,omitempty"`
 }
 
 func Load(dir string) (*Tests, string, error) {
@@ -82,17 +84,18 @@ func (t Tests) Validate() error {
 				return fmt.Errorf("test %s has no name", operationID)
 			}
 
-			if len(test.RequestBody) > 1 {
+			if test.RequestBody.Len() > 1 {
 				return fmt.Errorf("test %s has more than one request body", name)
 			}
 
-			if len(test.Responses) > 1 {
+			if test.Responses.Len() > 1 {
 				return fmt.Errorf("test %s has more than one response code", name)
 			}
 
 			if test.Responses != nil {
-				for _, responseBody := range test.Responses {
-					if len(responseBody) > 1 {
+				for pair := test.Responses.Oldest(); pair != nil; pair = pair.Next() {
+					responseBody := pair.Value
+					if responseBody.Len() > 1 {
 						return fmt.Errorf("test %s has more than one response body", name)
 					}
 				}
