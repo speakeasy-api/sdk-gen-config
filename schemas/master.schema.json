@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "anyOf": [
+  "oneOf": [
     {
       "$ref": "workflow.schema.json"
     },
@@ -11,6 +11,37 @@
       "$ref": "tests.schema.json"
     },
     {
+      "not": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "workflowVersion": {
+                "type": "string"
+              }
+            },
+            "required": ["workflowVersion"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "lintVersion": {
+                "type": "string"
+              }
+            },
+            "required": ["lintVersion"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "testsVersion": {
+                "type": "string"
+              }
+            },
+            "required": ["testsVersion"]
+          }
+        ]
+      }
     }
   ]
 }
