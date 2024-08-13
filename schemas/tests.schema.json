@@ -19,7 +19,7 @@
     },
     "components": {
       "type": "object",
-      "additionalProperties": "true"
+      "additionalProperties": true
     }
   },
   "required": ["testsVersion", "tests"],
