@@ -9,10 +9,17 @@
       "const": "0.0.1"
     },
     "tests": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/test"
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/test"
+        }
       }
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": "true"
     }
   },
   "required": ["testsVersion", "tests"],
