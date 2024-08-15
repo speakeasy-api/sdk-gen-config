@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"math/rand"
 	"os"
@@ -141,15 +142,14 @@ func (s Source) GetOutputLocation() (string, error) {
 		return output, nil
 	}
 
-	ext := ".yaml"
+	var ext string
 
 	// If we only have a single input, no overlays and its a local path, we can just use that
 	if len(s.Inputs) == 1 && len(s.Overlays) == 0 {
 		inputFile := s.Inputs[0].Location
 
 		switch getFileStatus(inputFile) {
-		case fileStatusRegistry:
-			return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s", randStringBytes(10))), nil
+			// sha the registry location, take first 6 characters
 		case fileStatusLocal:
 			return inputFile, nil
 		case fileStatusNotExists:
@@ -159,8 +159,14 @@ func (s Source) GetOutputLocation() (string, error) {
 			if ext == "" {
 				ext = ".yaml"
 			}
+			fallthrough
+		case fileStatusRegistry:
+			inputFileHash := fmt.Sprintf("%x", sha256.Sum256([]byte(inputFile)))
+			return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s%s", inputFileHash[:6], ext)), nil
 		}
 	}
+
+	ext = ".yaml"
 
 	// Otherwise output will go to a temp file
 	return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", randStringBytes(10), ext)), nil
