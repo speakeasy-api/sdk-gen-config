@@ -356,10 +356,6 @@ func TestSource_Validate(t *testing.T) {
 }
 
 func TestSource_GetOutputLocation(t *testing.T) {
-	workflow.SetRandStringBytesFunc(func(n int) string {
-		return "testrandomstring"
-	})
-
 	type args struct {
 		source workflow.Source
 	}
@@ -392,7 +388,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: ".speakeasy/temp/output_testrandomstring.json",
+			wantOutputLocation: ".speakeasy/temp/registry_e8ba45.json",
 		},
 		{
 			name: "simple remote source without extension returns auto-generated output location assumed to be yaml",
@@ -405,7 +401,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: ".speakeasy/temp/output_testrandomstring.yaml",
+			wantOutputLocation: ".speakeasy/temp/registry_94359d.yaml",
 		},
 		{
 			name: "source with multiple inputs returns specified output location",
@@ -438,7 +434,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: ".speakeasy/temp/output_testrandomstring.yaml",
+			wantOutputLocation: ".speakeasy/temp/output_6a0196.yaml",
 		},
 		{
 			name: "source with overlays returns specified output location",
@@ -471,7 +467,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: ".speakeasy/temp/output_testrandomstring.yaml",
+			wantOutputLocation: ".speakeasy/temp/output_d910ba.yaml",
 		},
 	}
 	for _, tt := range tests {

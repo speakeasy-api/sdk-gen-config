@@ -1,11 +1,11 @@
 package workflow
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
@@ -129,41 +129,59 @@ func (s Source) Validate() error {
 }
 
 func (s Source) GetOutputLocation() (string, error) {
-	// If we have an output location, we can just return that
-	if s.Output != nil {
-		output := *s.Output
+    if s.Output != nil {
+        if len(s.Inputs) > 1 && !isYAMLFile(*s.Output) {
+            return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
+        }
+        return *s.Output, nil
+    }
 
-		ext := filepath.Ext(output)
-		if len(s.Inputs) > 1 && !slices.Contains([]string{".yaml", ".yml"}, ext) {
-			return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
-		}
+    if len(s.Inputs) == 1 && len(s.Overlays) == 0 {
+        return s.handleSingleInput()
+    }
 
-		return output, nil
-	}
+    return s.generateOutputPath()
+}
 
-	ext := ".yaml"
+func (s Source) handleSingleInput() (string, error) {
+    input := s.Inputs[0].Location
+    switch getFileStatus(input) {
+    case fileStatusLocal:
+        return input, nil
+    case fileStatusNotExists:
+        return "", fmt.Errorf("input file %s does not exist", input)
+    case fileStatusRemote, fileStatusRegistry:
+        return s.generateRegistryPath(input)
+    default:
+        return "", fmt.Errorf("unknown file status for %s", input)
+    }
+}
 
-	// If we only have a single input, no overlays and its a local path, we can just use that
-	if len(s.Inputs) == 1 && len(s.Overlays) == 0 {
-		inputFile := s.Inputs[0].Location
+func (s Source) generateRegistryPath(input string) (string, error) {
+    ext := filepath.Ext(input)
+    if ext == "" {
+        ext = ".yaml"
+    }
+    hash := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
+    return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s%s", hash[:6], ext)), nil
+}
 
-		switch getFileStatus(inputFile) {
-		case fileStatusRegistry:
-			return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s", randStringBytes(10))), nil
-		case fileStatusLocal:
-			return inputFile, nil
-		case fileStatusNotExists:
-			return "", fmt.Errorf("input file %s does not exist", inputFile)
-		case fileStatusRemote:
-			ext = filepath.Ext(inputFile)
-			if ext == "" {
-				ext = ".yaml"
-			}
-		}
-	}
+func (s Source) generateOutputPath() (string, error) {
+    hashInputs := func() string {
+        var combined string
+        for _, input := range s.Inputs {
+            combined += input.Location
+        }
+        hash := sha256.Sum256([]byte(combined))
+        return fmt.Sprintf("%x", hash)[:6]
+    }
 
-	// Otherwise output will go to a temp file
-	return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", randStringBytes(10), ext)), nil
+    return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s.yaml", hashInputs())), nil
+}
+
+func isYAMLFile(path string) bool {
+    ext := filepath.Ext(path)
+    return ext == ".yaml" || ext == ".yml"
 }
 
 func GetTempDir() string {
