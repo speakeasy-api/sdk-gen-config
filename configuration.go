@@ -62,6 +62,9 @@ type Generation struct {
 	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
 	Auth                        *Auth          `yaml:"auth,omitempty"`
 
+	// Mock server generation configuration.
+	MockServer *MockServer `yaml:"mockServer,omitempty"`
+
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -70,6 +73,12 @@ type DevContainers struct {
 	// This can be a local path or a remote URL
 	SchemaPath           string         `yaml:"schemaPath"`
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+}
+
+// Generation configuration for the inter-templated mockserver target for test generation.
+type MockServer struct {
+	// Disables the code generation of the mockserver target.
+	Disabled bool `yaml:"disabled"`
 }
 
 type LanguageConfig struct {
