@@ -165,11 +165,20 @@ func (s Source) GetOutputLocation() (string, error) {
 			return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s%s", inputFileHash[:6], ext)), nil
 		}
 	}
+	// If we have multiple, sha them all together
+	hashInputs := func() string {
+		var combined string
+		for _, input := range s.Inputs {
+			combined += input.Location
+		}
+		hash := sha256.Sum256([]byte(combined))
+		return fmt.Sprintf("%x", hash[:6])
+	}
 
 	ext = ".yaml"
 
 	// Otherwise output will go to a temp file
-	return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", randStringBytes(10), ext)), nil
+	return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", hashInputs(), ext)), nil
 }
 
 func GetTempDir() string {
