@@ -434,7 +434,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: ".speakeasy/temp/output_6a0196f0d44e.yaml",
+			wantOutputLocation: ".speakeasy/temp/output_6a0196.yaml",
 		},
 		{
 			name: "source with overlays returns specified output location",
@@ -467,7 +467,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					},
 				},
 			},
-			wantOutputLocation: ".speakeasy/temp/output_d910ba2ef878.yaml",
+			wantOutputLocation: ".speakeasy/temp/output_d910ba.yaml",
 		},
 	}
 	for _, tt := range tests {

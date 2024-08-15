@@ -173,7 +173,7 @@ func (s Source) generateOutputPath() (string, error) {
             combined += input.Location
         }
         hash := sha256.Sum256([]byte(combined))
-        return fmt.Sprintf("%x", hash[:6])
+        return fmt.Sprintf("%x", hash)[:6]
     }
 
     return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s.yaml", hashInputs())), nil
