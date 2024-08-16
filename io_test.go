@@ -512,6 +512,65 @@ func TestLoad_Success(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "loads v2.0.0 config file with mockServer.disabled",
+			args: args{
+				langs:        []string{"go"},
+				configDir:    testDir,
+				targetDir:    testDir,
+				genYaml:      readTestFile(t, "v200-generation-mockserver-disabled.yaml"),
+				lockFile:     readTestFile(t, "v200-gen.lock"),
+				configSubDir: ".speakeasy",
+			},
+			want: &Config{
+				Config: &Configuration{
+					ConfigVersion: Version,
+					Languages: map[string]LanguageConfig{
+						"go": {
+							Version: "1.3.0",
+							Cfg: map[string]any{
+								"packageName": "github.com/speakeasy-api/speakeasy-client-sdk-go",
+							},
+						},
+					},
+					Generation: Generation{
+						BaseServerURL: "https://api.prod.speakeasyapi.dev",
+						SDKClassName:  "speakeasy",
+						UsageSnippets: &UsageSnippets{
+							OptionalPropertyRendering: "withExample",
+						},
+						Fixes: &Fixes{
+							NameResolutionDec2023:                false,
+							ParameterOrderingFeb2024:             false,
+							RequestResponseComponentNamesFeb2024: false,
+						},
+						Auth: &Auth{
+							OAuth2ClientCredentialsEnabled: false,
+						},
+						MockServer: &MockServer{
+							Disabled: true,
+						},
+					},
+					New: map[string]bool{},
+				},
+				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
+				LockFile: &LockFile{
+					LockVersion: Version,
+					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
+					Management: Management{
+						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
+						DocVersion:       "0.3.0",
+						SpeakeasyVersion: "1.3.1",
+						ReleaseVersion:   "1.3.0",
+					},
+					Features: map[string]map[string]string{
+						"go": {
+							"core": "2.90.0",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
