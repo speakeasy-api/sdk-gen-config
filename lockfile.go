@@ -1,6 +1,10 @@
 package config
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
+	"gopkg.in/yaml.v3"
+)
 
 type LockFile struct {
 	LockVersion          string                       `yaml:"lockVersion"`
@@ -8,6 +12,7 @@ type LockFile struct {
 	Management           Management                   `yaml:"management"`
 	Features             map[string]map[string]string `yaml:"features,omitempty"`
 	GeneratedFiles       []string                     `yaml:"generatedFiles,omitempty"`
+	Examples             Examples                     `yaml:"examples,omitempty"`
 	AdditionalProperties map[string]any               `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -23,6 +28,20 @@ type Management struct {
 	InstallationURL      string         `yaml:"installationURL,omitempty"`
 	Published            bool           `yaml:"published,omitempty"`
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+}
+
+type Examples = *orderedmap.OrderedMap[string, *orderedmap.OrderedMap[string, OperationExamples]]
+
+type OperationExamples struct {
+	Parameters  *ParameterExamples                                                        `yaml:"parameters,omitempty"`
+	RequestBody *orderedmap.OrderedMap[string, yaml.Node]                                 `yaml:"requestBody,omitempty"`
+	Responses   *orderedmap.OrderedMap[string, *orderedmap.OrderedMap[string, yaml.Node]] `yaml:"responses,omitempty"`
+}
+
+type ParameterExamples struct {
+	Path   *orderedmap.OrderedMap[string, yaml.Node] `yaml:"path,omitempty"`
+	Query  *orderedmap.OrderedMap[string, yaml.Node] `yaml:"query,omitempty"`
+	Header *orderedmap.OrderedMap[string, yaml.Node] `yaml:"header,omitempty"`
 }
 
 var getUUID = func() string {

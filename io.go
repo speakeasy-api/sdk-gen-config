@@ -417,11 +417,11 @@ func write(path string, cfg any, o *options) ([]byte, error) {
 	e := yaml.NewEncoder(buf)
 	e.SetIndent(2)
 	if err := e.Encode(cfg); err != nil {
-		return nil, fmt.Errorf("could not marshal gen.yaml: %w", err)
+		return nil, fmt.Errorf("could not marshal %s: %w", path, err)
 	}
 
 	if err := buf.Flush(); err != nil {
-		return nil, fmt.Errorf("could not marshal gen.yaml: %w", err)
+		return nil, fmt.Errorf("could not marshal %s: %w", path, err)
 	}
 
 	data := b.Bytes()
@@ -435,7 +435,7 @@ func write(path string, cfg any, o *options) ([]byte, error) {
 		writeFileFunc = o.FS.WriteFile
 	}
 
-	if err := writeFileFunc(path, data, 0666); err != nil {
+	if err := writeFileFunc(path, data, 0o666); err != nil {
 		return nil, fmt.Errorf("could not write gen.yaml: %w", err)
 	}
 
