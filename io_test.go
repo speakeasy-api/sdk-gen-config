@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/speakeasy-api/sdk-gen-config/testutils"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 const testDir = "gen/test"
@@ -82,7 +82,7 @@ func TestLoad_Success(t *testing.T) {
 				langs:     []string{"go"},
 				configDir: testDir,
 				targetDir: testDir,
-				genYaml:   readTestFile(t, "pre-v100-gen.yaml"),
+				genYaml:   testutils.ReadTestFile(t, "pre-v100-gen.yaml"),
 			},
 			want: &Config{
 				Config: &Configuration{
@@ -132,7 +132,7 @@ func TestLoad_Success(t *testing.T) {
 				langs:        []string{"go"},
 				configDir:    testDir,
 				targetDir:    testDir,
-				genYaml:      readTestFile(t, "v100-gen.yaml"),
+				genYaml:      testutils.ReadTestFile(t, "v100-gen.yaml"),
 				configSubDir: ".speakeasy",
 			},
 			want: &Config{
@@ -187,8 +187,8 @@ func TestLoad_Success(t *testing.T) {
 				langs:        []string{"go"},
 				configDir:    testDir,
 				targetDir:    testDir,
-				genYaml:      readTestFile(t, "v200-gen.yaml"),
-				lockFile:     readTestFile(t, "v200-gen.lock"),
+				genYaml:      testutils.ReadTestFile(t, "v200-gen.yaml"),
+				lockFile:     testutils.ReadTestFile(t, "v200-gen.lock"),
 				configSubDir: ".speakeasy",
 			},
 			want: &Config{
@@ -243,7 +243,7 @@ func TestLoad_Success(t *testing.T) {
 				langs:        []string{"go"},
 				configDir:    testDir,
 				targetDir:    testDir,
-				genYaml:      readTestFile(t, "v200-gen.yaml"),
+				genYaml:      testutils.ReadTestFile(t, "v200-gen.yaml"),
 				configSubDir: ".speakeasy",
 			},
 			want: &Config{
@@ -293,7 +293,7 @@ func TestLoad_Success(t *testing.T) {
 				langs:        []string{"go"},
 				configDir:    testDir,
 				targetDir:    testDir,
-				genYaml:      readTestFile(t, "v200-gen.yaml"),
+				genYaml:      testutils.ReadTestFile(t, "v200-gen.yaml"),
 				configSubDir: ".gen",
 			},
 			want: &Config{
@@ -343,8 +343,8 @@ func TestLoad_Success(t *testing.T) {
 				langs:     []string{"go"},
 				configDir: filepath.Dir(testDir),
 				targetDir: testDir,
-				genYaml:   readTestFile(t, "v200-gen.yaml"),
-				lockFile:  readTestFile(t, "v200-gen.lock"),
+				genYaml:   testutils.ReadTestFile(t, "v200-gen.yaml"),
+				lockFile:  testutils.ReadTestFile(t, "v200-gen.lock"),
 			},
 			want: &Config{
 				Config: &Configuration{
@@ -398,7 +398,7 @@ func TestLoad_Success(t *testing.T) {
 				langs:     []string{"go", "typescript"},
 				configDir: testDir,
 				targetDir: testDir,
-				genYaml:   readTestFile(t, "v100-gen.yaml"),
+				genYaml:   testutils.ReadTestFile(t, "v100-gen.yaml"),
 			},
 			want: &Config{
 				Config: &Configuration{
@@ -457,8 +457,8 @@ func TestLoad_Success(t *testing.T) {
 				langs:        []string{"go", "typescript"},
 				configDir:    testDir,
 				targetDir:    testDir,
-				genYaml:      readTestFile(t, "v200-gen.yaml"),
-				lockFile:     readTestFile(t, "v200-gen.lock"),
+				genYaml:      testutils.ReadTestFile(t, "v200-gen.yaml"),
+				lockFile:     testutils.ReadTestFile(t, "v200-gen.lock"),
 				configSubDir: ".speakeasy",
 			},
 			want: &Config{
@@ -518,8 +518,8 @@ func TestLoad_Success(t *testing.T) {
 				langs:        []string{"go"},
 				configDir:    testDir,
 				targetDir:    testDir,
-				genYaml:      readTestFile(t, "v200-generation-mockserver-disabled.yaml"),
-				lockFile:     readTestFile(t, "v200-gen.lock"),
+				genYaml:      testutils.ReadTestFile(t, "v200-generation-mockserver-disabled.yaml"),
+				lockFile:     testutils.ReadTestFile(t, "v200-gen.lock"),
 				configSubDir: ".speakeasy",
 			},
 			want: &Config{
@@ -585,11 +585,8 @@ func TestLoad_Success(t *testing.T) {
 				lockFileDir = filepath.Join(targetDir, ".speakeasy")
 			}
 
-			err := createTempFile(configDir, "gen.yaml", tt.args.genYaml)
-			require.NoError(t, err)
-
-			err = createTempFile(lockFileDir, "gen.lock", tt.args.lockFile)
-			require.NoError(t, err)
+			testutils.CreateTempFile(t, configDir, "gen.yaml", tt.args.genYaml)
+			testutils.CreateTempFile(t, lockFileDir, "gen.lock", tt.args.lockFile)
 
 			defer os.RemoveAll(configDir)
 			defer os.RemoveAll(targetDir)
@@ -620,13 +617,11 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 
 	// Create new config file in .speakeasy dir
 	speakeasyDir := filepath.Join(os.TempDir(), testDir, workspace.SpeakeasyFolder)
-	err := createTempFile(speakeasyDir, "gen.yaml", readTestFile(t, "v200-gen.yaml"))
-	require.NoError(t, err)
+	testutils.CreateTempFile(t, speakeasyDir, "gen.yaml", testutils.ReadTestFile(t, "v200-gen.yaml"))
 
 	// Create old config file in root dir
 	rootDir := filepath.Join(os.TempDir(), testDir)
-	err = createTempFile(rootDir, "gen.yaml", readTestFile(t, "v100-gen.yaml"))
-	require.NoError(t, err)
+	testutils.CreateTempFile(t, rootDir, "gen.yaml", testutils.ReadTestFile(t, "v100-gen.yaml"))
 
 	defer os.RemoveAll(speakeasyDir)
 	defer os.RemoveAll(rootDir)
@@ -722,7 +717,7 @@ func TestSaveConfig(t *testing.T) {
 			speakeasyPath := filepath.Join(tempDir, ".speakeasy")
 			configPath := filepath.Join(speakeasyPath, "gen.yaml")
 
-			err := os.Mkdir(speakeasyPath, 0755)
+			err := os.Mkdir(speakeasyPath, 0o755)
 			assert.NoError(t, err)
 
 			err = SaveConfig(tempDir, testCase.cfg, testCase.opts...)
@@ -738,7 +733,7 @@ func TestSaveConfig(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, false, fileInfo.IsDir())
-			assert.Equal(t, fs.FileMode(0644), fileInfo.Mode())
+			assert.Equal(t, fs.FileMode(0o644), fileInfo.Mode())
 
 			contents, err := os.ReadFile(configPath)
 			assert.NoError(t, err)
@@ -782,7 +777,7 @@ management: {}
 			speakeasyPath := filepath.Join(tempDir, ".speakeasy")
 			configPath := filepath.Join(speakeasyPath, "gen.lock")
 
-			err := os.Mkdir(speakeasyPath, 0755)
+			err := os.Mkdir(speakeasyPath, 0o755)
 			assert.NoError(t, err)
 
 			err = SaveLockFile(tempDir, testCase.lf, testCase.opts...)
@@ -798,36 +793,11 @@ management: {}
 
 			assert.NoError(t, err)
 			assert.Equal(t, false, fileInfo.IsDir())
-			assert.Equal(t, fs.FileMode(0644), fileInfo.Mode())
+			assert.Equal(t, fs.FileMode(0o644), fileInfo.Mode())
 
 			contents, err := os.ReadFile(configPath)
 			assert.NoError(t, err)
 			assert.Equal(t, testCase.expected, contents)
 		})
 	}
-}
-
-func createTempFile(dir string, fileName, contents string) error {
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		return err
-	}
-
-	if contents != "" {
-		tmpFile := filepath.Join(dir, fileName)
-		if err := os.WriteFile(tmpFile, []byte(contents), os.ModePerm); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func readTestFile(t *testing.T, file string) string {
-	t.Helper()
-	data, err := os.ReadFile(filepath.Join("testdata", file))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return string(data)
 }
