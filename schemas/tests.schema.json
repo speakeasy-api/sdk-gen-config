@@ -53,10 +53,17 @@
           "type": "object"
         },
         "responses": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          ]
         }
       },
       "required": ["name"]
