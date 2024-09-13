@@ -33,7 +33,7 @@ type Overlay struct {
 type InputFileType string
 
 const (
-	InputFileTypeUnknown InputFileType = ""
+	InputFileTypeUnknown InputFileType = "unknown"
 	InputFileTypeJSON    InputFileType = "json"
 	InputFileTypeYAML    InputFileType = "yaml"
 )
