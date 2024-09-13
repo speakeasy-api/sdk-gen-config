@@ -1,7 +1,11 @@
 package workflow_test
 
 import (
+	"encoding/json"
 	"fmt"
+	"net"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -359,6 +363,57 @@ func TestSource_GetOutputLocation(t *testing.T) {
 	type args struct {
 		source workflow.Source
 	}
+
+	// The URL needs to be deterministic because the hash is based on the URL + path
+	testServer, err := newTestServerWithURL("127.0.0.1:1234", http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		// Determine the file extension from the URL path
+		fileExt := filepath.Ext(req.URL.Path)
+
+		// Default to JSON or YAML if no file extension is present
+		if fileExt == "" {
+			switch {
+			case strings.Contains(req.URL.Path, "json"):
+				fileExt = ".json"
+			case strings.Contains(req.URL.Path, "yaml"):
+				fileExt = ".yaml"
+			}
+		}
+
+		// Determine the content type and response body based on the file extension
+		var (
+			contentType   string
+			response      interface{}
+			err           error
+			responseBytes []byte
+		)
+		response = map[string]interface{}{"openapi": "3.0.0"}
+
+		switch fileExt {
+		case ".json":
+			contentType = "application/json"
+		case ".yaml":
+			contentType = "application/yaml"
+		default:
+			http.Error(res, "Unsupported file format", http.StatusBadRequest)
+			return
+		}
+
+		// Set the content type header
+		res.Header().Set("Content-Type", contentType)
+
+		// Marshal and write the response based on content type
+		if contentType == "application/json" {
+			responseBytes, err = json.Marshal(response)
+		} else {
+			responseBytes, err = yaml.Marshal(response)
+		}
+		assert.NoError(t, err)
+		res.Write(responseBytes)
+	}))
+
+	require.NoError(t, err)
+	defer func() { testServer.Close() }()
+
 	tests := []struct {
 		name               string
 		args               args
@@ -383,12 +438,12 @@ func TestSource_GetOutputLocation(t *testing.T) {
 				source: workflow.Source{
 					Inputs: []workflow.Document{
 						{
-							Location: "http://example.com/openapi.json",
+							Location: fmt.Sprintf("%s/openapi.json", testServer.URL),
 						},
 					},
 				},
 			},
-			wantOutputLocation: ".speakeasy/temp/registry_e8ba45.json",
+			wantOutputLocation: ".speakeasy/temp/registry_4b5145.json",
 		},
 		{
 			name: "simple remote source without extension returns auto-generated output location assumed to be yaml",
@@ -396,12 +451,12 @@ func TestSource_GetOutputLocation(t *testing.T) {
 				source: workflow.Source{
 					Inputs: []workflow.Document{
 						{
-							Location: "http://example.com/openapi",
+							Location: fmt.Sprintf("%s/openapi", testServer.URL),
 						},
 					},
 				},
 			},
-			wantOutputLocation: ".speakeasy/temp/registry_94359d.yaml",
+			wantOutputLocation: ".speakeasy/temp/registry_61ea27.yaml",
 		},
 		{
 			name: "source with multiple inputs returns specified output location",
@@ -468,6 +523,76 @@ func TestSource_GetOutputLocation(t *testing.T) {
 				},
 			},
 			wantOutputLocation: ".speakeasy/temp/output_d910ba.yaml",
+		},
+		{
+			name: "single local source uses same extension as source",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.json",
+						},
+					},
+				},
+			},
+			wantOutputLocation: "openapi.json",
+		},
+		{
+			name: "single local source with overlays uses same extension as source",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.json",
+						},
+					},
+					Overlays: []workflow.Overlay{
+						{Document: &workflow.Document{Location: "overlay.yaml"}},
+					},
+				},
+			},
+			wantOutputLocation: ".speakeasy/temp/output_a98653.json",
+		},
+		{
+			name: "single remote source with unknown format uses resolved json extension",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							// The test server is setup so that it will return json if the path includes the word "json"
+							Location: fmt.Sprintf("%s/thepathincludesjson", testServer.URL),
+						},
+					},
+				},
+			},
+			wantOutputLocation: ".speakeasy/temp/registry_411616.json",
+		},
+		{
+			name: "single remote source with unknown format uses resolved yaml extension",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							// The test server is setup so that it will return yaml if the path includes the word "yaml"
+							Location: fmt.Sprintf("%s/thepathincludesyaml", testServer.URL),
+						},
+					},
+				},
+			},
+			wantOutputLocation: ".speakeasy/temp/registry_0254db.yaml",
+		},
+		{
+			name: "single remote source with unsupported file extension returns auto-generated output location",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: fmt.Sprintf("%s/foo.txt", testServer.URL),
+						},
+					},
+				},
+			},
+			wantOutputLocation: ".speakeasy/temp/registry_69a6f2.yaml",
 		},
 	}
 	for _, tt := range tests {
@@ -610,4 +735,18 @@ func createEmptyFile(path string) error {
 	}
 
 	return f.Close()
+}
+
+func newTestServerWithURL(URL string, handler http.Handler) (*httptest.Server, error) {
+	ts := httptest.NewUnstartedServer(handler)
+	if URL != "" {
+		l, err := net.Listen("tcp", URL)
+		if err != nil {
+			return nil, err
+		}
+		ts.Listener.Close()
+		ts.Listener = l
+	}
+	ts.Start()
+	return ts, nil
 }

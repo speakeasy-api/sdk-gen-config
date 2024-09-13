@@ -2,13 +2,17 @@ package workflow
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
+	"io"
 	"math/rand"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
+	"gopkg.in/yaml.v3"
 )
 
 // Ensure your update schema/workflow.schema.json on changes
@@ -25,6 +29,14 @@ type Overlay struct {
 	FallbackCodeSamples *FallbackCodeSamples `yaml:"fallbackCodeSamples,omitempty"`
 	Document            *Document            `yaml:"document,omitempty"`
 }
+
+type InputFileType string
+
+const (
+	InputFileTypeUnknown InputFileType = "unknown"
+	InputFileTypeJSON    InputFileType = "json"
+	InputFileTypeYAML    InputFileType = "yaml"
+)
 
 func (o *Overlay) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	// Overlay is flat, so we need to unmarshal it into a map to determine if it's a document or fallbackCodeSamples
@@ -129,59 +141,98 @@ func (s Source) Validate() error {
 }
 
 func (s Source) GetOutputLocation() (string, error) {
-    if s.Output != nil {
-        if len(s.Inputs) > 1 && !isYAMLFile(*s.Output) {
-            return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
-        }
-        return *s.Output, nil
-    }
+	if s.Output != nil {
+		if len(s.Inputs) > 1 && !isYAMLFile(*s.Output) {
+			return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
+		}
+		return *s.Output, nil
+	}
 
-    if len(s.Inputs) == 1 && len(s.Overlays) == 0 {
-        return s.handleSingleInput()
-    }
-
-    return s.generateOutputPath()
-}
-
-func (s Source) handleSingleInput() (string, error) {
-    input := s.Inputs[0].Location
-    switch getFileStatus(input) {
-    case fileStatusLocal:
-        return input, nil
-    case fileStatusNotExists:
-        return "", fmt.Errorf("input file %s does not exist", input)
-    case fileStatusRemote, fileStatusRegistry:
-        return s.generateRegistryPath(input)
-    default:
-        return "", fmt.Errorf("unknown file status for %s", input)
-    }
+	return s.generateOutputPath()
 }
 
 func (s Source) generateRegistryPath(input string) (string, error) {
-    ext := filepath.Ext(input)
-    if ext == "" {
-        ext = ".yaml"
-    }
-    hash := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
-    return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s%s", hash[:6], ext)), nil
+	ext := filepath.Ext(input)
+	hash := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
+
+	if ext == "" {
+		resolvedExtension := s.getRemoteResolvedExtension(input)
+
+		if resolvedExtension != InputFileTypeUnknown {
+			return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s.%s", hash[:6], resolvedExtension)), nil
+		}
+	}
+
+	// Check if the extension is supported
+	if ext != ".yaml" && ext != ".yml" && ext != ".json" {
+		ext = ".yaml"
+	}
+	return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s%s", hash[:6], ext)), nil
+}
+
+// Attempts to fetch the remote file and determine the format (yaml / json)
+// based on the contents of the file
+func (s Source) getRemoteResolvedExtension(input string) InputFileType {
+	res, err := http.Get(input)
+	if err != nil {
+		return InputFileTypeUnknown
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return InputFileTypeUnknown
+	}
+	if json.Unmarshal(body, &struct{}{}) == nil {
+		return InputFileTypeJSON
+	}
+	if yaml.Unmarshal(body, &struct{}{}) == nil {
+		return InputFileTypeYAML
+	}
+	return InputFileTypeUnknown
 }
 
 func (s Source) generateOutputPath() (string, error) {
-    hashInputs := func() string {
-        var combined string
-        for _, input := range s.Inputs {
-            combined += input.Location
-        }
-        hash := sha256.Sum256([]byte(combined))
-        return fmt.Sprintf("%x", hash)[:6]
-    }
+	generateOutputPath := func(extension string) string {
+		var combined string
+		for _, input := range s.Inputs {
+			combined += input.Location
+		}
+		hash := sha256.Sum256([]byte(combined))
+		hashStr := fmt.Sprintf("%x", hash)[:6]
+		return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", hashStr, extension))
+	}
 
-    return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s.yaml", hashInputs())), nil
+	if len(s.Inputs) == 1 {
+		hasOverlays := len(s.Overlays) > 0
+
+		if hasOverlays {
+			ext := filepath.Ext(s.Inputs[0].Location)
+			if ext == "" {
+				ext = ".yaml"
+			}
+			return generateOutputPath(ext), nil
+		}
+
+		input := s.Inputs[0].Location
+
+		switch getFileStatus(input) {
+		case fileStatusLocal:
+			return input, nil
+		case fileStatusNotExists:
+			return "", fmt.Errorf("input file %s does not exist", input)
+		case fileStatusRemote, fileStatusRegistry:
+			return s.generateRegistryPath(input)
+		default:
+			return "", fmt.Errorf("unknown file status for %s", input)
+		}
+	}
+
+	return generateOutputPath(".yaml"), nil
 }
 
 func isYAMLFile(path string) bool {
-    ext := filepath.Ext(path)
-    return ext == ".yaml" || ext == ".yml"
+	ext := filepath.Ext(path)
+	return ext == ".yaml" || ext == ".yml"
 }
 
 func GetTempDir() string {
