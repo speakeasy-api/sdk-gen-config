@@ -72,8 +72,22 @@ type FallbackCodeSamples struct {
 	FallbackCodeSamplesLanguage string `yaml:"fallbackCodeSamplesLanguage,omitempty"`
 }
 
+type LocationString string
+
+func (l LocationString) Resolve() string {
+	if strings.HasPrefix(string(l), "$") {
+		return os.ExpandEnv(string(l))
+	}
+
+	return string(l)
+}
+
+func (l LocationString) Reference() string {
+	return string(l)
+}
+
 type Document struct {
-	Location string `yaml:"location"`
+	Location LocationString `yaml:"location"`
 	Auth     *Auth  `yaml:",inline"`
 }
 
@@ -144,7 +158,7 @@ func (s Source) GetOutputLocation() (string, error) {
 }
 
 func (s Source) handleSingleInput() (string, error) {
-    input := s.Inputs[0].Location
+    input := s.Inputs[0].Location.Resolve()
     switch getFileStatus(input) {
     case fileStatusLocal:
         return input, nil
@@ -170,7 +184,7 @@ func (s Source) generateOutputPath() (string, error) {
     hashInputs := func() string {
         var combined string
         for _, input := range s.Inputs {
-            combined += input.Location
+            combined += input.Location.Resolve()
         }
         hash := sha256.Sum256([]byte(combined))
         return fmt.Sprintf("%x", hash)[:6]
@@ -204,7 +218,7 @@ func (d Document) Validate() error {
 	}
 
 	if d.Auth != nil {
-		if getFileStatus(d.Location) != fileStatusRemote {
+		if getFileStatus(d.Location.Resolve()) != fileStatusRemote {
 			return fmt.Errorf("auth is only supported for remote documents")
 		}
 
@@ -217,11 +231,11 @@ func (d Document) Validate() error {
 }
 
 func (d Document) IsRemote() bool {
-	return getFileStatus(d.Location) == fileStatusRemote
+	return getFileStatus(d.Location.Resolve()) == fileStatusRemote
 }
 
 func (d Document) IsSpeakeasyRegistry() bool {
-	return strings.Contains(d.Location, "registry.speakeasyapi.dev")
+	return strings.Contains(d.Location.Resolve(), "registry.speakeasyapi.dev")
 }
 
 func (f FallbackCodeSamples) Validate() error {
@@ -300,7 +314,7 @@ func ParseSpeakeasyRegistryReference(location string) *SpeakeasyRegistryDocument
 }
 
 func (d Document) GetTempDownloadPath(tempDir string) string {
-	return filepath.Join(tempDir, fmt.Sprintf("downloaded_%s%s", randStringBytes(10), filepath.Ext(d.Location)))
+	return filepath.Join(tempDir, fmt.Sprintf("downloaded_%s%s", randStringBytes(10), filepath.Ext(d.Location.Resolve())))
 }
 
 func (d Document) GetTempRegistryDir(tempDir string) string {

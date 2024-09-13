@@ -576,12 +576,12 @@ func createLocalFiles(s workflow.Source) (string, error) {
 
 	for _, input := range s.Inputs {
 		var filePath string
-		if strings.HasPrefix(input.Location, "~/") {
-			filePath = workflow.SanitizeFilePath(input.Location)
+		if strings.HasPrefix(input.Location.Resolve(), "~/") {
+			filePath = workflow.SanitizeFilePath(input.Location.Resolve())
 		} else {
-			filePath = filepath.Join(tmpDir, input.Location)
+			filePath = filepath.Join(tmpDir, input.Location.Resolve())
 		}
-		_, err := url.ParseRequestURI(input.Location)
+		_, err := url.ParseRequestURI(input.Location.Resolve())
 		if err != nil {
 			if err := createEmptyFile(filePath); err != nil {
 				return "", err
@@ -591,9 +591,9 @@ func createLocalFiles(s workflow.Source) (string, error) {
 
 	for _, overlay := range s.Overlays {
 		if overlay.Document != nil {
-			_, err := url.ParseRequestURI(overlay.Document.Location)
+			_, err := url.ParseRequestURI(overlay.Document.Location.Resolve())
 			if err != nil {
-				if err := createEmptyFile(filepath.Join(tmpDir, overlay.Document.Location)); err != nil {
+				if err := createEmptyFile(filepath.Join(tmpDir, overlay.Document.Location.Resolve())); err != nil {
 					return "", err
 				}
 			}
