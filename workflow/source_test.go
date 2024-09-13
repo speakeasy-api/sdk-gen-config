@@ -554,17 +554,32 @@ func TestSource_GetOutputLocation(t *testing.T) {
 			wantOutputLocation: ".speakeasy/temp/output_a98653.json",
 		},
 		{
-			name: "single remote source with unknown format uses resolved extension",
+			name: "single remote source with unknown format uses resolved json extension",
 			args: args{
 				source: workflow.Source{
 					Inputs: []workflow.Document{
 						{
+							// The test server is setup so that it will return json if the path includes the word "json"
 							Location: fmt.Sprintf("%s/thepathincludesjson", testServer.URL),
 						},
 					},
 				},
 			},
 			wantOutputLocation: ".speakeasy/temp/registry_411616.json",
+		},
+		{
+			name: "single remote source with unknown format uses resolved yaml extension",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							// The test server is setup so that it will return yaml if the path includes the word "yaml"
+							Location: fmt.Sprintf("%s/thepathincludesyaml", testServer.URL),
+						},
+					},
+				},
+			},
+			wantOutputLocation: ".speakeasy/temp/registry_0254db.yaml",
 		},
 		{
 			name: "single remote source with unsupported file extension returns auto-generated output location",
