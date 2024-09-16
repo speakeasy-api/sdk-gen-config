@@ -26,9 +26,16 @@ type Publishing struct {
 }
 
 type CodeSamples struct {
-	Output   string          `yaml:"output"`
-	Registry *SourceRegistry `yaml:"registry,omitempty"`
-	Style    *string         `yaml:"style,omitempty"` // Oneof "standard", "readme" (default: standard) (see codesamples.go)
+	Output        string                    `yaml:"output"`
+	Registry      *SourceRegistry           `yaml:"registry,omitempty"`
+	Style         *string                   `yaml:"style,omitempty"`         // Oneof "standard", "readme" (default: standard) (see codesamples.go)
+	LangOverride  *string                   `yaml:"langOverride,omitempty"`  // The value to use for the "lang" field of each codeSample (default: auto-detect)
+	LabelOverride *CodeSamplesLabelOverride `yaml:"labelOverride,omitempty"` // The value to use for the "label" field of each codeSample (default: operationId)
+}
+
+type CodeSamplesLabelOverride struct {
+	FixedValue *string `yaml:"fixedValue,omitempty"`
+	Omit       *bool   `yaml:"omit,omitempty"`
 }
 
 type NPM struct {
@@ -107,6 +114,15 @@ func (t Target) Validate(supportedLangs []string, sources map[string]Source) err
 		if t.CodeSamples.Style != nil {
 			if !slices.Contains([]string{"standard", "readme"}, *t.CodeSamples.Style) {
 				return fmt.Errorf("failed to validate target: code samples style must be one of 'standard', 'readme'")
+			}
+		}
+
+		if t.CodeSamples.LabelOverride != nil {
+			if t.CodeSamples.LabelOverride.FixedValue != nil && t.CodeSamples.LabelOverride.Omit != nil {
+				return fmt.Errorf("failed to validate target: code samples labelOverride cannot be both fixedValue and omit")
+			}
+			if t.CodeSamples.LabelOverride.FixedValue == nil && t.CodeSamples.LabelOverride.Omit == nil {
+				return fmt.Errorf("failed to validate target: code samples labelOverride must be either fixedValue or omit")
 			}
 		}
 	}
