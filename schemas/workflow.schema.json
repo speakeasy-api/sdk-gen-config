@@ -183,6 +183,28 @@
             }
           },
           "required": ["location"]
+        },
+        "style": {
+          "type": "string",
+          "description": "Optional style for the code sample, one of 'standard' or 'readme'. Default is 'standard'."
+        },
+        "langOverride": {
+          "type": "string",
+          "description": "Optional language override for the code sample. Default behavior is to auto-detect."
+        },
+        "labelOverride": {
+          "type": "object",
+          "description": "Optional label override for the code sample. Default is to use the operationId.",
+          "properties": {
+            "fixedValue": {
+              "type": "string",
+              "description": "Optional fixed value for the label."
+            },
+            "omit": {
+              "type": "boolean",
+              "description": "Optional flag to omit the label."
+            }
+          }
         }
       },
       "required": ["output"]
