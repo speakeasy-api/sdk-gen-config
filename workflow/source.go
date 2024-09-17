@@ -105,11 +105,13 @@ type Auth struct {
 	Secret string `yaml:"authSecret,omitempty"`
 }
 
-type SourceRegistryLocation string
-type SourceRegistry struct {
-	Location SourceRegistryLocation `yaml:"location"`
-	Tags     []string               `yaml:"tags,omitempty"`
-}
+type (
+	SourceRegistryLocation string
+	SourceRegistry         struct {
+		Location SourceRegistryLocation `yaml:"location"`
+		Tags     []string               `yaml:"tags,omitempty"`
+	}
+)
 
 func (s Source) Validate() error {
 	if len(s.Inputs) == 0 {
@@ -376,7 +378,6 @@ func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, error)
 	subParts := strings.Split(location, namespacePrefix)
 	components := strings.Split(strings.TrimSuffix(subParts[1], "/"), "/")
 	return components[0], components[1], components[2], nil
-
 }
 
 // @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>

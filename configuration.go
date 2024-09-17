@@ -169,8 +169,7 @@ type WorkflowDispatch struct {
 	Inputs Inputs `yaml:"inputs"`
 }
 
-type WorkflowDispatchTagging struct {
-}
+type WorkflowDispatchTagging struct{}
 
 type Schedule struct {
 	Cron string `yaml:"cron"`
