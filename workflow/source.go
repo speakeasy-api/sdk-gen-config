@@ -88,7 +88,7 @@ func (l LocationString) Reference() string {
 
 type Document struct {
 	Location LocationString `yaml:"location"`
-	Auth     *Auth  `yaml:",inline"`
+	Auth     *Auth          `yaml:",inline"`
 }
 
 type SpeakeasyRegistryDocument struct {
@@ -105,11 +105,13 @@ type Auth struct {
 	Secret string `yaml:"authSecret,omitempty"`
 }
 
-type SourceRegistryLocation string
-type SourceRegistry struct {
-	Location SourceRegistryLocation `yaml:"location"`
-	Tags     []string               `yaml:"tags,omitempty"`
-}
+type (
+	SourceRegistryLocation string
+	SourceRegistry         struct {
+		Location SourceRegistryLocation `yaml:"location"`
+		Tags     []string               `yaml:"tags,omitempty"`
+	}
+)
 
 func (s Source) Validate() error {
 	if len(s.Inputs) == 0 {
@@ -143,59 +145,73 @@ func (s Source) Validate() error {
 }
 
 func (s Source) GetOutputLocation() (string, error) {
-    if s.Output != nil {
-        if len(s.Inputs) > 1 && !isYAMLFile(*s.Output) {
-            return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
-        }
-        return *s.Output, nil
-    }
+	if s.Output != nil {
+		if len(s.Inputs) > 1 && !isYAMLFile(*s.Output) {
+			return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
+		}
+		return *s.Output, nil
+	}
 
-    if len(s.Inputs) == 1 && len(s.Overlays) == 0 {
-        return s.handleSingleInput()
-    }
+	if len(s.Inputs) == 1 && len(s.Overlays) == 0 {
+		return s.handleSingleInput()
+	}
 
-    return s.generateOutputPath()
+	return s.generateOutputPath()
 }
 
 func (s Source) handleSingleInput() (string, error) {
-    input := s.Inputs[0].Location.Resolve()
-    switch getFileStatus(input) {
-    case fileStatusLocal:
-        return input, nil
-    case fileStatusNotExists:
-        return "", fmt.Errorf("input file %s does not exist", input)
-    case fileStatusRemote, fileStatusRegistry:
-        return s.generateRegistryPath(input)
-    default:
-        return "", fmt.Errorf("unknown file status for %s", input)
-    }
+	input := s.Inputs[0].Location.Resolve()
+	switch getFileStatus(input) {
+	case fileStatusLocal:
+		return input, nil
+	case fileStatusNotExists:
+		return "", fmt.Errorf("input file %s does not exist", input)
+	case fileStatusRemote, fileStatusRegistry:
+		return s.generateRegistryPath(input)
+	default:
+		return "", fmt.Errorf("unknown file status for %s", input)
+	}
 }
 
 func (s Source) generateRegistryPath(input string) (string, error) {
-    ext := filepath.Ext(input)
-    if ext == "" {
-        ext = ".yaml"
-    }
-    hash := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
-    return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s%s", hash[:6], ext)), nil
+	ext := filepath.Ext(input)
+	if ext == "" {
+		ext = ".yaml"
+	}
+	hash := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
+	return filepath.Join(GetTempDir(), fmt.Sprintf("registry_%s%s", hash[:6], ext)), nil
 }
 
 func (s Source) generateOutputPath() (string, error) {
-    hashInputs := func() string {
-        var combined string
-        for _, input := range s.Inputs {
-            combined += input.Location.Resolve()
-        }
-        hash := sha256.Sum256([]byte(combined))
-        return fmt.Sprintf("%x", hash)[:6]
-    }
+	hashInputs := func() string {
+		var combined string
+		for _, input := range s.Inputs {
+			combined += input.Location.Resolve()
+		}
+		hash := sha256.Sum256([]byte(combined))
+		return fmt.Sprintf("%x", hash)[:6]
+	}
 
-    return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s.yaml", hashInputs())), nil
+	// If there's only one input, we can output to the same file type as that input even if we're applying overlays
+	ext := ".yaml"
+	if len(s.Inputs) == 1 {
+		ext = getExt(s.Inputs[0].Location.Resolve())
+	}
+
+	return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", hashInputs(), ext)), nil
+}
+
+func getExt(path string) string {
+	ext := filepath.Ext(path)
+	if ext == "" {
+		ext = ".yaml"
+	}
+	return ext
 }
 
 func isYAMLFile(path string) bool {
-    ext := filepath.Ext(path)
-    return ext == ".yaml" || ext == ".yml"
+	ext := filepath.Ext(path)
+	return ext == ".yaml" || ext == ".yml"
 }
 
 func GetTempDir() string {
@@ -362,7 +378,6 @@ func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, error)
 	subParts := strings.Split(location, namespacePrefix)
 	components := strings.Split(strings.TrimSuffix(subParts[1], "/"), "/")
 	return components[0], components[1], components[2], nil
-
 }
 
 // @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
