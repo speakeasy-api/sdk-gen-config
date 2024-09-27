@@ -365,9 +365,9 @@ func (p *SourceRegistry) SetNamespace(namespace string) error {
 	return p.Validate()
 }
 
-func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, error) {
+func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, string, error) {
 	if err := p.Validate(); err != nil {
-		return "", "", "", err
+		return "", "", "", "", err
 	}
 
 	location := p.Location.String()
@@ -377,7 +377,19 @@ func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, error)
 
 	subParts := strings.Split(location, namespacePrefix)
 	components := strings.Split(strings.TrimSuffix(subParts[1], "/"), "/")
-	return components[0], components[1], components[2], nil
+	namespace := components[2]
+	tag := ""
+	if shaSplit := strings.Split(components[2], "@sha256:"); len(shaSplit) == 2 {
+		namespace = shaSplit[0]
+		tag = "sha256:" + shaSplit[1]
+	}
+
+	if tagSplit := strings.Split(components[2], ":"); tag == "" && len(tagSplit) == 2 {
+		namespace = tagSplit[0]
+		tag = tagSplit[1]
+	}
+
+	return components[0], components[1], namespace, tag, nil
 }
 
 // @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
