@@ -114,12 +114,13 @@ type PublishWorkflow struct {
 }
 
 type PublishOn struct {
-	Push Push `yaml:"push"`
+	Push             Push                  `yaml:"push"`
+	WorkflowDispatch WorkflowDispatchEmpty `yaml:"workflow_dispatch"`
 }
 
 type TagOn struct {
-	Push             Push                    `yaml:"push"`
-	WorkflowDispatch WorkflowDispatchTagging `yaml:"workflow_dispatch"`
+	Push             Push                  `yaml:"push"`
+	WorkflowDispatch WorkflowDispatchEmpty `yaml:"workflow_dispatch"`
 }
 
 type Push struct {
@@ -169,7 +170,7 @@ type WorkflowDispatch struct {
 	Inputs Inputs `yaml:"inputs"`
 }
 
-type WorkflowDispatchTagging struct{}
+type WorkflowDispatchEmpty struct{}
 
 type Schedule struct {
 	Cron string `yaml:"cron"`
