@@ -21,7 +21,6 @@ type Management struct {
 	DocVersion           string         `yaml:"docVersion,omitempty"`
 	SpeakeasyVersion     string         `yaml:"speakeasyVersion,omitempty"`
 	GenerationVersion    string         `yaml:"generationVersion,omitempty"`
-	GenerationTimestamp  string         `yaml:"generationTimestamp,omitempty"`
 	ReleaseVersion       string         `yaml:"releaseVersion,omitempty"`
 	ConfigChecksum       string         `yaml:"configChecksum,omitempty"`
 	RepoURL              string         `yaml:"repoURL,omitempty"`
