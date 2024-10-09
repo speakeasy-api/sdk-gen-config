@@ -114,8 +114,8 @@ type PublishWorkflow struct {
 }
 
 type PublishOn struct {
-	Push             Push                  `yaml:"push"`
-	WorkflowDispatch WorkflowDispatchEmpty `yaml:"workflow_dispatch"`
+	Push             Push                   `yaml:"push"`
+	WorkflowDispatch *WorkflowDispatchEmpty `yaml:"workflow_dispatch,omitempty"`
 }
 
 type TagOn struct {
