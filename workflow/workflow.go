@@ -134,7 +134,7 @@ func (v Version) String() string {
 	return string(v)
 }
 
-func (w Workflow) Migrate() Workflow {
+func (w Workflow) Migrate(telemetryDisabled bool) Workflow {
 	// Backfill speakeasyVersion
 	if w.SpeakeasyVersion == "" {
 		// This is the pinned version from the GitHub action. If it's set, backfill using it.
@@ -145,29 +145,31 @@ func (w Workflow) Migrate() Workflow {
 		}
 	}
 
-	// Add codeSamples by default
-	for targetID, target := range w.Targets {
-		if !slices.Contains(SupportedLanguagesUsageSnippets, target.Target) {
-			continue
-		}
-
-		// Only add code samples if there's a registry source. This is mostly because we need to know an org and workspace slug
-		// in order to construct the new registry location for the code samples.
-		source, ok := w.Sources[target.Source]
-		if !ok || source.Registry == nil {
-			continue
-		}
-
-		if target.CodeSamples == nil {
-			target.CodeSamples = &CodeSamples{
-				Registry: &SourceRegistry{
-					Location: codeSamplesRegistryLocation(source.Registry.Location),
-				},
-				Blocking: pointer.ToBool(false),
+	// Add codeSamples by default, unless telemetry is disabled
+	if !telemetryDisabled {
+		for targetID, target := range w.Targets {
+			if !slices.Contains(SupportedLanguagesUsageSnippets, target.Target) {
+				continue
 			}
-		}
 
-		w.Targets[targetID] = target
+			// Only add code samples if there's a registry source. This is mostly because we need to know an org and workspace slug
+			// in order to construct the new registry location for the code samples.
+			source, ok := w.Sources[target.Source]
+			if !ok || source.Registry == nil {
+				continue
+			}
+
+			if target.CodeSamples == nil {
+				target.CodeSamples = &CodeSamples{
+					Registry: &SourceRegistry{
+						Location: codeSamplesRegistryLocation(source.Registry.Location),
+					},
+					Blocking: pointer.ToBool(false),
+				}
+			}
+
+			w.Targets[targetID] = target
+		}
 	}
 
 	return w
