@@ -337,7 +337,7 @@ func (d Document) GetTempRegistryDir(tempDir string) string {
 	return filepath.Join(tempDir, fmt.Sprintf("registry_%s", randStringBytes(10)))
 }
 
-const namespacePrefix = "registry.speakeasyapi.dev/"
+const baseRegistryURL = "registry.speakeasyapi.dev/"
 
 func (p SourceRegistry) Validate() error {
 	if p.Location == "" {
@@ -349,19 +349,19 @@ func (p SourceRegistry) Validate() error {
 	location = strings.TrimPrefix(location, "https://")
 	location = strings.TrimPrefix(location, "http://")
 
-	if !strings.HasPrefix(location, namespacePrefix) {
-		return fmt.Errorf("registry location must begin with %s", namespacePrefix)
+	if !strings.HasPrefix(location, baseRegistryURL) {
+		return fmt.Errorf("registry location must begin with %s", baseRegistryURL)
 	}
 
 	if strings.Count(p.Location.Namespace(), "/") != 2 {
-		return fmt.Errorf("registry location should look like %s<org>/<workspace>/<image>", namespacePrefix)
+		return fmt.Errorf("registry location should look like %s<org>/<workspace>/<image>", baseRegistryURL)
 	}
 
 	return nil
 }
 
 func (p *SourceRegistry) SetNamespace(namespace string) error {
-	p.Location = SourceRegistryLocation(namespacePrefix + namespace)
+	p.Location = SourceRegistryLocation(baseRegistryURL + namespace)
 	return p.Validate()
 }
 
@@ -375,7 +375,7 @@ func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, string
 	location = strings.TrimPrefix(location, "https://")
 	location = strings.TrimPrefix(location, "http://")
 
-	subParts := strings.Split(location, namespacePrefix)
+	subParts := strings.Split(location, baseRegistryURL)
 	components := strings.Split(strings.TrimSuffix(subParts[1], "/"), "/")
 	namespace := components[2]
 	tag := ""
@@ -398,7 +398,7 @@ func (n SourceRegistryLocation) Namespace() string {
 	// perfectly valid for someone to add http prefixes
 	location = strings.TrimPrefix(location, "https://")
 	location = strings.TrimPrefix(location, "http://")
-	return strings.TrimPrefix(location, namespacePrefix)
+	return strings.TrimPrefix(location, baseRegistryURL)
 }
 
 // @<org>/<workspace>/<namespace_name> => <namespace_name>

@@ -26,7 +26,7 @@ type Publishing struct {
 }
 
 type CodeSamples struct {
-	Output        string                    `yaml:"output"`
+	Output        string                    `yaml:"output,omitempty"`
 	Registry      *SourceRegistry           `yaml:"registry,omitempty"`
 	Style         *string                   `yaml:"style,omitempty"`         // Oneof "standard", "readme" (default: standard) (see codesamples.go)
 	LangOverride  *string                   `yaml:"langOverride,omitempty"`  // The value to use for the "lang" field of each codeSample (default: auto-detect)

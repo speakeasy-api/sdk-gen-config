@@ -2,6 +2,7 @@ package workflow_test
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"testing"
@@ -254,6 +255,49 @@ func TestWorkflow_Validate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMigrate_Success(t *testing.T) {
+	in := `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: ./openapi.yaml
+    registry:
+      location: registry.speakeasyapi.dev/org/workspace/testSource
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+`
+
+	expected := `workflowVersion: 1.0.0
+speakeasyVersion: latest
+sources:
+    testSource:
+        inputs:
+            - location: ./openapi.yaml
+        registry:
+            location: registry.speakeasyapi.dev/org/workspace/testSource
+targets:
+    typescript:
+        target: typescript
+        source: testSource
+        codeSamples:
+            registry:
+                location: registry.speakeasyapi.dev/org/workspace/testSource-code-samples
+            blocking: false
+`
+
+	var workflow workflow.Workflow
+	require.NoError(t, yaml.Unmarshal([]byte(in), &workflow))
+
+	workflow = workflow.Migrate()
+
+	actual, err := yaml.Marshal(workflow)
+	require.NoError(t, err)
+
+	assert.Equal(t, expected, string(actual))
 }
 
 func createTempFile(dir string, fileName, contents string) error {
