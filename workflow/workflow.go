@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
@@ -146,6 +147,10 @@ func (w Workflow) Migrate() Workflow {
 
 	// Add codeSamples by default
 	for targetID, target := range w.Targets {
+		if !slices.Contains(SupportedLanguagesUsageSnippets, target.Target) {
+			continue
+		}
+
 		// Only add code samples if there's a registry source. This is mostly because we need to know an org and workspace slug
 		// in order to construct the new registry location for the code samples.
 		source, ok := w.Sources[target.Source]
@@ -153,7 +158,6 @@ func (w Workflow) Migrate() Workflow {
 			continue
 		}
 
-		// TODO: check that the target is supported
 		if target.CodeSamples == nil {
 			target.CodeSamples = &CodeSamples{
 				Registry: &SourceRegistry{

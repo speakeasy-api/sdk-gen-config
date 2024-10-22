@@ -39,6 +39,18 @@ type CodeSamplesLabelOverride struct {
 	Omit       *bool   `yaml:"omit,omitempty"`
 }
 
+var SupportedLanguagesUsageSnippets = []string{
+	"go",
+	"typescript",
+	"python",
+	"java",
+	"php",
+	"swift",
+	"ruby",
+	"csharp",
+	"unity",
+}
+
 type NPM struct {
 	Token string `yaml:"token"`
 }
