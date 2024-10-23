@@ -3,9 +3,11 @@ package workflow
 import (
 	"errors"
 	"fmt"
+	"github.com/AlekSi/pointer"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
@@ -130,4 +132,57 @@ func (v Version) String() string {
 	}
 
 	return string(v)
+}
+
+func (w Workflow) Migrate() Workflow {
+	return w.migrate(false)
+}
+
+func (w Workflow) MigrateNoTelemetry() Workflow {
+	return w.migrate(true)
+}
+
+func (w Workflow) migrate(telemetryDisabled bool) Workflow {
+	// Backfill speakeasyVersion
+	if w.SpeakeasyVersion == "" {
+		// This is the pinned version from the GitHub action. If it's set, backfill using it.
+		if ghPinned := os.Getenv("PINNED_VERSION"); ghPinned != "" {
+			w.SpeakeasyVersion = Version(ghPinned)
+		} else {
+			w.SpeakeasyVersion = "latest"
+		}
+	}
+
+	// Add codeSamples by default, unless telemetry is disabled
+	if !telemetryDisabled {
+		for targetID, target := range w.Targets {
+			if !slices.Contains(SupportedLanguagesUsageSnippets, target.Target) {
+				continue
+			}
+
+			// Only add code samples if there's a registry source. This is mostly because we need to know an org and workspace slug
+			// in order to construct the new registry location for the code samples.
+			source, ok := w.Sources[target.Source]
+			if !ok || source.Registry == nil {
+				continue
+			}
+
+			if target.CodeSamples == nil {
+				target.CodeSamples = &CodeSamples{
+					Registry: &SourceRegistry{
+						Location: codeSamplesRegistryLocation(source.Registry.Location),
+					},
+					Blocking: pointer.ToBool(false),
+				}
+			}
+
+			w.Targets[targetID] = target
+		}
+	}
+
+	return w
+}
+
+func codeSamplesRegistryLocation(sourceRegistryURL SourceRegistryLocation) SourceRegistryLocation {
+	return SourceRegistryLocation(string(sourceRegistryURL) + "-code-samples")
 }

@@ -26,16 +26,29 @@ type Publishing struct {
 }
 
 type CodeSamples struct {
-	Output        string                    `yaml:"output"`
+	Output        string                    `yaml:"output,omitempty"`
 	Registry      *SourceRegistry           `yaml:"registry,omitempty"`
 	Style         *string                   `yaml:"style,omitempty"`         // Oneof "standard", "readme" (default: standard) (see codesamples.go)
 	LangOverride  *string                   `yaml:"langOverride,omitempty"`  // The value to use for the "lang" field of each codeSample (default: auto-detect)
 	LabelOverride *CodeSamplesLabelOverride `yaml:"labelOverride,omitempty"` // The value to use for the "label" field of each codeSample (default: operationId)
+	Blocking      *bool                     `yaml:"blocking,omitempty"`      // Default: true. If false, code samples failures will not consider the workflow as failed
 }
 
 type CodeSamplesLabelOverride struct {
 	FixedValue *string `yaml:"fixedValue,omitempty"`
 	Omit       *bool   `yaml:"omit,omitempty"`
+}
+
+var SupportedLanguagesUsageSnippets = []string{
+	"go",
+	"typescript",
+	"python",
+	"java",
+	"php",
+	"swift",
+	"ruby",
+	"csharp",
+	"unity",
 }
 
 type NPM struct {
