@@ -134,7 +134,15 @@ func (v Version) String() string {
 	return string(v)
 }
 
-func (w Workflow) Migrate(telemetryDisabled bool) Workflow {
+func (w Workflow) Migrate() Workflow {
+	return w.migrate(false)
+}
+
+func (w Workflow) MigrateNoTelemetry() Workflow {
+	return w.migrate(true)
+}
+
+func (w Workflow) migrate(telemetryDisabled bool) Workflow {
 	// Backfill speakeasyVersion
 	if w.SpeakeasyVersion == "" {
 		// This is the pinned version from the GitHub action. If it's set, backfill using it.
