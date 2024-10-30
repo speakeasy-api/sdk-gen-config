@@ -344,7 +344,7 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Name:         "auth.oAuth2PasswordEnabled",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables support for OAuth2 client credentials grant type (Enterprise tier only)"),
+			Description:  pointer.To("Enables support for OAuth2 resource owner password credentials grant type (Enterprise tier only)"),
 		},
 	}
 }
