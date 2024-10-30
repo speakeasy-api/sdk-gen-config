@@ -50,6 +50,7 @@ type Fixes struct {
 
 type Auth struct {
 	OAuth2ClientCredentialsEnabled bool `yaml:"oAuth2ClientCredentialsEnabled"`
+	OAuth2PasswordEnabled          bool `yaml:"oAuth2PasswordEnabled"`
 }
 
 type Generation struct {
@@ -338,6 +339,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables support for OAuth2 client credentials grant type (Enterprise tier only)"),
+		},
+		{
+			Name:         "auth.oAuth2PasswordEnabled",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Enables support for OAuth2 resource owner password credentials grant type (Enterprise tier only)"),
 		},
 	}
 }
