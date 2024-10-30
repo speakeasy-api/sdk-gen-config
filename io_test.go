@@ -60,6 +60,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
+							OAuth2PasswordEnabled:          true,
 						},
 						UseClassNamesForArrayFields: true,
 					},
@@ -108,6 +109,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 					},
 					New: map[string]bool{},
@@ -159,6 +161,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 					},
 					New: map[string]bool{},
@@ -215,6 +218,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 					},
 					New: map[string]bool{},
@@ -270,6 +274,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
+							OAuth2PasswordEnabled:          true,
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
@@ -320,6 +325,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
+							OAuth2PasswordEnabled:          true,
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
@@ -370,6 +376,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 					},
 					New: map[string]bool{},
@@ -427,6 +434,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 					},
 					New: map[string]bool{
@@ -488,6 +496,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 					},
 					New: map[string]bool{
@@ -546,6 +555,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 						MockServer: &MockServer{
 							Disabled: true,
@@ -658,6 +668,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 				},
 				Auth: &Auth{
 					OAuth2ClientCredentialsEnabled: false,
+					OAuth2PasswordEnabled:          false,
 				},
 			},
 			New: map[string]bool{},
