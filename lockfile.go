@@ -7,13 +7,20 @@ import (
 )
 
 type LockFile struct {
-	LockVersion          string                       `yaml:"lockVersion"`
-	ID                   string                       `yaml:"id"`
-	Management           Management                   `yaml:"management"`
-	Features             map[string]map[string]string `yaml:"features,omitempty"`
-	GeneratedFiles       []string                     `yaml:"generatedFiles,omitempty"`
-	Examples             Examples                     `yaml:"examples,omitempty"`
-	AdditionalProperties map[string]any               `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	LockVersion    string     `yaml:"lockVersion"`
+	ID             string     `yaml:"id"`
+	Management     Management `yaml:"management"`
+	GeneratedFiles []string   `yaml:"generatedFiles,omitempty"`
+	Examples       Examples   `yaml:"examples,omitempty"`
+
+	// Mapping of targets to used feature names and versions
+	Features map[string]map[string]string `yaml:"features,omitempty"`
+
+	// Mapping of targets to available feature names and versions
+	FeaturesAvailable map[string]map[string]string `yaml:"featuresAvailable,omitempty"`
+
+	// Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	AdditionalProperties map[string]any `yaml:",inline"`
 }
 
 type Management struct {
