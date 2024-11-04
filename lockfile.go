@@ -13,6 +13,7 @@ type LockFile struct {
 	Features             map[string]map[string]string `yaml:"features,omitempty"`
 	GeneratedFiles       []string                     `yaml:"generatedFiles,omitempty"`
 	Examples             Examples                     `yaml:"examples,omitempty"`
+	GeneratedTests       GeneratedTests               `yaml:"generatedTests,omitempty"`
 	AdditionalProperties map[string]any               `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -30,7 +31,10 @@ type Management struct {
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
-type Examples = *orderedmap.OrderedMap[string, *orderedmap.OrderedMap[string, OperationExamples]]
+type (
+	Examples       = *orderedmap.OrderedMap[string, *orderedmap.OrderedMap[string, OperationExamples]]
+	GeneratedTests = *orderedmap.OrderedMap[string, string]
+)
 
 type OperationExamples struct {
 	Parameters  *ParameterExamples                                                        `yaml:"parameters,omitempty"`
