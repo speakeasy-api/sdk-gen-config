@@ -148,6 +148,7 @@ type Permissions struct {
 	Contents     string `yaml:"contents,omitempty"`
 	PullRequests string `yaml:"pull-requests,omitempty"`
 	Statuses     string `yaml:"statuses,omitempty"`
+	IDToken      string `yaml:"id-token,omitempty"`
 }
 
 type GenerateOn struct {
