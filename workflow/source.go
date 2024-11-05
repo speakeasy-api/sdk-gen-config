@@ -335,10 +335,8 @@ func (f FilterOperationsOptions) ParseOperations() []string {
 	// If it's a faux-array, like:
 	// filterOperations:
 	//   operations: >
-	//     - get
-	//     - post
-	//     - put
-	//     - delete
+	//     - getPets
+	//     - createPet
 	if strings.Contains(f.Operations, "\n") {
 		secondLineAndBeyond := strings.SplitN(f.Operations, "\n", 2)[1]
 		pattern := regexp.MustCompile(`-\s*(\S+)`)
