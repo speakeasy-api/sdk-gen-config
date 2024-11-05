@@ -235,6 +235,10 @@ func (s Source) GetTempOverlayLocation() string {
 	return filepath.Join(GetTempDir(), fmt.Sprintf("overlay_%s.yaml", randStringBytes(10)))
 }
 
+func (s Source) GetTempTransformLocation() string {
+	return filepath.Join(GetTempDir(), fmt.Sprintf("transform_%s.yaml", randStringBytes(10)))
+}
+
 func (d Document) Validate() error {
 	if d.Location == "" {
 		return fmt.Errorf("location is required")
