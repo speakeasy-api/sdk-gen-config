@@ -3,9 +3,9 @@ package workflow
 import (
 	"crypto/sha256"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
@@ -13,11 +13,12 @@ import (
 
 // Ensure your update schema/workflow.schema.json on changes
 type Source struct {
-	Inputs   []Document      `yaml:"inputs"`
-	Overlays []Overlay       `yaml:"overlays,omitempty"`
-	Output   *string         `yaml:"output,omitempty"`
-	Ruleset  *string         `yaml:"ruleset,omitempty"`
-	Registry *SourceRegistry `yaml:"registry,omitempty"`
+	Inputs          []Document       `yaml:"inputs"`
+	Overlays        []Overlay        `yaml:"overlays,omitempty"`
+	Transformations []Transformation `yaml:"transformations,omitempty"`
+	Output          *string          `yaml:"output,omitempty"`
+	Ruleset         *string          `yaml:"ruleset,omitempty"`
+	Registry        *SourceRegistry  `yaml:"registry,omitempty"`
 }
 
 // Either FallBackCodeSamples or Document
@@ -127,6 +128,12 @@ func (s Source) Validate() error {
 	for i, overlay := range s.Overlays {
 		if err := overlay.Validate(); err != nil {
 			return fmt.Errorf("failed to validate overlay %d: %w", i, err)
+		}
+	}
+
+	for i, transformation := range s.Transformations {
+		if err := transformation.Validate(); err != nil {
+			return fmt.Errorf("failed to validate transformation %d: %w", i, err)
 		}
 	}
 
@@ -282,140 +289,72 @@ func (o Overlay) Validate() error {
 	return nil
 }
 
-// Parse the location to extract the namespace ID, namespace name, and reference
-// The location should be in the format registry.speakeasyapi.dev/org/workspace/name[:tag|@sha256:digest]
-func ParseSpeakeasyRegistryReference(location string) *SpeakeasyRegistryDocument {
-	// Parse the location to extract the organization, workspace, namespace, and reference
-	// Examples:
-	// registry.speakeasyapi.dev/org/workspace/name (default reference: latest)
-	// registry.speakeasyapi.dev/org/workspace/name@sha256:1234567890abcdef
-	// registry.speakeasyapi.dev/org/workspace/name:tag
-
-	// Assert it starts with the registry prefix
-	if !strings.HasPrefix(location, "registry.speakeasyapi.dev/") {
-		return nil
-	}
-
-	// Extract the organization, workspace, and namespace
-	parts := strings.Split(strings.TrimPrefix(location, "registry.speakeasyapi.dev/"), "/")
-	if len(parts) != 3 {
-		return nil
-	}
-
-	organizationSlug := parts[0]
-	workspaceSlug := parts[1]
-	suffix := parts[2]
-
-	reference := "latest"
-	namespaceName := suffix
-
-	// Check if the suffix contains a reference
-	if strings.Contains(suffix, "@") {
-		// Reference is a digest
-		reference = suffix[strings.Index(suffix, "@")+1:]
-		namespaceName = suffix[:strings.Index(suffix, "@")]
-	} else if strings.Contains(suffix, ":") {
-		// Reference is a tag
-		reference = suffix[strings.Index(suffix, ":")+1:]
-		namespaceName = suffix[:strings.Index(suffix, ":")]
-	}
-
-	return &SpeakeasyRegistryDocument{
-		OrganizationSlug: organizationSlug,
-		WorkspaceSlug:    workspaceSlug,
-		NamespaceID:      organizationSlug + "/" + workspaceSlug + "/" + namespaceName,
-		NamespaceName:    namespaceName,
-		Reference:        reference,
-	}
+type Transformation struct {
+	RemoveUnused     *bool                    `yaml:"removeUnused,omitempty"`
+	FilterOperations *FilterOperationsOptions `yaml:"filterOperations,omitempty"`
+	Cleanup          *bool                    `yaml:"cleanup,omitempty"`
 }
 
-func (d Document) GetTempDownloadPath(tempDir string) string {
-	return filepath.Join(tempDir, fmt.Sprintf("downloaded_%s%s", randStringBytes(10), filepath.Ext(d.Location.Resolve())))
+type FilterOperationsOptions struct {
+	Operations string `yaml:"operations"` // Comma-separated list of operations to filter
+	Include    *bool  `yaml:"include,omitempty"`
+	Exclude    *bool  `yaml:"exclude,omitempty"`
 }
 
-func (d Document) GetTempRegistryDir(tempDir string) string {
-	return filepath.Join(tempDir, fmt.Sprintf("registry_%s", randStringBytes(10)))
-}
-
-const baseRegistryURL = "registry.speakeasyapi.dev/"
-
-func (p SourceRegistry) Validate() error {
-	if p.Location == "" {
-		return fmt.Errorf("location is required")
+func (t Transformation) Validate() error {
+	numNil := 0
+	if t.RemoveUnused != nil {
+		numNil++
+	}
+	if t.FilterOperations != nil {
+		numNil++
+	}
+	if t.Cleanup != nil {
+		numNil++
+	}
+	if numNil != 1 {
+		return fmt.Errorf("transformation must have exactly one of removeUnused, filterOperations, or cleanup")
 	}
 
-	location := p.Location.String()
-	// perfectly valid for someone to add http prefixes
-	location = strings.TrimPrefix(location, "https://")
-	location = strings.TrimPrefix(location, "http://")
+	if t.FilterOperations != nil {
+		if len(t.FilterOperations.ParseOperations()) == 0 {
+			return fmt.Errorf("filterOperations.operations must not be empty")
+		}
 
-	if !strings.HasPrefix(location, baseRegistryURL) {
-		return fmt.Errorf("registry location must begin with %s", baseRegistryURL)
-	}
-
-	if strings.Count(p.Location.Namespace(), "/") != 2 {
-		return fmt.Errorf("registry location should look like %s<org>/<workspace>/<image>", baseRegistryURL)
+		if t.FilterOperations.Include != nil && t.FilterOperations.Exclude != nil {
+			return fmt.Errorf("filterOperations.include and filterOperations.exclude cannot both be set")
+		}
 	}
 
 	return nil
 }
 
-func (p *SourceRegistry) SetNamespace(namespace string) error {
-	p.Location = SourceRegistryLocation(baseRegistryURL + namespace)
-	return p.Validate()
-}
+func (f FilterOperationsOptions) ParseOperations() []string {
+	var operations []string
 
-func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, string, error) {
-	if err := p.Validate(); err != nil {
-		return "", "", "", "", err
+	// If it's a faux-array, like:
+	// filterOperations:
+	//   operations: >
+	//     - getPets
+	//     - createPet
+	if strings.Contains(f.Operations, "\n") {
+		secondLineAndBeyond := strings.SplitN(f.Operations, "\n", 2)[1]
+		pattern := regexp.MustCompile(`-\s*(\S+)`)
+		matches := pattern.FindAllStringSubmatch(secondLineAndBeyond, -1)
+		for _, match := range matches {
+			if len(match) > 1 && match[1] != "" {
+				operations = append(operations, strings.TrimSpace(match[1]))
+			}
+		}
+	} else {
+		// If it's a normal CSV
+		for _, op := range strings.Split(f.Operations, ",") {
+			op = strings.TrimSpace(op)
+			if op != "" {
+				operations = append(operations, op)
+			}
+		}
 	}
 
-	location := p.Location.String()
-	// perfectly valid for someone to add http prefixes
-	location = strings.TrimPrefix(location, "https://")
-	location = strings.TrimPrefix(location, "http://")
-
-	subParts := strings.Split(location, baseRegistryURL)
-	components := strings.Split(strings.TrimSuffix(subParts[1], "/"), "/")
-	namespace := components[2]
-	tag := ""
-	if shaSplit := strings.Split(components[2], "@sha256:"); len(shaSplit) == 2 {
-		namespace = shaSplit[0]
-		tag = "sha256:" + shaSplit[1]
-	}
-
-	if tagSplit := strings.Split(components[2], ":"); tag == "" && len(tagSplit) == 2 {
-		namespace = tagSplit[0]
-		tag = tagSplit[1]
-	}
-
-	return components[0], components[1], namespace, tag, nil
-}
-
-// @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
-func (n SourceRegistryLocation) Namespace() string {
-	location := string(n)
-	// perfectly valid for someone to add http prefixes
-	location = strings.TrimPrefix(location, "https://")
-	location = strings.TrimPrefix(location, "http://")
-	return strings.TrimPrefix(location, baseRegistryURL)
-}
-
-// @<org>/<workspace>/<namespace_name> => <namespace_name>
-func (n SourceRegistryLocation) NamespaceName() string {
-	return n.Namespace()[strings.LastIndex(n.Namespace(), "/")+1:]
-}
-
-func (n SourceRegistryLocation) String() string {
-	return string(n)
-}
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-var randStringBytes = func(n int) string {
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
+	return operations
 }

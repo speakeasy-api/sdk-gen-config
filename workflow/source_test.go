@@ -310,6 +310,125 @@ func TestSource_Validate(t *testing.T) {
 			},
 			wantErr: fmt.Errorf("failed to validate registry: location is required"),
 		},
+		{
+			name: "transformations success",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Transformations: []workflow.Transformation{
+						{
+							RemoveUnused: pointer.ToBool(true),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "transformations multiple types invalid",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Transformations: []workflow.Transformation{
+						{
+							RemoveUnused: pointer.ToBool(true),
+							Cleanup:      pointer.ToBool(true),
+						},
+					},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate transformation 0: transformation must have exactly one of removeUnused, filterOperations, or cleanup"),
+		},
+		{
+			name: "transformations filter success",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Transformations: []workflow.Transformation{
+						{
+							FilterOperations: &workflow.FilterOperationsOptions{
+								Operations: "abc, def",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "transformations filter success multiline",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Transformations: []workflow.Transformation{
+						{
+							FilterOperations: &workflow.FilterOperationsOptions{
+								Operations: `>
+    - abc
+ 	- def`,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "transformations filter invalid empty",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Transformations: []workflow.Transformation{
+						{
+							FilterOperations: &workflow.FilterOperationsOptions{
+								Operations: `>
+`,
+							},
+						},
+					},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate transformation 0: filterOperations.operations must not be empty"),
+		},
+		{
+			name: "transformations filter invalid include/exclude",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "openapi.yaml",
+						},
+					},
+					Transformations: []workflow.Transformation{
+						{
+							FilterOperations: &workflow.FilterOperationsOptions{
+								Operations: "abc, def",
+								Include:    pointer.ToBool(true),
+								Exclude:    pointer.ToBool(true),
+							},
+						},
+					},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate transformation 0: filterOperations.include and filterOperations.exclude cannot both be set"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
