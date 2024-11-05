@@ -159,11 +159,15 @@ func (s Source) GetOutputLocation() (string, error) {
 		return *s.Output, nil
 	}
 
-	if len(s.Inputs) == 1 && len(s.Overlays) == 0 {
+	if s.IsSingleInput() {
 		return s.handleSingleInput()
 	}
 
 	return s.generateOutputPath()
+}
+
+func (s Source) IsSingleInput() bool {
+	return len(s.Inputs) == 1 && len(s.Overlays) == 0 && len(s.Transformations) == 0
 }
 
 func (s Source) handleSingleInput() (string, error) {
