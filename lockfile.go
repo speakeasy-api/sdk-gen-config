@@ -16,6 +16,10 @@ type LockFile struct {
 	ExamplesVersion      string                       `yaml:"examplesVersion,omitempty"`
 	GeneratedTests       GeneratedTests               `yaml:"generatedTests,omitempty"`
 	AdditionalProperties map[string]any               `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+
+	// Mapping of language names to operation identifiers and operation metadata
+	// for change reporting.
+	Operations map[string]map[string]OperationMetadata `yaml:"operations,omitempty"`
 }
 
 type Management struct {
@@ -30,6 +34,36 @@ type Management struct {
 	InstallationURL      string         `yaml:"installationURL,omitempty"`
 	Published            bool           `yaml:"published,omitempty"`
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+}
+
+// Metadata associated with a single operation for change reporting.
+type OperationMetadata struct {
+	// HTTP method for operation.
+	Method string `yaml:"method"`
+
+	// OpenAPI path for operation. Includes path parameter syntax.
+	Path string `yaml:"path"`
+
+	// Mapping of language-specific representations to representation metadata
+	// for change reporting.
+	//
+	// Representations include native syntax, such as: `sdk.group.Create()`.
+	Representations map[string]OperationRepresentationMetadata `yaml:"representations"`
+
+	// Captures any additional properties that are not explicitly defined for
+	// backwards/forwards compatibility
+	AdditionalProperties map[string]any `yaml:",inline"`
+}
+
+// Metadata associated with a single operation representation for change
+// reporting.
+type OperationRepresentationMetadata struct {
+	// Example future enhancement.
+	// RequiredArguments []string `yaml:"required_arguments,omitempty"`
+
+	// Captures any additional properties that are not explicitly defined for
+	// backwards/forwards compatibility
+	AdditionalProperties map[string]any `yaml:",inline"`
 }
 
 type (
