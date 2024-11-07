@@ -1,7 +1,6 @@
 package workflow
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/AlekSi/pointer"
@@ -196,9 +195,6 @@ func codeSamplesRegistryUpdatedLocation(wf Workflow, codeSamples *CodeSamples) S
 
 	registryDocument := codeSamples.Registry.Location.Parse()
 	namespace := registryDocument.NamespaceID
-
-	j, _ := json.Marshal(registryDocument)
-	println("REGISTRY IS: " + string(j))
 	if namespace == "" {
 		return ""
 	}
