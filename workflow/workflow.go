@@ -6,6 +6,7 @@ import (
 	"github.com/AlekSi/pointer"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -174,6 +175,9 @@ func (w Workflow) migrate(telemetryDisabled bool) Workflow {
 					},
 					Blocking: pointer.ToBool(false),
 				}
+			} else {
+				// Fix the registry location if it needs fixing
+				target.CodeSamples.Registry.Location = codeSamplesRegistryUpdatedLocation(w, target.CodeSamples)
 			}
 
 			w.Targets[targetID] = target
@@ -183,6 +187,55 @@ func (w Workflow) migrate(telemetryDisabled bool) Workflow {
 	return w
 }
 
+// For a brief time we were not properly adding -code-samples to the namespace and so we created some duplicated registry locations
+// This function checks if the registry location is a duplicate and if so, updates it to include -code-samples
+func codeSamplesRegistryUpdatedLocation(wf Workflow, codeSamples *CodeSamples) SourceRegistryLocation {
+	if codeSamples.Registry == nil {
+		return ""
+	}
+
+	namespace := getNamespace(codeSamples.Registry.Location)
+	if namespace == "" {
+		return ""
+	}
+
+	// Registry namespaces should be unique
+	var namespaces []string
+	for _, source := range wf.Sources {
+		if source.Registry != nil {
+			namespaces = append(namespaces, getNamespace(source.Registry.Location))
+		}
+	}
+
+	for _, target := range wf.Targets {
+		if target.CodeSamples != nil && target.CodeSamples != codeSamples && target.CodeSamples.Registry != nil {
+			namespaces = append(namespaces, getNamespace(target.CodeSamples.Registry.Location))
+		}
+	}
+
+	// For a brief time we were not properly adding -code-samples to the namespace and so we created some duplicated registry locations
+	if slices.Contains(namespaces, namespace) {
+		namespace += "-code-samples"
+	}
+
+	// Even if the namespace was already unique, we still want to return this because it also trims any tags/revisions,
+	// which should not be present in an output registry location
+	return makeRegistryLocation(namespace)
+}
+
+func getNamespace(location SourceRegistryLocation) string {
+	if parsed := ParseSpeakeasyRegistryReference(string(location)); parsed != nil {
+		return parsed.NamespaceID
+	}
+	return ""
+}
+
 func codeSamplesRegistryLocation(sourceRegistryURL SourceRegistryLocation) SourceRegistryLocation {
-	return SourceRegistryLocation(string(sourceRegistryURL) + "-code-samples")
+	registryDocument := ParseSpeakeasyRegistryReference(string(sourceRegistryURL))
+	newNamespace := registryDocument.NamespaceID + "-code-samples"
+	return makeRegistryLocation(newNamespace)
+}
+
+func makeRegistryLocation(namespace string) SourceRegistryLocation {
+	return SourceRegistryLocation(path.Join(baseRegistryURL, namespace))
 }
