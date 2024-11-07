@@ -3,6 +3,7 @@ package workflow
 import (
 	"fmt"
 	"math/rand"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -16,6 +17,10 @@ func ParseSpeakeasyRegistryReference(location string) *SpeakeasyRegistryDocument
 	// registry.speakeasyapi.dev/org/workspace/name@sha256:1234567890abcdef
 	// registry.speakeasyapi.dev/org/workspace/name:tag
 
+	// perfectly valid for someone to add http prefixes
+	location = strings.TrimPrefix(location, "https://")
+	location = strings.TrimPrefix(location, "http://")
+
 	// Assert it starts with the registry prefix
 	if !strings.HasPrefix(location, "registry.speakeasyapi.dev/") {
 		return nil
@@ -27,30 +32,45 @@ func ParseSpeakeasyRegistryReference(location string) *SpeakeasyRegistryDocument
 		return nil
 	}
 
-	organizationSlug := parts[0]
-	workspaceSlug := parts[1]
+	document := &SpeakeasyRegistryDocument{
+		OrganizationSlug: parts[0],
+		WorkspaceSlug:    parts[1],
+	}
 	suffix := parts[2]
 
-	reference := "latest"
-	namespaceName := suffix
+	document.SetNamespaceName(suffix)
+	document.Reference = "latest"
 
 	// Check if the suffix contains a reference
 	if strings.Contains(suffix, "@") {
 		// Reference is a digest
-		reference = suffix[strings.Index(suffix, "@")+1:]
-		namespaceName = suffix[:strings.Index(suffix, "@")]
+		document.SetNamespaceName(suffix[:strings.Index(suffix, "@")])
+		document.Reference = suffix[strings.Index(suffix, "@")+1:]
 	} else if strings.Contains(suffix, ":") {
 		// Reference is a tag
-		reference = suffix[strings.Index(suffix, ":")+1:]
-		namespaceName = suffix[:strings.Index(suffix, ":")]
+		document.SetNamespaceName(suffix[:strings.Index(suffix, ":")])
+		document.Reference = suffix[strings.Index(suffix, ":")+1:]
 	}
 
-	return &SpeakeasyRegistryDocument{
-		OrganizationSlug: organizationSlug,
-		WorkspaceSlug:    workspaceSlug,
-		NamespaceID:      organizationSlug + "/" + workspaceSlug + "/" + namespaceName,
-		NamespaceName:    namespaceName,
-		Reference:        reference,
+	return document
+}
+
+func (s *SpeakeasyRegistryDocument) SetNamespaceName(namespaceName string) {
+	s.NamespaceName = namespaceName
+	s.NamespaceID = s.OrganizationSlug + "/" + s.WorkspaceSlug + "/" + s.NamespaceName
+}
+
+func (s *SpeakeasyRegistryDocument) MakeURL(includeReference bool) SourceRegistryLocation {
+	if includeReference && s.Reference != "" {
+		separator := ':'
+		if strings.Contains(s.Reference, "sha256:") {
+			separator = '@'
+		}
+		url := path.Join(baseRegistryURL, fmt.Sprintf("%s%c%s", s.NamespaceID, separator, s.Reference))
+		return SourceRegistryLocation(url)
+	} else {
+		url := path.Join(baseRegistryURL, s.NamespaceID)
+		return SourceRegistryLocation(url)
 	}
 }
 
@@ -90,49 +110,30 @@ func (p *SourceRegistry) SetNamespace(namespace string) error {
 	return p.Validate()
 }
 
-func (p *SourceRegistry) ParseRegistryLocation() (string, string, string, string, error) {
-	if err := p.Validate(); err != nil {
-		return "", "", "", "", err
-	}
-
-	location := p.Location.String()
-	// perfectly valid for someone to add http prefixes
-	location = strings.TrimPrefix(location, "https://")
-	location = strings.TrimPrefix(location, "http://")
-
-	subParts := strings.Split(location, baseRegistryURL)
-	components := strings.Split(strings.TrimSuffix(subParts[1], "/"), "/")
-	namespace := components[2]
-	tag := ""
-	if shaSplit := strings.Split(components[2], "@sha256:"); len(shaSplit) == 2 {
-		namespace = shaSplit[0]
-		tag = "sha256:" + shaSplit[1]
-	}
-
-	if tagSplit := strings.Split(components[2], ":"); tag == "" && len(tagSplit) == 2 {
-		namespace = tagSplit[0]
-		tag = tagSplit[1]
-	}
-
-	return components[0], components[1], namespace, tag, nil
+func (s SourceRegistryLocation) Parse() *SpeakeasyRegistryDocument {
+	return ParseSpeakeasyRegistryReference(string(s))
 }
 
 // @<org>/<workspace>/<namespace_name> => <org>/<workspace>/<namespace_name>
-func (n SourceRegistryLocation) Namespace() string {
-	location := string(n)
-	// perfectly valid for someone to add http prefixes
-	location = strings.TrimPrefix(location, "https://")
-	location = strings.TrimPrefix(location, "http://")
-	return strings.TrimPrefix(location, baseRegistryURL)
+func (s SourceRegistryLocation) Namespace() string {
+	if parsed := s.Parse(); parsed == nil {
+		return ""
+	} else {
+		return parsed.NamespaceID
+	}
 }
 
 // @<org>/<workspace>/<namespace_name> => <namespace_name>
-func (n SourceRegistryLocation) NamespaceName() string {
-	return n.Namespace()[strings.LastIndex(n.Namespace(), "/")+1:]
+func (s SourceRegistryLocation) NamespaceName() string {
+	if parsed := s.Parse(); parsed == nil {
+		return ""
+	} else {
+		return parsed.NamespaceName
+	}
 }
 
-func (n SourceRegistryLocation) String() string {
-	return string(n)
+func (s SourceRegistryLocation) String() string {
+	return string(s)
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

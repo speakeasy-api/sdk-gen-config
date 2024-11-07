@@ -1,12 +1,12 @@
 package workflow
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/AlekSi/pointer"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -194,7 +194,11 @@ func codeSamplesRegistryUpdatedLocation(wf Workflow, codeSamples *CodeSamples) S
 		return ""
 	}
 
-	namespace := getNamespace(codeSamples.Registry.Location)
+	registryDocument := codeSamples.Registry.Location.Parse()
+	namespace := registryDocument.NamespaceID
+
+	j, _ := json.Marshal(registryDocument)
+	println("REGISTRY IS: " + string(j))
 	if namespace == "" {
 		return ""
 	}
@@ -203,39 +207,28 @@ func codeSamplesRegistryUpdatedLocation(wf Workflow, codeSamples *CodeSamples) S
 	var namespaces []string
 	for _, source := range wf.Sources {
 		if source.Registry != nil {
-			namespaces = append(namespaces, getNamespace(source.Registry.Location))
+			namespaces = append(namespaces, source.Registry.Location.Namespace())
 		}
 	}
 
 	for _, target := range wf.Targets {
 		if target.CodeSamples != nil && target.CodeSamples != codeSamples && target.CodeSamples.Registry != nil {
-			namespaces = append(namespaces, getNamespace(target.CodeSamples.Registry.Location))
+			namespaces = append(namespaces, target.CodeSamples.Registry.Location.Namespace())
 		}
 	}
 
 	// For a brief time we were not properly adding -code-samples to the namespace and so we created some duplicated registry locations
 	if slices.Contains(namespaces, namespace) {
-		namespace += "-code-samples"
+		registryDocument.SetNamespaceName(registryDocument.NamespaceName + "-code-samples")
 	}
 
 	// Even if the namespace was already unique, we still want to return this because it also trims any tags/revisions,
 	// which should not be present in an output registry location
-	return makeRegistryLocation(namespace)
-}
-
-func getNamespace(location SourceRegistryLocation) string {
-	if parsed := ParseSpeakeasyRegistryReference(string(location)); parsed != nil {
-		return parsed.NamespaceID
-	}
-	return ""
+	return registryDocument.MakeURL(false)
 }
 
 func codeSamplesRegistryLocation(sourceRegistryURL SourceRegistryLocation) SourceRegistryLocation {
-	registryDocument := ParseSpeakeasyRegistryReference(string(sourceRegistryURL))
-	newNamespace := registryDocument.NamespaceID + "-code-samples"
-	return makeRegistryLocation(newNamespace)
-}
-
-func makeRegistryLocation(namespace string) SourceRegistryLocation {
-	return SourceRegistryLocation(path.Join(baseRegistryURL, namespace))
+	registryDocument := sourceRegistryURL.Parse()
+	registryDocument.SetNamespaceName(registryDocument.NamespaceName + "-code-samples")
+	return registryDocument.MakeURL(false)
 }

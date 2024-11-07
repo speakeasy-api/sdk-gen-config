@@ -259,9 +259,9 @@ func TestWorkflow_Validate(t *testing.T) {
 
 func TestMigrate_Success(t *testing.T) {
 	tests := []struct {
-		in       string
-		expected string
+		name, in, expected string
 	}{{
+		name: "adds code samples registry location",
 		in: `workflowVersion: 1.0.0
 sources:
   testSource:
@@ -292,6 +292,7 @@ targets:
             blocking: false
 `,
 	}, {
+		name: "adds code samples registry location, ignoring tag",
 		in: `workflowVersion: 1.0.0
 sources:
   testSource:
@@ -322,6 +323,7 @@ targets:
             blocking: false
 `,
 	}, {
+		name: "fixes code samples registry location with tag",
 		in: `workflowVersion: 1.0.0
 sources:
   testSource:
@@ -358,15 +360,17 @@ targets:
 	}}
 
 	for _, tt := range tests {
-		var workflow workflow.Workflow
-		require.NoError(t, yaml.Unmarshal([]byte(tt.in), &workflow))
+		t.Run(tt.name, func(t *testing.T) {
+			var workflow workflow.Workflow
+			require.NoError(t, yaml.Unmarshal([]byte(tt.in), &workflow))
 
-		workflow = workflow.Migrate()
+			workflow = workflow.Migrate()
 
-		actual, err := yaml.Marshal(workflow)
-		require.NoError(t, err)
+			actual, err := yaml.Marshal(workflow)
+			require.NoError(t, err)
 
-		assert.Equal(t, tt.expected, string(actual))
+			assert.Equal(t, tt.expected, string(actual))
+		})
 	}
 }
 
