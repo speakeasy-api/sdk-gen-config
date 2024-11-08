@@ -354,6 +354,37 @@ targets:
             registry:
                 location: registry.speakeasyapi.dev/org/workspace/testSource-code-samples
             blocking: false
+`}, {
+		in: `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: ./openapi.yaml
+    registry:
+      location: registry.speakeasyapi.dev/org/workspace/testSource
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+    codeSamples:
+      output: output.yaml
+`,
+		expected: `workflowVersion: 1.0.0
+speakeasyVersion: latest
+sources:
+    testSource:
+        inputs:
+            - location: ./openapi.yaml
+        registry:
+            location: registry.speakeasyapi.dev/org/workspace/testSource
+targets:
+    typescript:
+        target: typescript
+        source: testSource
+        codeSamples:
+            output: output.yaml
+            registry:
+                location: registry.speakeasyapi.dev/org/workspace/testSource-code-samples
 `,
 	}}
 
