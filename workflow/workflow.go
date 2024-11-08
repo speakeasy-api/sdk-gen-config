@@ -168,13 +168,17 @@ func (w Workflow) migrate(telemetryDisabled bool) Workflow {
 				continue
 			}
 
+			codeSamplesRegistry := &SourceRegistry{
+				Location: codeSamplesRegistryLocation(source.Registry.Location),
+			}
+
 			if target.CodeSamples == nil {
 				target.CodeSamples = &CodeSamples{
-					Registry: &SourceRegistry{
-						Location: codeSamplesRegistryLocation(source.Registry.Location),
-					},
+					Registry: codeSamplesRegistry,
 					Blocking: pointer.ToBool(false),
 				}
+			} else if target.CodeSamples.Registry == nil {
+				target.CodeSamples.Registry = codeSamplesRegistry
 			} else {
 				// Fix the registry location if it needs fixing
 				target.CodeSamples.Registry.Location = codeSamplesRegistryUpdatedLocation(w, target.CodeSamples)
