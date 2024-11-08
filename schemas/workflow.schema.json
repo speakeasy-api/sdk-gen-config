@@ -72,6 +72,45 @@
             ]
           }
         },
+        "transformations": {
+          "type": "array",
+          "description": "A list of transformations to apply to the OpenAPI document",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "removeUnused": {
+                "type": "boolean",
+                "description": "Remove unused components from the OpenAPI document"
+              },
+              "filterOperations": {
+                "type": "object",
+                "description": "Filter operations from the OpenAPI document",
+                "properties": {
+                  "operations": {
+                    "type": "string",
+                    "description": "Comma-separated list of operations to filter"
+                  },
+                  "include": {
+                    "type": "boolean",
+                    "description": "Include the specified operations (mutually exclusive with exclude)"
+                  },
+                  "exclude": {
+                    "type": "boolean",
+                    "description": "Exclude the specified operations (mutually exclusive with include)"
+                  }
+                },
+                "required": ["operations"]
+              },
+              "cleanup": {
+                "type": "boolean",
+                "description": "Clean up the OpenAPI document"
+              }
+            },
+            "minProperties": 1,
+            "maxProperties": 1
+          }
+        },
         "output": {
           "type": "string",
           "description": "The output file name (optional)"
