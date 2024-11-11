@@ -53,6 +53,10 @@ type Auth struct {
 	OAuth2PasswordEnabled          bool `yaml:"oAuth2PasswordEnabled"`
 }
 
+type Tests struct {
+	GenerateNewTests bool `yaml:"generateNewTests"`
+}
+
 type Generation struct {
 	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
 	BaseServerURL               string         `yaml:"baseServerUrl,omitempty"`
@@ -65,6 +69,8 @@ type Generation struct {
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
+
+	Tests Tests `yaml:"tests,omitempty"`
 
 	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
@@ -346,6 +352,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables support for OAuth2 resource owner password credentials grant type (Enterprise tier only)"),
+		},
+		{
+			Name:         "tests.generateNewTests",
+			Required:     false,
+			DefaultValue: ptr(false),
+			Description:  pointer.To("Enables generation of new tests for any new operations found in the OpenAPI spec"),
 		},
 	}
 }
