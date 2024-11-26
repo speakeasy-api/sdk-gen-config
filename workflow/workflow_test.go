@@ -401,10 +401,10 @@ targets:
                 location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
             blocking: false
 `}, {
-		name: "migrates a simple workflow with a code samples output",
+		name: "migrates a workflow with a code samples output and a source with a name that contains the target",
 		in: `workflowVersion: 1.0.0
 sources:
-  testSource:
+  testSource-typescript:
     inputs:
       - location: ./openapi.yaml
     registry:
@@ -412,14 +412,14 @@ sources:
 targets:
   typescript:
     target: typescript
-    source: testSource
+    source: testSource-typescript
     codeSamples:
       output: output.yaml
 `,
 		expected: `workflowVersion: 1.0.0
 speakeasyVersion: latest
 sources:
-    testSource:
+    testSource-typescript:
         inputs:
             - location: ./openapi.yaml
         registry:
@@ -427,7 +427,7 @@ sources:
 targets:
     typescript:
         target: typescript
-        source: testSource
+        source: testSource-typescript
         codeSamples:
             output: output.yaml
             registry:

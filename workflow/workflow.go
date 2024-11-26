@@ -205,11 +205,6 @@ func codeSamplesRegistryUpdatedLocation(target Target) SourceRegistryLocation {
 		return ""
 	}
 
-	// There was a bug where we were adding the -code-samples suffix repeatedly to the namespace if there was more than one target
-	for strings.HasSuffix(namespace, "-code-samples") {
-		namespace = strings.TrimSuffix(namespace, "-code-samples")
-	}
-
 	namespace = codeSamplesNamespace(namespace, target.Target)
 
 	// Trims any tags/revisions, which should not be present in an output registry location
@@ -230,7 +225,17 @@ func codeSamplesRegistryLocation(target string, sourceRegistryURL SourceRegistry
 }
 
 func codeSamplesNamespace(namespace, target string) string {
-	return fmt.Sprintf("%s-%s-code-samples", namespace, target)
+	// There was a bug where we were adding the -code-samples suffix repeatedly to the namespace if there was more than one target
+	for strings.HasSuffix(namespace, "-code-samples") {
+		namespace = strings.TrimSuffix(namespace, "-code-samples")
+	}
+
+	// Some people have their sources named things like "java-OAS"
+	if strings.Contains(namespace, target) {
+		return fmt.Sprintf("%s-code-samples", namespace)
+	} else {
+		return fmt.Sprintf("%s-%s-code-samples", namespace, target)
+	}
 }
 
 func makeRegistryLocation(namespace string) SourceRegistryLocation {
