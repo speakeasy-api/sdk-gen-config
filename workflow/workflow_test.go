@@ -301,9 +301,11 @@ func TestWorkflow_Validate(t *testing.T) {
 
 func TestMigrate_Success(t *testing.T) {
 	tests := []struct {
+		name     string
 		in       string
 		expected string
 	}{{
+		name: "migrates a simple workflow",
 		in: `workflowVersion: 1.0.0
 sources:
   testSource:
@@ -330,10 +332,11 @@ targets:
         source: testSource
         codeSamples:
             registry:
-                location: registry.speakeasyapi.dev/org/workspace/testSource-code-samples
+                location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
             blocking: false
 `,
 	}, {
+		name: "migrates a workflow with a tagged registry location",
 		in: `workflowVersion: 1.0.0
 sources:
   testSource:
@@ -360,10 +363,11 @@ targets:
         source: testSource
         codeSamples:
             registry:
-                location: registry.speakeasyapi.dev/org/workspace/testSource-code-samples
+                location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
             blocking: false
 `,
 	}, {
+		name: "migrates a workflow with a duplicate registry location",
 		in: `workflowVersion: 1.0.0
 sources:
   testSource:
@@ -394,9 +398,10 @@ targets:
         source: testSource
         codeSamples:
             registry:
-                location: registry.speakeasyapi.dev/org/workspace/testSource-code-samples
+                location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
             blocking: false
 `}, {
+		name: "migrates a simple workflow with a code samples output",
 		in: `workflowVersion: 1.0.0
 sources:
   testSource:
@@ -426,20 +431,91 @@ targets:
         codeSamples:
             output: output.yaml
             registry:
-                location: registry.speakeasyapi.dev/org/workspace/testSource-code-samples
+                location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
+`,
+	}, {
+		name: "migrates a workflow with multiple targets, some with multiple -code-samples suffixes",
+		in: `workflowVersion: 1.0.0
+speakeasyVersion: latest
+sources:
+    Acuvity-OAS:
+        inputs:
+            - location: ./apex-openapi.yaml
+        registry:
+            location: registry.speakeasyapi.dev/acuvity-9dx/acuvity/acuvity-oas
+targets:
+    golang:
+        target: go
+        source: Acuvity-OAS
+        output: acuvity-go
+        codeSamples:
+            registry:
+                location: registry.speakeasyapi.dev/acuvity-9dx/acuvity/acuvity-oas-code-samples
+            blocking: false
+    python:
+        target: python
+        source: Acuvity-OAS
+        output: acuvity-python
+        codeSamples:
+            registry:
+                location: registry.speakeasyapi.dev/acuvity-9dx/acuvity/acuvity-oas-code-samples-code-samples
+            blocking: false
+    typescript:
+        target: typescript
+        source: Acuvity-OAS
+        output: acuvity-ts
+        codeSamples:
+            registry:
+                location: registry.speakeasyapi.dev/acuvity-9dx/acuvity/acuvity-oas-code-samples-code-samples
+            blocking: false`,
+		expected: `workflowVersion: 1.0.0
+speakeasyVersion: latest
+sources:
+    Acuvity-OAS:
+        inputs:
+            - location: ./apex-openapi.yaml
+        registry:
+            location: registry.speakeasyapi.dev/acuvity-9dx/acuvity/acuvity-oas
+targets:
+    golang:
+        target: go
+        source: Acuvity-OAS
+        output: acuvity-go
+        codeSamples:
+            registry:
+                location: registry.speakeasyapi.dev/acuvity-9dx/acuvity/acuvity-oas-go-code-samples
+            blocking: false
+    python:
+        target: python
+        source: Acuvity-OAS
+        output: acuvity-python
+        codeSamples:
+            registry:
+                location: registry.speakeasyapi.dev/acuvity-9dx/acuvity/acuvity-oas-python-code-samples
+            blocking: false
+    typescript:
+        target: typescript
+        source: Acuvity-OAS
+        output: acuvity-ts
+        codeSamples:
+            registry:
+                location: registry.speakeasyapi.dev/acuvity-9dx/acuvity/acuvity-oas-typescript-code-samples
+            blocking: false
 `,
 	}}
 
 	for _, tt := range tests {
-		var workflow workflow.Workflow
-		require.NoError(t, yaml.Unmarshal([]byte(tt.in), &workflow))
+		t.Run(tt.name, func(t *testing.T) {
+			var workflow workflow.Workflow
+			require.NoError(t, yaml.Unmarshal([]byte(tt.in), &workflow))
 
-		workflow = workflow.Migrate()
+			workflow = workflow.Migrate()
 
-		actual, err := yaml.Marshal(workflow)
-		require.NoError(t, err)
+			actual, err := yaml.Marshal(workflow)
+			require.NoError(t, err)
 
-		assert.Equal(t, tt.expected, string(actual))
+			assert.Equal(t, tt.expected, string(actual))
+		})
 	}
 }
 
