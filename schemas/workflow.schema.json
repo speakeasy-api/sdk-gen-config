@@ -168,6 +168,9 @@
         },
         "codeSamples": {
           "$ref": "#/$defs/codeSamples"
+        },
+        "testing": {
+          "$ref": "#/$defs/testing"
         }
       },
       "required": ["target", "source"]
@@ -345,6 +348,30 @@
           "required": ["apiKey"]
         }
       }
+    },
+    "testing": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Target testing configuration. By default, targets are not tested as part of the workflow.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Defaults to false. If true, the target will be tested as part of the workflow."
+        },
+        "mockServer": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Mock API server configuration for testing. By default and if generated, the mock API server is started before testing and used.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Defaults to true. If false, the mock API server will not be started."
+            }
+          },
+          "required": []
+        }
+      },
+      "required": []
     }
   }
 }

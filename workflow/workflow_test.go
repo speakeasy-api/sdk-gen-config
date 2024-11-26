@@ -2,11 +2,13 @@ package workflow_test
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"gopkg.in/yaml.v3"
+
+	"github.com/AlekSi/pointer"
 	"github.com/speakeasy-api/sdk-gen-config/workflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -54,6 +56,46 @@ targets:
 					"typescript": {
 						Target: "typescript",
 						Source: "testSource",
+					},
+				},
+			},
+		},
+		{
+			name: "loads workflow file with target testing",
+			args: args{
+				workflowLocation: "test/.speakeasy",
+				workflowContents: `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "./openapi.yaml"
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+    testing:
+      enabled: true
+`,
+				workingDir: "test",
+			},
+			want: &workflow.Workflow{
+				Version: "1.0.0",
+				Sources: map[string]workflow.Source{
+					"testSource": {
+						Inputs: []workflow.Document{
+							{
+								Location: "./openapi.yaml",
+							},
+						},
+					},
+				},
+				Targets: map[string]workflow.Target{
+					"typescript": {
+						Target: "typescript",
+						Source: "testSource",
+						Testing: &workflow.Testing{
+							Enabled: pointer.ToBool(true),
+						},
 					},
 				},
 			},
