@@ -179,8 +179,10 @@ func (w Workflow) migrate(telemetryDisabled bool) Workflow {
 				}
 			} else if target.CodeSamples.Registry == nil {
 				target.CodeSamples.Registry = codeSamplesRegistry
-			} else {
-				// Fix the registry location if it needs fixing
+			} else if target.CodeSamples.Blocking != nil && !*target.CodeSamples.Blocking {
+				// Fix the registry location if it needs fixing.
+				// We only do this when the target is not blocking because that means we likely set it up automatically.
+				// We don't want to migrate a registry location that the user set up manually.
 				target.CodeSamples.Registry.Location = codeSamplesRegistryUpdatedLocation(target)
 			}
 

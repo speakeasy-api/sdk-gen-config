@@ -336,6 +336,39 @@ targets:
             blocking: false
 `,
 	}, {
+		name: "doesn't migrate a blocking workflow with a registry location",
+		in: `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: ./openapi.yaml
+    registry:
+      location: registry.speakeasyapi.dev/org/workspace/testSource
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+    codeSamples:
+      registry:
+        location: registry.speakeasyapi.dev/org/workspace/testSource-custom-code-samples
+`,
+		expected: `workflowVersion: 1.0.0
+speakeasyVersion: latest
+sources:
+    testSource:
+        inputs:
+            - location: ./openapi.yaml
+        registry:
+            location: registry.speakeasyapi.dev/org/workspace/testSource
+targets:
+    typescript:
+        target: typescript
+        source: testSource
+        codeSamples:
+            registry:
+                location: registry.speakeasyapi.dev/org/workspace/testSource-custom-code-samples
+`,
+	}, {
 		name: "migrates a workflow with a tagged registry location",
 		in: `workflowVersion: 1.0.0
 sources:
