@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/AlekSi/pointer"
 	"github.com/speakeasy-api/sdk-gen-config/workflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -64,6 +65,37 @@ func TestTarget_Validate(t *testing.T) {
 					Publishing: &workflow.Publishing{
 						NPM: &workflow.NPM{
 							Token: "$TEST_TOKEN",
+						},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "target with testing successfully validates",
+			args: args{
+				supportedLangs: []string{"typescript"},
+				target: workflow.Target{
+					Target: "typescript",
+					Source: "openapi.yaml",
+					Testing: &workflow.Testing{
+						Enabled: pointer.ToBool(true),
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "target with testing.mockServer successfully validates",
+			args: args{
+				supportedLangs: []string{"typescript"},
+				target: workflow.Target{
+					Target: "typescript",
+					Source: "openapi.yaml",
+					Testing: &workflow.Testing{
+						Enabled: pointer.ToBool(true),
+						MockServer: &workflow.MockServer{
+							Enabled: pointer.ToBool(false),
 						},
 					},
 				},

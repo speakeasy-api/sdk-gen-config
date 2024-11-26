@@ -13,6 +13,25 @@ type Target struct {
 	Output      *string      `yaml:"output,omitempty"`
 	Publishing  *Publishing  `yaml:"publish,omitempty"`
 	CodeSamples *CodeSamples `yaml:"codeSamples,omitempty"`
+
+	// Configuration for target testing. By default, target testing is disabled.
+	Testing *Testing `yaml:"testing,omitempty"`
+}
+
+// Configuration for target testing, such as `go test` for Go targets.
+type Testing struct {
+	// When enabled, the target will be tested as part of the workflow.
+	Enabled *bool `yaml:"enabled,omitempty"`
+
+	// Configuration for mockserver handling during testing. By default, the
+	// mockserver is enabled.
+	MockServer *MockServer `yaml:"mockServer,omitempty"`
+}
+
+// Configuration for mockserver handling during testing.
+type MockServer struct {
+	// When enabled, the mockserver will be started during testing.
+	Enabled *bool `yaml:"enabled,omitempty"`
 }
 
 type Publishing struct {
