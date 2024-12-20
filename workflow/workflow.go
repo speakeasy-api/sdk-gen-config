@@ -3,13 +3,14 @@ package workflow
 import (
 	"errors"
 	"fmt"
-	"github.com/AlekSi/pointer"
 	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/AlekSi/pointer"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
@@ -173,9 +174,14 @@ func (w Workflow) migrate(telemetryDisabled bool) Workflow {
 			}
 
 			if target.CodeSamples == nil {
+				// Capitalize the first letter of language
+				sdkLabel := fmt.Sprintf("%s (SDK)", strings.ToUpper(string(target.Target[0]))+target.Target[1:])
 				target.CodeSamples = &CodeSamples{
 					Registry: codeSamplesRegistry,
 					Blocking: pointer.ToBool(false),
+					LabelOverride: &CodeSamplesLabelOverride{
+						FixedValue: &sdkLabel,
+					},
 				}
 			} else if target.CodeSamples.Registry == nil {
 				target.CodeSamples.Registry = codeSamplesRegistry

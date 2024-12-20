@@ -333,6 +333,8 @@ targets:
         codeSamples:
             registry:
                 location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
+            labelOverride:
+                fixedValue: Typescript (SDK)
             blocking: false
 `,
 	}, {
@@ -397,6 +399,8 @@ targets:
         codeSamples:
             registry:
                 location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
+            labelOverride:
+                fixedValue: Typescript (SDK)
             blocking: false
 `,
 	}, {
