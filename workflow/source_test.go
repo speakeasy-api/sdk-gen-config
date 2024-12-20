@@ -344,7 +344,7 @@ func TestSource_Validate(t *testing.T) {
 					},
 				},
 			},
-			wantErr: fmt.Errorf("failed to validate transformation 0: transformation must have exactly one of removeUnused, filterOperations, or cleanup"),
+			wantErr: fmt.Errorf("failed to validate transformation 0: transformation must have exactly one of removeUnused, filterOperations, cleanup, format, normalize"),
 		},
 		{
 			name: "transformations filter success",
