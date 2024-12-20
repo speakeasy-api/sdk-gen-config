@@ -333,9 +333,9 @@ targets:
         codeSamples:
             registry:
                 location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
+            labelOverride:
+                fixedValue: Typescript (SDK)
             blocking: false
-			labelOverride:
-				fixedValue: Typescript (SDK)
 `,
 	}, {
 		name: "doesn't migrate a blocking workflow with a registry location",
@@ -399,6 +399,8 @@ targets:
         codeSamples:
             registry:
                 location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
+            labelOverride:
+                fixedValue: Typescript (SDK)
             blocking: false
 `,
 	}, {
