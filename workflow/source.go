@@ -315,6 +315,8 @@ type FilterOperationsOptions struct {
 	Exclude    *bool  `yaml:"exclude,omitempty"`
 }
 
+var transformList = []string{"removeUnused", "filterOperations", "cleanup", "format", "normalize"}
+
 func (t Transformation) Validate() error {
 	numNil := 0
 	if t.RemoveUnused != nil {
@@ -326,8 +328,14 @@ func (t Transformation) Validate() error {
 	if t.Cleanup != nil {
 		numNil++
 	}
+	if t.Format != nil {
+		numNil++
+	}
+	if t.Normalize != nil {
+		numNil++
+	}
 	if numNil != 1 {
-		return fmt.Errorf("transformation must have exactly one of removeUnused, filterOperations, or cleanup")
+		return fmt.Errorf("transformation must have exactly one of %s", strings.Join(transformList, ", "))
 	}
 
 	if t.FilterOperations != nil {
