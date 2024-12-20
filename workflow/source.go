@@ -301,6 +301,12 @@ type Transformation struct {
 	RemoveUnused     *bool                    `yaml:"removeUnused,omitempty"`
 	FilterOperations *FilterOperationsOptions `yaml:"filterOperations,omitempty"`
 	Cleanup          *bool                    `yaml:"cleanup,omitempty"`
+	Format           *bool                    `yaml:"format,omitempty"`
+	Normalize        *NormalizeOptions        `yaml:"normalize,omitempty"`
+}
+
+type NormalizeOptions struct {
+	PrefixItems *bool `yaml:"prefixItems,omitempty"`
 }
 
 type FilterOperationsOptions struct {
