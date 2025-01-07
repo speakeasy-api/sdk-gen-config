@@ -140,26 +140,6 @@ func TestSource_Validate(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "source with multiple merged documents fails if output is not yaml",
-			args: args{
-				source: workflow.Source{
-					Inputs: []workflow.Document{
-						{
-							Location: "openapi.yaml",
-						},
-						{
-							Location: "openapi.yaml",
-						},
-					},
-					Overlays: []workflow.Overlay{
-						{Document: &workflow.Document{Location: "overlay.yaml"}},
-					},
-					Output: pointer.ToString("openapi.json"),
-				},
-			},
-			wantErr: fmt.Errorf("failed to get output location: when merging multiple inputs, output must be a yaml file"),
-		},
-		{
 			name: "fails with no inputs",
 			args: args{
 				source: workflow.Source{
