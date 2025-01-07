@@ -153,9 +153,6 @@ func (s Source) Validate() error {
 
 func (s Source) GetOutputLocation() (string, error) {
 	if s.Output != nil {
-		if len(s.Inputs) > 1 && !isYAMLFile(*s.Output) {
-			return "", fmt.Errorf("when merging multiple inputs, output must be a yaml file")
-		}
 		return *s.Output, nil
 	}
 
@@ -203,13 +200,15 @@ func (s Source) generateOutputPath() (string, error) {
 		return fmt.Sprintf("%x", hash)[:6]
 	}
 
-	// If there's only one input, we can output to the same file type as that input even if we're applying overlays
-	ext := ".yaml"
-	if len(s.Inputs) == 1 {
-		ext = getExt(s.Inputs[0].Location.Resolve())
+	return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", hashInputs(), s.outputExt())), nil
+}
+
+func (s Source) outputExt() string {
+	if s.Output != nil {
+		return getExt(*s.Output)
 	}
 
-	return filepath.Join(GetTempDir(), fmt.Sprintf("output_%s%s", hashInputs(), ext)), nil
+	return getExt(s.Inputs[0].Location.Resolve())
 }
 
 func getExt(path string) string {
@@ -232,15 +231,15 @@ func GetTempDir() string {
 }
 
 func (s Source) GetTempMergeLocation() string {
-	return filepath.Join(GetTempDir(), fmt.Sprintf("merge_%s.yaml", randStringBytes(10)))
+	return filepath.Join(GetTempDir(), fmt.Sprintf("merge_%s%s", randStringBytes(10), s.outputExt()))
 }
 
 func (s Source) GetTempOverlayLocation() string {
-	return filepath.Join(GetTempDir(), fmt.Sprintf("overlay_%s.yaml", randStringBytes(10)))
+	return filepath.Join(GetTempDir(), fmt.Sprintf("overlay_%s%s", randStringBytes(10), s.outputExt()))
 }
 
 func (s Source) GetTempTransformLocation() string {
-	return filepath.Join(GetTempDir(), fmt.Sprintf("transform_%s.yaml", randStringBytes(10)))
+	return filepath.Join(GetTempDir(), fmt.Sprintf("transform_%s%s", randStringBytes(10), s.outputExt()))
 }
 
 func (d Document) Validate() error {
