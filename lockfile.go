@@ -13,6 +13,7 @@ type LockFile struct {
 	Features             map[string]map[string]string `yaml:"features,omitempty"`
 	GeneratedFiles       []string                     `yaml:"generatedFiles,omitempty"`
 	Examples             Examples                     `yaml:"examples,omitempty"`
+	ExamplesVersion      string                       `yaml:"examplesVersion,omitempty"`
 	GeneratedTests       GeneratedTests               `yaml:"generatedTests,omitempty"`
 	AdditionalProperties map[string]any               `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 
