@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-// Ensure your update schema/workflow.schema.json on changes
+// Ensure you update schema/workflow.schema.json on changes
 type Target struct {
 	Target      string       `yaml:"target"`
 	Source      string       `yaml:"source"`
