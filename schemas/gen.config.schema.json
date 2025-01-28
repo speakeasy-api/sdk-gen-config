@@ -43,6 +43,14 @@
       "ruby": {
         "$ref": "./languages/ruby.schema.json",
         "description": "Configuration specific to Ruby SDK"
+      },
+      "postman": {
+        "$ref": "./languages/postman.schema.json",
+        "description": "Configuration specific to Postman"
+      },
+      "terraform": {
+        "$ref": "./languages/terraform.schema.json",
+        "description": "Configuration specific to Terraform Provider"
       }
     },
     "required": ["configVersion", "generation"],
