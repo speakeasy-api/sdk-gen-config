@@ -146,7 +146,8 @@
             "type": "boolean",
             "description": "Enables support for OAuth2 resource owner password credentials grant type"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "mockServer": {
         "type": "object",
@@ -156,7 +157,8 @@
             "type": "boolean",
             "description": "Disables the code generation of the mock server target"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "tests": {
         "type": "object",
@@ -166,7 +168,8 @@
             "type": "boolean",
             "description": "Enables generation of new tests for any new operations in the OpenAPI specification"
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }
