@@ -21,7 +21,7 @@ const (
 	workflowFile    = "workflow.yaml"
 )
 
-// Ensure your update schema/workflow.schema.json on changes
+// Ensure you update schema/workflow.schema.json on changes
 type Workflow struct {
 	Version          string            `yaml:"workflowVersion"`
 	SpeakeasyVersion Version           `yaml:"speakeasyVersion,omitempty"`

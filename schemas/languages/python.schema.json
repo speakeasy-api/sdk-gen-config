@@ -1,0 +1,15 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Python Configuration Schema",
+    "type": "object",
+    "description": "Schema for configuration specific to the Python SDK",
+    "properties": {
+      "version": {
+        "type": "string",
+        "description": "The current version of the SDK"
+      }
+    },
+    "required": ["version"],
+    "additionalProperties": true
+  }
+  

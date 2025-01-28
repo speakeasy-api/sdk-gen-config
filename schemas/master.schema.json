@@ -11,6 +11,9 @@
       "$ref": "tests.schema.json"
     },
     {
+      "$ref": "gen.config.schema.json"
+    },
+    {
       "not": {
         "anyOf": [
           {
@@ -39,6 +42,15 @@
               }
             },
             "required": ["testsVersion"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "configVersion": {
+                "type": "string"
+              }
+            },
+            "required": ["configVersion"]
           }
         ]
       }
