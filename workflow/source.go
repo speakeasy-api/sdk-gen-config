@@ -11,7 +11,7 @@ import (
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 )
 
-// Ensure your update schema/workflow.schema.json on changes
+// Ensure you update schema/workflow.schema.json on changes
 type Source struct {
 	Inputs          []Document       `yaml:"inputs"`
 	Overlays        []Overlay        `yaml:"overlays,omitempty"`

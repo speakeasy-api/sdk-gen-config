@@ -106,6 +106,7 @@ type SDKGenConfigField struct {
 	TestValue             *any    `yaml:"testValue,omitempty" json:"test_value,omitempty"`
 }
 
+// Ensure you update schema/gen.config.schema.json on changes
 type Configuration struct {
 	ConfigVersion string                    `yaml:"configVersion"`
 	Generation    Generation                `yaml:"generation"`

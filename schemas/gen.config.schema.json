@@ -1,0 +1,173 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Gen YAML Configuration Schema",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "configVersion": {
+        "type": "string",
+        "description": "The version of the configuration file",
+        "minLength": 1
+      },
+      "generation": {
+        "$ref": "#/$defs/generation"
+      },
+      "go": {
+        "$ref": "./languages/go.schema.json",
+        "description": "Configuration specific to Go SDK"
+      },
+      "typescript": {
+        "$ref": "./languages/typescript.schema.json",
+        "description": "Configuration specific to TypeScript SDK"
+      },
+      "python": {
+        "$ref": "./languages/python.schema.json",
+        "description": "Configuration specific to Python SDK"
+      },
+      "java": {
+        "$ref": "./languages/java.schema.json",
+        "description": "Configuration specific to Java SDK"
+      },
+      "csharp": {
+        "$ref": "./languages/csharp.schema.json",
+        "description": "Configuration specific to C# SDK"
+      },
+      "unity": {
+        "$ref": "./languages/unity.schema.json",
+        "description": "Configuration specific to Unity SDK"
+      },
+      "php": {
+        "$ref": "./languages/php.schema.json",
+        "description": "Configuration specific to PHP SDK"
+      },
+      "ruby": {
+        "$ref": "./languages/ruby.schema.json",
+        "description": "Configuration specific to Ruby SDK"
+      }
+    },
+    "required": ["configVersion", "generation"],
+    "$defs": {
+      "generation": {
+        "type": "object",
+        "description": "Generation configuration",
+        "additionalProperties": true,
+        "properties": {
+          "devContainers": {
+            "$ref": "#/$defs/devContainers"
+          },
+          "baseServerURL": {
+            "type": "string",
+            "description": "The base URL of the server. This value will be used if global servers are not defined in the spec."
+          },
+          "sdkClassName": {
+            "type": "string",
+            "description": "Generated name of the root SDK class"
+          },
+          "maintainOpenAPIOrder": {
+            "type": "boolean",
+            "description": "Maintains the order of parameters and fields in the OpenAPI specification"
+          },
+          "usageSnippets": {
+            "$ref": "#/$defs/usageSnippets"
+          },
+          "useClassNamesForArrayFields": {
+            "type": "boolean",
+            "description": "Use class names for array fields instead of the child's schema type"
+          },
+          "fixes": {
+            "$ref": "#/$defs/fixes"
+          },
+          "auth": {
+            "$ref": "#/$defs/auth"
+          },
+          "mockServer": {
+            "$ref": "#/$defs/mockServer"
+          },
+          "tests": {
+            "$ref": "#/$defs/tests"
+          }
+        }
+      },
+      "devContainers": {
+        "type": "object",
+        "description": "Dev container configuration",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether dev containers are enabled"
+          },
+          "schemaPath": {
+            "type": "string",
+            "description": "Path to the schema file for the dev container"
+          }
+        },
+        "additionalProperties": true
+      },
+      "usageSnippets": {
+        "type": "object",
+        "description": "Configuration for usage snippets",
+        "properties": {
+          "optionalPropertyRendering": {
+            "type": "string",
+            "enum": ["always", "never", "withExample"],
+            "description": "Controls how optional properties are rendered in usage snippets"
+          }
+        },
+        "additionalProperties": true
+      },
+      "fixes": {
+        "type": "object",
+        "description": "Fixes applied to the SDK generation",
+        "properties": {
+          "nameResolutionDec2023": {
+            "type": "boolean",
+            "description": "Enables name resolution fixes from December 2023"
+          },
+          "parameterOrderingFeb2024": {
+            "type": "boolean",
+            "description": "Enables parameter ordering fixes from February 2024"
+          },
+          "requestResponseComponentNamesFeb2024": {
+            "type": "boolean",
+            "description": "Enables request and response component naming fixes from February 2024"
+          }
+        },
+        "additionalProperties": true
+      },
+      "auth": {
+        "type": "object",
+        "description": "Authentication configuration",
+        "properties": {
+          "oAuth2ClientCredentialsEnabled": {
+            "type": "boolean",
+            "description": "Enables support for OAuth2 client credentials grant type"
+          },
+          "oAuth2PasswordEnabled": {
+            "type": "boolean",
+            "description": "Enables support for OAuth2 resource owner password credentials grant type"
+          }
+        }
+      },
+      "mockServer": {
+        "type": "object",
+        "description": "Mock server generation configuration",
+        "properties": {
+          "disabled": {
+            "type": "boolean",
+            "description": "Disables the code generation of the mock server target"
+          }
+        }
+      },
+      "tests": {
+        "type": "object",
+        "description": "Test generation configuration",
+        "properties": {
+          "generateNewTests": {
+            "type": "boolean",
+            "description": "Enables generation of new tests for any new operations in the OpenAPI specification"
+          }
+        }
+      }
+    }
+  }
+  
