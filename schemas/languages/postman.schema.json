@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Postman Configuration Schema",
     "type": "object",
-    "description": "Schema for configuration specific to a Postman Collection",
+    "description": "Schema for configuration specific to Postman Collections",
     "properties": {
       "version": {
         "type": "string",

@@ -46,11 +46,11 @@
       },
       "postman": {
         "$ref": "./languages/postman.schema.json",
-        "description": "Configuration specific to Postman"
+        "description": "Configuration specific to Postman Collections"
       },
       "terraform": {
         "$ref": "./languages/terraform.schema.json",
-        "description": "Configuration specific to Terraform Provider"
+        "description": "Configuration specific to Terraform Providers"
       }
     },
     "required": ["configVersion", "generation"],
