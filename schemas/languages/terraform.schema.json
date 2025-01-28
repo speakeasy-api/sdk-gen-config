@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Terraform Configuration Schema",
     "type": "object",
-    "description": "Schema for configuration specific to a Terraform Provider",
+    "description": "Schema for configuration specific to Terraform Providers",
     "properties": {
       "version": {
         "type": "string",
