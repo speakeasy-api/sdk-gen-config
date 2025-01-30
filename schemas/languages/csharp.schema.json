@@ -1,15 +1,96 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "C# Configuration Schema",
-    "type": "object",
-    "description": "Schema for configuration specific to the C# SDK",
-    "properties": {
-      "version": {
-        "type": "string",
-        "description": "The current version of the SDK"
-      }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "csharp Configuration Schema",
+  "type": "object",
+  "description": "Schema for configuration specific to a csharp SDK",
+  "properties": {
+    "author": {
+      "description": "The name of the author of the published package. https://learn.microsoft.com/en-us/nuget/create-packages/package-authoring-best-practices#authors",
+      "type": "string"
     },
-    "required": ["version"],
-    "additionalProperties": true
-  }
-  
+    "clientServerStatusCodesAsErrors": {
+      "description": "Whether to treat 4xx and 5xx status codes as errors.",
+      "type": "boolean"
+    },
+    "defaultErrorName": {
+      "description": "The name of the default exception that is thrown when an API error occurs.",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "type": "string"
+    },
+    "disableNamespacePascalCasingApr2024": {
+      "description": "Whether to disable Pascal Casing sanitization on provided packageName when setting the root namespace and NuGet package ID.",
+      "type": "boolean"
+    },
+    "dotnetVersion": {
+      "description": "The version of .NET to target. net8.0 (default), net6.0 and net5.0 supported. https://learn.microsoft.com/en-us/dotnet/standard/frameworks",
+      "pattern": "^(net5\\.0|net6\\.0|net8\\.0)$",
+      "type": "string"
+    },
+    "enableSourceLink": {
+      "description": "Whether to produce and publish the package with Source Link. https://github.com/dotnet/sourcelink",
+      "type": "boolean"
+    },
+    "flattenGlobalSecurity": {
+      "description": "Flatten the global security configuration if there is only a single option in the spec",
+      "type": "boolean"
+    },
+    "flatteningOrder": {
+      "description": "When flattening parameters and body fields, determines the ordering of generated method arguments. Leave empty to apply legacy ordering.",
+      "pattern": "^(parameters-first|body-first)?$",
+      "type": "string"
+    },
+    "includeDebugSymbols": {
+      "description": "Whether to generate .pdb files and publish a .snupkg symbol package to NuGet.",
+      "type": "boolean"
+    },
+    "inputModelSuffix": {
+      "description": "The suffix to add to models with writeOnly fields that are created as input models",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "maxMethodParams": {
+      "description": "The maximum number of parameters a method can have before the resulting SDK endpoint is no longer 'flattened' and an input object is created instead. 0 will use input objects always. https://www.speakeasy.com/docs/customize-sdks/methods",
+      "pattern": "^\\d+$",
+      "type": "number"
+    },
+    "methodArguments": {
+      "description": "Determines how arguments for SDK methods are generated",
+      "pattern": "^infer-optional-args$",
+      "type": "string"
+    },
+    "outputModelSuffix": {
+      "description": "The suffix to add to models with writeOnly fields that are created as input models",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "packageName": {
+      "description": "The NuGet package ID, also used as the root namespace. https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/names-of-namespaces.",
+      "pattern": "^[\\w\\d._]+$",
+      "type": "string"
+    },
+    "packageTags": {
+      "description": "Space-delimited list of tags and keywords used when searching for packages on NuGet.",
+      "type": "string"
+    },
+    "responseFormat": {
+      "description": "Determines the shape of the response envelope that is return from SDK methods",
+      "pattern": "^(envelope|envelope-http|flat)$",
+      "type": "string"
+    },
+    "sourceDirectory": {
+      "description": "The name of the source directory. Default is \"src\"",
+      "pattern": "^\\w*$",
+      "type": "string"
+    },
+    "version": {
+      "description": "The current version of the SDK",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "packageName"
+  ],
+  "additionalProperties": true
+}
