@@ -1,15 +1,31 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Postman Configuration Schema",
-    "type": "object",
-    "description": "Schema for configuration specific to Postman Collections",
-    "properties": {
-      "version": {
-        "type": "string",
-        "description": "The current version of the SDK"
-      }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "postman Configuration Schema",
+  "type": "object",
+  "description": "Schema for configuration specific to a postman SDK",
+  "properties": {
+    "fileName": {
+      "description": "The collection file name. If not file name is provided the packageName is used in the `{example}_postman_collection.json` if no file name is provided.",
+      "pattern": "^[\\w\\d\\-~]([\\w\\d.\\-_\\/~]*[\\w\\d\\-~])?$"
     },
-    "required": ["version"],
-    "additionalProperties": true
-  }
-  
+    "inputModelSuffix": {
+      "description": "The suffix to add to models with writeOnly fields that are created as input models",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "outputModelSuffix": {
+      "description": "The suffix to add to models with writeOnly fields that are created as input models",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "packageName": {
+      "description": "The name of the Postman collection. This show as the name when imported into Postman. This is also used as the file name in `{example}_postman_collection.json` if no file name is provided.",
+      "pattern": "^[\\w\\d\\-~]([\\w\\d.\\-_\\/~]*[\\w\\d\\-~])?$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "packageName"
+  ],
+  "additionalProperties": true
+}
