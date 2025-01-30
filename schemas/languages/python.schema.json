@@ -1,15 +1,98 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Python Configuration Schema",
-    "type": "object",
-    "description": "Schema for configuration specific to the Python SDK",
-    "properties": {
-      "version": {
-        "type": "string",
-        "description": "The current version of the SDK"
-      }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "python Configuration Schema",
+  "type": "object",
+  "description": "Schema for configuration specific to a python SDK",
+  "properties": {
+    "clientServerStatusCodesAsErrors": {
+      "description": "Whether to treat 4xx and 5xx status codes as errors.",
+      "type": "boolean"
     },
-    "required": ["version"],
-    "additionalProperties": true
-  }
+    "defaultErrorName": {
+      "description": "The name of the default exception that is raised when an API error occurs.",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "type": "string"
+    },
+    "description": {
+      "description": "A short description of the project. https://python-poetry.org/docs/pyproject/#description",
+      "type": "string"
+    },
+    "documentationUrl": {
+      "description": "The URL for the documentation of the project. https://python-poetry.org/docs/pyproject/#documentation"
+    },
+    "enableCustomCodeRegions": {
+      "description": "Allow custom code to be inserted into the generated SDK.",
+      "type": "boolean"
+    },
+    "enumFormat": {
+      "description": "Determines the format to express enums in Python",
+      "pattern": "^(union|enum)$",
+      "type": "string"
+    },
+    "envVarPrefix": {
+      "description": "The environment variable prefix for security and global env variable overrides. If empty these overrides will not be possible"
+    },
+    "flattenGlobalSecurity": {
+      "description": "Flatten the global security configuration if there is only a single option in the spec",
+      "type": "boolean"
+    },
+    "flattenRequests": {
+      "description": "Turn request parameters and body fields into a flat list of method arguments. This takes precedence over maxMethodParams. If there is no request body then maxMethodParams will be respected.",
+      "type": "boolean"
+    },
+    "flatteningOrder": {
+      "description": "When flattening parameters and body fields, determines the ordering of generated method arguments.",
+      "pattern": "^(parameters-first|body-first)$",
+      "type": "string"
+    },
+    "homepage": {
+      "description": "The URL for the homepage of the project. https://python-poetry.org/docs/pyproject/#homepage"
+    },
+    "inputModelSuffix": {
+      "description": "The suffix to add to models with writeOnly fields that are created as input models",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "maxMethodParams": {
+      "description": "The maximum number of parameters a method can have before the resulting SDK endpoint is no longer 'flattened' and an input object is created instead. 0 will use input objects always. https://www.speakeasy.com/docs/customize-sdks/methods",
+      "pattern": "^\\d+$",
+      "type": "number"
+    },
+    "methodArguments": {
+      "description": "Determines how arguments for SDK methods are generated",
+      "pattern": "^(infer-optional-args|require-security-and-request)$",
+      "type": "string"
+    },
+    "outputModelSuffix": {
+      "description": "The suffix to add to models with writeOnly fields that are created as input models",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "packageName": {
+      "description": "The distribution name of the PyPI Package. https://docs.python.org/3.11/distutils/setupscript.html#additional-meta-data",
+      "pattern": "^@?[\\w\\d.\\-_\\u002f]+$",
+      "type": "string"
+    },
+    "responseFormat": {
+      "description": "Determines the shape of the response envelope that is returned from SDK methods",
+      "pattern": "^(envelope|envelope-http|flat)$",
+      "type": "string"
+    },
+    "templateVersion": {
+      "description": "The template version to use",
+      "pattern": "^v\\d+$",
+      "type": "string"
+    },
+    "version": {
+      "description": "The current version of the SDK",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "packageName",
+    "version"
+  ],
+  "additionalProperties": true
+}
   
