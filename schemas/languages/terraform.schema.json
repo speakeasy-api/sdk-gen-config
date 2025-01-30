@@ -1,15 +1,41 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Terraform Configuration Schema",
-    "type": "object",
-    "description": "Schema for configuration specific to Terraform Providers",
-    "properties": {
-      "version": {
-        "type": "string",
-        "description": "The current version of the SDK"
-      }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "terraform Configuration Schema",
+  "type": "object",
+  "description": "Schema for configuration specific to a terraform SDK",
+  "properties": {
+    "allowUnknownFieldsInWeakUnions": {
+      "description": "Allow unknown fields in weak (undiscriminated) unions",
+      "type": "boolean"
     },
-    "required": ["version"],
-    "additionalProperties": true
-  }
-  
+    "author": {
+      "description": "The name of the author of the published package.",
+      "type": "string"
+    },
+    "defaultErrorName": {
+      "description": "The name of the default error type used to represent API errors",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "type": "string"
+    },
+    "enableTypeDeduplication": {
+      "description": "Enables deduplication of terraform value types",
+      "type": "boolean"
+    },
+    "packageName": {
+      "description": "The terraform provider name.",
+      "pattern": "^[\\w\\d-]+$",
+      "type": "string"
+    },
+    "version": {
+      "description": "The current version of the SDK",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "packageName",
+    "author",
+    "version"
+  ],
+  "additionalProperties": true
+}
