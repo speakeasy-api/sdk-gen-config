@@ -1,15 +1,89 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "Java Configuration Schema",
-    "type": "object",
-    "description": "Schema for configuration specific to the Java SDK",
-    "properties": {
-      "version": {
-        "type": "string",
-        "description": "The current version of the SDK"
-      }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "java Configuration Schema",
+  "type": "object",
+  "description": "Schema for configuration specific to a java SDK",
+  "properties": {
+    "artifactID": {
+      "description": "The artifactID to use for namespacing the package. This is usually the name of your project. If publishing is enabled, it will also be used as the artifactId (e.g. com.your-org.\u003cartifactId\u003e).",
+      "pattern": "^[\\w\\d\\/._-]+$",
+      "type": "string"
     },
-    "required": ["version"],
-    "additionalProperties": true
-  }
+    "clientServerStatusCodesAsErrors": {
+      "description": "Whether to treat 4xx and 5xx status codes as errors.",
+      "type": "boolean"
+    },
+    "companyEmail": {
+      "description": "A support email address for your company. Sets metadata required by Maven.",
+      "type": "string"
+    },
+    "companyName": {
+      "description": "The name of your company. Sets metadata required by Maven.",
+      "type": "string"
+    },
+    "companyURL": {
+      "description": "Your company's homepage URL. Sets metadata required by Maven.",
+      "type": "string"
+    },
+    "defaultErrorName": {
+      "description": "The name of the default exception that is thrown when an API error occurs.",
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "type": "string"
+    },
+    "flattenGlobalSecurity": {
+      "description": "Flatten the global security configuration if there is only a single option in the spec",
+      "type": "boolean"
+    },
+    "githubURL": {
+      "description": "The github URL where the artifact is hosted. Sets metadata required by Maven.",
+      "pattern": "github\\.com\\/[a-zA-z\\d_-]+?\\/.+",
+      "type": "string"
+    },
+    "groupID": {
+      "description": "The groupID to use for namespacing the package. This is usually the reversed domain name of your organization. If publishing is enabled, it will also be used as the artifact's groupId (e.g. \u003cgroupId\u003e.my-artifact).",
+      "pattern": "^\\w[\\w\\d.\\-_]*$",
+      "type": "string"
+    },
+    "inputModelSuffix": {
+      "description": "The suffix to add to models with writeOnly fields that are created as input models",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "maxMethodParams": {
+      "description": "The maximum number of parameters a method can have before the resulting SDK endpoint is no longer 'flattened' and an input object is created instead. 0 will use input objects always. https://www.speakeasy.com/docs/customize-sdks/methods",
+      "pattern": "^\\d+$",
+      "type": "number"
+    },
+    "ossrhURL": {
+      "description": "The URL of the staging repository to publish the SDK artifact to."
+    },
+    "outputModelSuffix": {
+      "description": "The suffix to add to models with writeOnly fields that are created as input models",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "projectName": {
+      "description": "Assigns Gradle rootProject.name, which gives a name to the Gradle build. https://docs.gradle.org/current/userguide/multi_project_builds.html#naming_recommendations",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    },
+    "templateVersion": {
+      "description": "The template version to use",
+      "pattern": "v2",
+      "type": "string"
+    },
+    "version": {
+      "description": "The current version of the SDK",
+      "pattern": "^[\\w\\d.\\-_]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "projectName",
+    "groupID",
+    "version",
+    "artifactID"
+  ],
+  "additionalProperties": true
+}
   
