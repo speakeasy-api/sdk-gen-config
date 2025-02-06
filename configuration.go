@@ -45,6 +45,7 @@ type Fixes struct {
 	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023"`
 	ParameterOrderingFeb2024             bool           `yaml:"parameterOrderingFeb2024"`
 	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024"`
+	SecurityFeb2025                      bool           `yaml:"securityFeb2025"`
 	AdditionalProperties                 map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -359,6 +360,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(false),
 			Description:  pointer.To("Enables generation of new tests for any new operations found in the OpenAPI spec"),
+		},
+		{
+			Name:         "fixes.securityFeb2025",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Enables fixes and refactoring for security that were introduced in February 2025"),
 		},
 	}
 }
