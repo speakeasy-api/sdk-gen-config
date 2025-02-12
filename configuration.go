@@ -132,6 +132,12 @@ type TagOn struct {
 	WorkflowDispatch WorkflowDispatchEmpty `yaml:"workflow_dispatch"`
 }
 
+type TestingOn struct {
+	PullRequest      Push                    `yaml:"pull_request"`
+	Push             *Push                   `yaml:"push,omitempty"`
+	WorkflowDispatch WorkflowDispatchTesting `yaml:"workflow_dispatch"`
+}
+
 type Push struct {
 	Branches []string `yaml:"branches"`
 	Paths    []string `yaml:"paths"`
@@ -148,6 +154,13 @@ type TaggingWorkflow struct {
 	Name        string      `yaml:"name"`
 	Permissions Permissions `yaml:"permissions,omitempty"`
 	On          TagOn       `yaml:"on"`
+	Jobs        Jobs        `yaml:"jobs"`
+}
+
+type TestingWorkflow struct {
+	Name        string      `yaml:"name"`
+	Permissions Permissions `yaml:"permissions,omitempty"`
+	On          TestingOn   `yaml:"on"`
 	Jobs        Jobs        `yaml:"jobs"`
 }
 
@@ -168,6 +181,7 @@ type Jobs struct {
 	Generate Job `yaml:"generate,omitempty"`
 	Publish  Job `yaml:"publish,omitempty"`
 	Tag      Job `yaml:"tag,omitempty"`
+	Test     Job `yaml:"test,omitempty"`
 }
 
 type Job struct {
@@ -180,10 +194,18 @@ type WorkflowDispatch struct {
 	Inputs Inputs `yaml:"inputs"`
 }
 
+type WorkflowDispatchTesting struct {
+	Inputs InputsTesting `yaml:"inputs"`
+}
+
 type WorkflowDispatchEmpty struct{}
 
 type Schedule struct {
 	Cron string `yaml:"cron"`
+}
+
+type InputsTesting struct {
+	Target Target `yaml:"target"`
 }
 
 type Inputs struct {
