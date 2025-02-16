@@ -43,6 +43,7 @@ type UsageSnippets struct {
 
 type Fixes struct {
 	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023"`
+	NameResolutionFeb2025                bool           `yaml:"nameResolutionFeb2025"`
 	ParameterOrderingFeb2024             bool           `yaml:"parameterOrderingFeb2024"`
 	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024"`
 	SecurityFeb2025                      bool           `yaml:"securityFeb2025"`
