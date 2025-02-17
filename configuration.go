@@ -50,6 +50,19 @@ type Fixes struct {
 	AdditionalProperties                 map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
+func (f *Fixes) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var raw map[string]any
+	if err := unmarshal(&raw); err != nil {
+		return err
+	}
+
+	if raw["nameResolutionFeb2025"] == true {
+		raw["nameResolutionDec2023"] = true
+	}
+
+	return unmarshal(f)
+}
+
 type Auth struct {
 	OAuth2ClientCredentialsEnabled bool `yaml:"oAuth2ClientCredentialsEnabled"`
 	OAuth2PasswordEnabled          bool `yaml:"oAuth2PasswordEnabled"`
