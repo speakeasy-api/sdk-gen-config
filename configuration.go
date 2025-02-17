@@ -42,7 +42,7 @@ type UsageSnippets struct {
 }
 
 type Fixes struct {
-	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023"`
+	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023,omitempty"`
 	NameResolutionFeb2025                bool           `yaml:"nameResolutionFeb2025"`
 	ParameterOrderingFeb2024             bool           `yaml:"parameterOrderingFeb2024"`
 	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024"`
@@ -51,16 +51,20 @@ type Fixes struct {
 }
 
 func (f *Fixes) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var raw map[string]any
-	if err := unmarshal(&raw); err != nil {
+	type rawFixes Fixes // Prevents recursion by creating a type without the UnmarshalYAML method
+
+	var tmp rawFixes
+	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
 
-	if raw["nameResolutionFeb2025"] == true {
-		raw["nameResolutionDec2023"] = true
+	if tmp.NameResolutionFeb2025 {
+		tmp.NameResolutionDec2023 = true
 	}
 
-	return unmarshal(f)
+	// Copy the temporary values back to the original struct
+	*f = Fixes(tmp)
+	return nil
 }
 
 type Auth struct {
@@ -360,6 +364,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables a number of breaking changes introduced in December 2023, that improve name resolution for inline schemas and reduce chances of name collisions"),
+		},
+		{
+			Name:         "fixes.nameResolutionFeb2025",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Enables a number of breaking changes introduced in February 2025, that improve name resolution for inline schemas and reduce chances of name collisions"),
 		},
 		{
 			Name:         "fixes.parameterOrderingFeb2024",
