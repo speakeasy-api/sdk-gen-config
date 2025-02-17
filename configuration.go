@@ -368,7 +368,7 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 		{
 			Name:         "fixes.nameResolutionFeb2025",
 			Required:     false,
-			DefaultValue: ptr(newSDK),
+			DefaultValue: ptr(false),
 			Description:  pointer.To("Enables a number of breaking changes introduced in February 2025, that improve name resolution for inline schemas and reduce chances of name collisions"),
 		},
 		{
