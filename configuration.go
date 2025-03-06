@@ -81,6 +81,7 @@ type Generation struct {
 	BaseServerURL               string         `yaml:"baseServerUrl,omitempty"`
 	SDKClassName                string         `yaml:"sdkClassName,omitempty"`
 	MaintainOpenAPIOrder        bool           `yaml:"maintainOpenAPIOrder,omitempty"`
+	DeduplicateErrors           bool           `yaml:"deduplicateErrors,omitempty"`
 	UsageSnippets               *UsageSnippets `yaml:"usageSnippets,omitempty"`
 	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty"`
 	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
@@ -346,6 +347,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Maintains the order of things like parameters and fields when generating the SDK"),
+		},
+		{
+			Name:         "deduplicateErrors",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Deduplicates errors that have the same schema"),
 		},
 		{
 			Name:         "usageSnippets.optionalPropertyRendering",
