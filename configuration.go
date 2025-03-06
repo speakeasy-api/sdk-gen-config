@@ -351,7 +351,7 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 		{
 			Name:         "deduplicateErrors",
 			Required:     false,
-			DefaultValue: ptr(newSDK),
+			DefaultValue: ptr(false),
 			Description:  pointer.To("Deduplicates errors that have the same schema"),
 		},
 		{
