@@ -86,6 +86,7 @@ type Generation struct {
 	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty"`
 	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
 	Auth                        *Auth          `yaml:"auth,omitempty"`
+	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty"`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
@@ -353,6 +354,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(false),
 			Description:  pointer.To("Deduplicates errors that have the same schema"),
+		},
+		{
+			Name:         "skipErrorSuffix",
+			Required:     false,
+			DefaultValue: ptr(false),
+			Description:  pointer.To("Skips the automatic addition of an error suffix to error types"),
 		},
 		{
 			Name:         "usageSnippets.optionalPropertyRendering",
