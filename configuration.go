@@ -47,6 +47,7 @@ type Fixes struct {
 	ParameterOrderingFeb2024             bool           `yaml:"parameterOrderingFeb2024"`
 	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024"`
 	SecurityFeb2025                      bool           `yaml:"securityFeb2025"`
+	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025"`
 	AdditionalProperties                 map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -426,6 +427,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables fixes and refactoring for security that were introduced in February 2025"),
+		},
+		{
+			Name:         "fixes.sharedErrorComponentsApr2025",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Enables fixes that will allow shared error components to be generated correctly"),
 		},
 	}
 }
