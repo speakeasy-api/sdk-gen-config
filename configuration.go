@@ -431,7 +431,7 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 		{
 			Name:         "fixes.sharedErrorComponentsApr2025",
 			Required:     false,
-			DefaultValue: ptr(newSDK),
+			DefaultValue: ptr(false),
 			Description:  pointer.To("Enables fixes that will allow shared error components to be generated correctly"),
 		},
 	}
