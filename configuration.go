@@ -74,7 +74,8 @@ type Auth struct {
 }
 
 type Tests struct {
-	GenerateNewTests bool `yaml:"generateNewTests"`
+	GenerateNewTests           bool `yaml:"generateNewTests"`
+	SkipResponseBodyAssertions bool `yaml:"skipResponseBodyAssertions"`
 }
 
 type Generation struct {
@@ -421,6 +422,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(false),
 			Description:  pointer.To("Enables generation of new tests for any new operations found in the OpenAPI spec"),
+		},
+		{
+			Name:         "tests.skipResponseBodyAssertions",
+			Required:     false,
+			DefaultValue: ptr(false),
+			Description:  pointer.To("Skips the generation of response body assertions in tests"),
 		},
 		{
 			Name:         "fixes.securityFeb2025",
