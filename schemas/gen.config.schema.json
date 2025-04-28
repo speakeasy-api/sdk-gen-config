@@ -179,6 +179,10 @@
         "generateNewTests": {
           "type": "boolean",
           "description": "Enables generation of new tests for any new operations in the OpenAPI specification"
+        },
+        "skipResponseBodyAssertions": {
+          "type": "boolean",
+          "description": "Skip asserting that the client got the same response bodies returned by the mock server"
         }
       },
       "additionalProperties": false
