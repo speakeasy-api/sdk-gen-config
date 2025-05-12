@@ -89,6 +89,7 @@ type Generation struct {
 	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
 	Auth                        *Auth          `yaml:"auth,omitempty"`
 	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty"`
+	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty"`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
@@ -440,6 +441,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"),
+		},
+		{
+			Name:         "sdkHooksConfigAccess",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Enables access to the SDK configuration from hooks"),
 		},
 	}
 }
