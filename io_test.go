@@ -13,6 +13,36 @@ import (
 
 const testDir = "gen/test"
 
+// check it implements the interface
+var _ fs.FS = &virtualFsImplementation{}
+
+type virtualFsImplementation struct {
+}
+
+func (v virtualFsImplementation) MkdirAll(path string, perm os.FileMode) error {
+	return os.MkdirAll(path, perm)
+}
+
+func (v virtualFsImplementation) Stat(name string) (os.FileInfo, error) {
+	return os.Stat(name)
+}
+
+func (v virtualFsImplementation) Open(name string) (fs.File, error) {
+	return os.Open(name)
+}
+
+func (v virtualFsImplementation) ReadFile(name string) ([]byte, error) {
+	return os.ReadFile(name)
+}
+
+func (v virtualFsImplementation) WriteFile(name string, data []byte, perm os.FileMode) error {
+	return os.WriteFile(name, data, perm)
+}
+
+func (v virtualFsImplementation) Abs(path string) (string, error) {
+	return filepath.Abs(path)
+}
+
 func TestLoad_Success(t *testing.T) {
 	getUUID = func() string {
 		return "123"
@@ -606,6 +636,7 @@ func TestLoad_Success(t *testing.T) {
 
 			opts := []Option{
 				WithUpgradeFunc(testUpdateLang),
+				WithFileSystem(virtualFsImplementation{}),
 			}
 
 			for _, lang := range tt.args.langs {
@@ -644,6 +675,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 	}
 
 	opts = append(opts, WithLanguages("go"))
+	opts = append(opts, WithFileSystem(virtualFsImplementation{}))
 
 	cfg, err := Load(rootDir, opts...)
 	assert.NoError(t, err)
@@ -734,7 +766,11 @@ func TestSaveConfig(t *testing.T) {
 			err := os.Mkdir(speakeasyPath, 0o755)
 			assert.NoError(t, err)
 
-			err = SaveConfig(tempDir, testCase.cfg, testCase.opts...)
+			opts := []Option{
+				WithFileSystem(virtualFsImplementation{}),
+			}
+			opts = append(opts, testCase.opts...)
+			err = SaveConfig(tempDir, testCase.cfg, opts...)
 			assert.NoError(t, err)
 
 			fileInfo, err := os.Stat(configPath)
@@ -794,7 +830,11 @@ management: {}
 			err := os.Mkdir(speakeasyPath, 0o755)
 			assert.NoError(t, err)
 
-			err = SaveLockFile(tempDir, testCase.lf, testCase.opts...)
+			opts := []Option{
+				WithFileSystem(virtualFsImplementation{}),
+			}
+			opts = append(opts, testCase.opts...)
+			err = SaveLockFile(tempDir, testCase.lf, opts...)
 			assert.NoError(t, err)
 
 			fileInfo, err := os.Stat(configPath)
@@ -815,3 +855,15 @@ management: {}
 		})
 	}
 }
+
+// func TestFindConfigFile(t *testing.T) {
+// 	t.Parallel()
+
+// 	dir := t.TempDir()
+
+// 	fs := virtualFsImplementation{}
+
+// 	cfg, err := FindConfigFile(dir, fs)
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, filepath.Join(dir, ".speakeasy", "gen.yaml"), cfg.Path)
+// }
