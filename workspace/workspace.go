@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
+
+	fs "github.com/speakeasy-api/sdk-gen-config/fs"
 )
 
 const (
@@ -14,15 +15,11 @@ const (
 	GenFolder       = ".gen"
 )
 
-type FS interface {
-	fs.StatFS
-}
-
 type FindWorkspaceOptions struct {
 	FindFile     string // An optional file to find in the workspace
 	AllowOutside bool   // Allow searching outside the workspace
 	Recursive    bool   // Recursively search for the workspace in parent directories
-	FS           FS     // An optional filesystem to use
+	FS           fs.FS  // An optional filesystem to use
 }
 
 type FindWorkspaceResult struct {
@@ -31,7 +28,7 @@ type FindWorkspaceResult struct {
 }
 
 func FindWorkspace(workingDir string, opts FindWorkspaceOptions) (*FindWorkspaceResult, error) {
-	path, err := filepath.Abs(workingDir)
+	path, err := opts.FS.Abs(workingDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get absolute path: %w", err)
 	}
@@ -124,7 +121,7 @@ func FindWorkspaceTempDir(wd string, opts FindWorkspaceOptions) string {
 	return filepath.Join(res.Path, "temp")
 }
 
-func stat(path string, fs FS) (fs.FileInfo, error) {
+func stat(path string, fs fs.FS) (fs.FileInfo, error) {
 	if fs == nil {
 		return os.Stat(path)
 	}
