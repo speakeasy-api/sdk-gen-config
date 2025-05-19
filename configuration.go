@@ -198,6 +198,11 @@ type Permissions struct {
 type GenerateOn struct {
 	WorkflowDispatch WorkflowDispatch `yaml:"workflow_dispatch"`
 	Schedule         []Schedule       `yaml:"schedule,omitempty"`
+	PullRequest      PullRequestOn    `yaml:"pull_request,omitempty"`
+}
+
+type PullRequestOn struct {
+	Types []string `yaml:"types,omitempty"`
 }
 
 type Jobs struct {
