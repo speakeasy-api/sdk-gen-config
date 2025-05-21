@@ -63,8 +63,8 @@ func TestLoad_Success(t *testing.T) {
 							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
-							OAuth2ClientCredentialsEnabled: true,
-							OAuth2PasswordEnabled:          true,
+							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 						UseClassNamesForArrayFields: true,
 						SDKHooksConfigAccess:        true,
@@ -285,8 +285,8 @@ func TestLoad_Success(t *testing.T) {
 							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
-							OAuth2ClientCredentialsEnabled: true,
-							OAuth2PasswordEnabled:          true,
+							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
@@ -341,8 +341,8 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionFeb2025:                true,
 						},
 						Auth: &Auth{
-							OAuth2ClientCredentialsEnabled: true,
-							OAuth2PasswordEnabled:          true,
+							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
