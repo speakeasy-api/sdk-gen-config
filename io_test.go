@@ -52,6 +52,7 @@ func TestLoad_Success(t *testing.T) {
 						MaintainOpenAPIOrder: true,
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                true,
@@ -102,6 +103,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                false,
@@ -154,6 +156,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                false,
@@ -211,6 +214,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                false,
@@ -267,6 +271,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                true,
@@ -319,6 +324,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                true,
@@ -371,6 +377,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                false,
@@ -429,6 +436,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                false,
@@ -491,6 +499,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                false,
@@ -550,6 +559,7 @@ func TestLoad_Success(t *testing.T) {
 						SDKClassName:  "speakeasy",
 						UsageSnippets: &UsageSnippets{
 							OptionalPropertyRendering: "withExample",
+							SDKInitStyle:              "constructor",
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                false,
