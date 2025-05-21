@@ -36,8 +36,16 @@ const (
 	OptionalPropertyRenderingOptionWithExample OptionalPropertyRenderingOption = "withExample"
 )
 
+type SDKInitStyle string
+
+const (
+	SDKInitStyleConstructor SDKInitStyle = "constructor"
+	SDKInitStyleBuilder     SDKInitStyle = "builder"
+)
+
 type UsageSnippets struct {
 	OptionalPropertyRendering OptionalPropertyRenderingOption `yaml:"optionalPropertyRendering"`
+	SDKInitStyle              SDKInitStyle                    `yaml:"sdkInitStyle"`
 	AdditionalProperties      map[string]any                  `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -374,6 +382,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(OptionalPropertyRenderingOptionWithExample),
 			Description:  pointer.To("Controls how optional properties are rendered in usage snippets, by default they will be rendered when an example is present in the OpenAPI spec"),
+		},
+		{
+			Name:         "usageSnippets.sdkInitStyle",
+			Required:     false,
+			DefaultValue: ptr(SDKInitStyleConstructor),
+			Description:  pointer.To("Controls how the SDK initialization is depicted in usage snippets, by default it will use the constructor"),
 		},
 		{
 			Name:         "useClassNamesForArrayFields",
