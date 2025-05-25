@@ -7,10 +7,10 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 
+	fs "github.com/speakeasy-api/sdk-gen-config/fs"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
 )
@@ -26,12 +26,6 @@ type Config struct {
 	LockFile   *LockFile
 }
 
-type FS interface {
-	fs.ReadFileFS
-	fs.StatFS
-	WriteFile(name string, data []byte, perm os.FileMode) error
-}
-
 type Option func(*options)
 
 type (
@@ -41,7 +35,7 @@ type (
 )
 
 type options struct {
-	FS                     FS
+	FS                     fs.FS
 	UpgradeFunc            UpgradeFunc
 	getLanguageDefaultFunc GetLanguageDefaultFunc
 	langs                  []string
@@ -50,7 +44,7 @@ type options struct {
 	dontWrite              bool
 }
 
-func WithFileSystem(fs FS) Option {
+func WithFileSystem(fs fs.FS) Option {
 	return func(o *options) {
 		o.FS = fs
 	}
@@ -92,7 +86,7 @@ func WithValidateFunc(f ValidateFunc) Option {
 	}
 }
 
-func FindConfigFile(dir string, fileSystem FS) (*workspace.FindWorkspaceResult, error) {
+func FindConfigFile(dir string, fileSystem fs.FS) (*workspace.FindWorkspaceResult, error) {
 	configRes, err := workspace.FindWorkspace(dir, workspace.FindWorkspaceOptions{
 		FindFile:     configFile,
 		AllowOutside: true,

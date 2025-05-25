@@ -6,12 +6,44 @@ import (
 	"path/filepath"
 	"testing"
 
+	customFs "github.com/speakeasy-api/sdk-gen-config/fs"
+
 	"github.com/speakeasy-api/sdk-gen-config/testutils"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"github.com/stretchr/testify/assert"
 )
 
 const testDir = "gen/test"
+
+// check it implements the interface
+var _ customFs.FS = &virtualFsImplementation{}
+
+type virtualFsImplementation struct {
+}
+
+func (v virtualFsImplementation) MkdirAll(path string, perm os.FileMode) error {
+	return os.MkdirAll(path, perm)
+}
+
+func (v virtualFsImplementation) Stat(name string) (os.FileInfo, error) {
+	return os.Stat(name)
+}
+
+func (v virtualFsImplementation) Open(name string) (fs.File, error) {
+	return os.Open(name)
+}
+
+func (v virtualFsImplementation) ReadFile(name string) ([]byte, error) {
+	return os.ReadFile(name)
+}
+
+func (v virtualFsImplementation) WriteFile(name string, data []byte, perm os.FileMode) error {
+	return os.WriteFile(name, data, perm)
+}
+
+func (v virtualFsImplementation) Abs(path string) (string, error) {
+	return filepath.Abs(path)
+}
 
 func TestLoad_Success(t *testing.T) {
 	getUUID = func() string {
@@ -55,15 +87,18 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                true,
+							NameResolutionFeb2025:                true,
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
 							SecurityFeb2025:                      true,
+							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
 							OAuth2PasswordEnabled:          true,
 						},
 						UseClassNamesForArrayFields: true,
+						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -270,9 +305,11 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                true,
+							NameResolutionFeb2025:                true,
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
 							SecurityFeb2025:                      true,
+							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
@@ -280,6 +317,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
+						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -322,9 +360,11 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                true,
+							NameResolutionFeb2025:                true,
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
 							SecurityFeb2025:                      true,
+							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
@@ -332,6 +372,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
+						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -598,6 +639,7 @@ func TestLoad_Success(t *testing.T) {
 				lockFileDir = filepath.Join(targetDir, ".speakeasy")
 			}
 
+			fs := virtualFsImplementation{}
 			testutils.CreateTempFile(t, configDir, "gen.yaml", tt.args.genYaml)
 			testutils.CreateTempFile(t, lockFileDir, "gen.lock", tt.args.lockFile)
 
@@ -606,6 +648,7 @@ func TestLoad_Success(t *testing.T) {
 
 			opts := []Option{
 				WithUpgradeFunc(testUpdateLang),
+				WithFileSystem(fs),
 			}
 
 			for _, lang := range tt.args.langs {
@@ -628,6 +671,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 		return "123"
 	}
 
+	fs := virtualFsImplementation{}
 	// Create new config file in .speakeasy dir
 	speakeasyDir := filepath.Join(os.TempDir(), testDir, workspace.SpeakeasyFolder)
 	testutils.CreateTempFile(t, speakeasyDir, "gen.yaml", testutils.ReadTestFile(t, "v200-gen.yaml"))
@@ -644,6 +688,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 	}
 
 	opts = append(opts, WithLanguages("go"))
+	opts = append(opts, WithFileSystem(fs))
 
 	cfg, err := Load(rootDir, opts...)
 	assert.NoError(t, err)
@@ -734,7 +779,11 @@ func TestSaveConfig(t *testing.T) {
 			err := os.Mkdir(speakeasyPath, 0o755)
 			assert.NoError(t, err)
 
-			err = SaveConfig(tempDir, testCase.cfg, testCase.opts...)
+			opts := []Option{
+				WithFileSystem(virtualFsImplementation{}),
+			}
+			opts = append(opts, testCase.opts...)
+			err = SaveConfig(tempDir, testCase.cfg, opts...)
 			assert.NoError(t, err)
 
 			fileInfo, err := os.Stat(configPath)
@@ -794,7 +843,11 @@ management: {}
 			err := os.Mkdir(speakeasyPath, 0o755)
 			assert.NoError(t, err)
 
-			err = SaveLockFile(tempDir, testCase.lf, testCase.opts...)
+			opts := []Option{
+				WithFileSystem(virtualFsImplementation{}),
+			}
+			opts = append(opts, testCase.opts...)
+			err = SaveLockFile(tempDir, testCase.lf, opts...)
 			assert.NoError(t, err)
 
 			fileInfo, err := os.Stat(configPath)
@@ -815,3 +868,15 @@ management: {}
 		})
 	}
 }
+
+// func TestFindConfigFile(t *testing.T) {
+// 	t.Parallel()
+
+// 	dir := t.TempDir()
+
+// 	fs := virtualFsImplementation{}
+
+// 	cfg, err := FindConfigFile(dir, fs)
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, filepath.Join(dir, ".speakeasy", "gen.yaml"), cfg.Path)
+// }
