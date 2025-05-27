@@ -56,15 +56,18 @@ func TestLoad_Success(t *testing.T) {
 						},
 						Fixes: &Fixes{
 							NameResolutionDec2023:                true,
+							NameResolutionFeb2025:                true,
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
 							SecurityFeb2025:                      true,
+							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
 							OAuth2PasswordEnabled:          true,
 						},
 						UseClassNamesForArrayFields: true,
+						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -277,7 +280,9 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionDec2023:                true,
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
+							NameResolutionFeb2025:                true,
 							SecurityFeb2025:                      true,
+							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
@@ -285,6 +290,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
+						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -331,6 +337,8 @@ func TestLoad_Success(t *testing.T) {
 							ParameterOrderingFeb2024:             true,
 							RequestResponseComponentNamesFeb2024: true,
 							SecurityFeb2025:                      true,
+							SharedErrorComponentsApr2025:         true,
+							NameResolutionFeb2025:                true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
@@ -338,6 +346,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
+						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -673,6 +682,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 				SDKClassName:  "speakeasy",
 				UsageSnippets: &UsageSnippets{
 					OptionalPropertyRendering: "withExample",
+					SDKInitStyle:              "constructor",
 				},
 				Fixes: &Fixes{
 					NameResolutionDec2023:                false,
