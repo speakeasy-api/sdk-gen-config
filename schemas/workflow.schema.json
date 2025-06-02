@@ -147,6 +147,7 @@
             "csharp",
             "go",
             "java",
+            "mcp-typescript",
             "php",
             "python",
             "ruby",
