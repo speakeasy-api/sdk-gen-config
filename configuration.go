@@ -428,13 +428,13 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 		{
 			Name:         "auth.oAuth2ClientCredentialsEnabled",
 			Required:     false,
-			DefaultValue: ptr(newSDK),
+			DefaultValue: ptr(false),
 			Description:  pointer.To("Enables support for OAuth2 client credentials grant type (Enterprise tier only)"),
 		},
 		{
 			Name:         "auth.oAuth2PasswordEnabled",
 			Required:     false,
-			DefaultValue: ptr(newSDK),
+			DefaultValue: ptr(false),
 			Description:  pointer.To("Enables support for OAuth2 resource owner password credentials grant type (Enterprise tier only)"),
 		},
 		{
