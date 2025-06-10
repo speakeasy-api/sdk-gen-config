@@ -19,6 +19,17 @@ type LockFile struct {
 
 	// Mapping of language names to operation identifiers and operation metadata
 	// for change reporting.
+	// Example "go":{ "getUsers":{ "method": "GET", "path": "/users", "representations": { "sdk.group.GetUsers()": {} } } }
+	// Example "go":{
+	// 	"getUsers":{
+	// 		"method": "GET",
+	// 		"path": "/users",
+	// 		"representations": {
+	//        "sdk.group1.GetUsers()": {}
+	//        "sdk.group2.GetUsers()": {}
+	//      }
+	// 	}
+	// }
 	Operations map[string]map[string]OperationMetadata `yaml:"operations,omitempty"`
 }
 
