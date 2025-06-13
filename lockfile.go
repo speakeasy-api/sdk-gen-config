@@ -71,6 +71,7 @@ type OperationMetadata struct {
 type OperationRepresentationMetadata struct {
 	// Example future enhancement.
 	// RequiredArguments []string `yaml:"required_arguments,omitempty"`
+	Arguments map[string]any `yaml:"arguments"`
 
 	// Captures any additional properties that are not explicitly defined for
 	// backwards/forwards compatibility
