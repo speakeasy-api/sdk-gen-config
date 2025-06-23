@@ -176,6 +176,10 @@
       "type": "object",
       "description": "Test generation configuration",
       "properties": {
+        "generateTests": {
+          "type": "boolean",
+          "description": "Enables generation of tests"
+        },
         "generateNewTests": {
           "type": "boolean",
           "description": "Enables generation of new tests for any new operations in the OpenAPI specification"

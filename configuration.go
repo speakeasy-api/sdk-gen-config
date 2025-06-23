@@ -82,6 +82,7 @@ type Auth struct {
 }
 
 type Tests struct {
+	GenerateTests              bool `yaml:"generateTests"`
 	GenerateNewTests           bool `yaml:"generateNewTests"`
 	SkipResponseBodyAssertions bool `yaml:"skipResponseBodyAssertions"`
 }
@@ -438,9 +439,15 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Description:  pointer.To("Enables support for OAuth2 resource owner password credentials grant type (Enterprise tier only)"),
 		},
 		{
+			Name:         "tests.generateTests",
+			Required:     false,
+			DefaultValue: ptr(!newSDK),
+			Description:  pointer.To("Enables generation of tests"),
+		},
+		{
 			Name:         "tests.generateNewTests",
 			Required:     false,
-			DefaultValue: ptr(false),
+			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables generation of new tests for any new operations found in the OpenAPI spec"),
 		},
 		{

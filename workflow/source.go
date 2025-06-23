@@ -219,11 +219,6 @@ func getExt(path string) string {
 	return ext
 }
 
-func isYAMLFile(path string) bool {
-	ext := filepath.Ext(path)
-	return ext == ".yaml" || ext == ".yml"
-}
-
 func GetTempDir() string {
 	wd, _ := os.Getwd()
 

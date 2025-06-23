@@ -66,6 +66,10 @@ func TestLoad_Success(t *testing.T) {
 							OAuth2ClientCredentialsEnabled: true,
 							OAuth2PasswordEnabled:          true,
 						},
+						Tests: Tests{
+							GenerateTests:    false,
+							GenerateNewTests: true,
+						},
 						UseClassNamesForArrayFields: true,
 						SDKHooksConfigAccess:        true,
 					},
@@ -116,6 +120,10 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+						},
+						Tests: Tests{
+							GenerateTests:    true,
+							GenerateNewTests: false,
 						},
 					},
 					New: map[string]bool{},
@@ -169,6 +177,10 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+						},
+						Tests: Tests{
+							GenerateTests:    true,
+							GenerateNewTests: false,
 						},
 					},
 					New: map[string]bool{},
@@ -227,6 +239,10 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+						},
+						Tests: Tests{
+							GenerateTests:    true,
+							GenerateNewTests: false,
 						},
 					},
 					New: map[string]bool{},
@@ -288,6 +304,10 @@ func TestLoad_Success(t *testing.T) {
 							OAuth2ClientCredentialsEnabled: true,
 							OAuth2PasswordEnabled:          true,
 						},
+						Tests: Tests{
+							GenerateTests:    false,
+							GenerateNewTests: true,
+						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
 						SDKHooksConfigAccess:        true,
@@ -344,6 +364,10 @@ func TestLoad_Success(t *testing.T) {
 							OAuth2ClientCredentialsEnabled: true,
 							OAuth2PasswordEnabled:          true,
 						},
+						Tests: Tests{
+							GenerateTests:    false,
+							GenerateNewTests: true,
+						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
 						SDKHooksConfigAccess:        true,
@@ -396,6 +420,10 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+						},
+						Tests: Tests{
+							GenerateTests:    true,
+							GenerateNewTests: false,
 						},
 					},
 					New: map[string]bool{},
@@ -455,6 +483,10 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+						},
+						Tests: Tests{
+							GenerateTests:    true,
+							GenerateNewTests: false,
 						},
 					},
 					New: map[string]bool{
@@ -519,6 +551,10 @@ func TestLoad_Success(t *testing.T) {
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
 						},
+						Tests: Tests{
+							GenerateTests:    true,
+							GenerateNewTests: false,
+						},
 					},
 					New: map[string]bool{
 						"typescript": true,
@@ -578,6 +614,10 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+						},
+						Tests: Tests{
+							GenerateTests:    true,
+							GenerateNewTests: false,
 						},
 						MockServer: &MockServer{
 							Disabled: true,
@@ -692,6 +732,10 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 				Auth: &Auth{
 					OAuth2ClientCredentialsEnabled: false,
 					OAuth2PasswordEnabled:          false,
+				},
+				Tests: Tests{
+					GenerateTests:    true,
+					GenerateNewTests: false,
 				},
 			},
 			New: map[string]bool{},
