@@ -55,6 +55,9 @@ type OperationMetadata struct {
 	// OpenAPI path for operation. Includes path parameter syntax.
 	Path string `yaml:"path"`
 
+	// Store information on whether the operation is deprecated
+	Deprecated bool `yaml:"deprecated"`
+
 	// Mapping of language-specific representations to representation metadata
 	// for change reporting.
 	//
@@ -69,10 +72,6 @@ type OperationMetadata struct {
 // Metadata associated with a single operation representation for change
 // reporting.
 type OperationRepresentationMetadata struct {
-	// Example future enhancement.
-	// RequiredArguments []string `yaml:"required_arguments,omitempty"`
-	Arguments map[string]any `yaml:"arguments"`
-
 	// Captures any additional properties that are not explicitly defined for
 	// backwards/forwards compatibility
 	AdditionalProperties map[string]any `yaml:",inline"`
