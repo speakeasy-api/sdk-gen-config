@@ -168,7 +168,7 @@ func (t Target) IsPublished() bool {
 
 func (p Publishing) Validate(target string) error {
 	switch target {
-	case "typescript":
+	case "mcp-typescript", "typescript":
 		if p.NPM != nil && p.NPM.Token != "" {
 			if err := validateSecret(p.NPM.Token); err != nil {
 				return fmt.Errorf("failed to validate npm token: %w", err)
@@ -237,7 +237,7 @@ func (p Publishing) Validate(target string) error {
 
 func (p Publishing) IsPublished(target string) bool {
 	switch target {
-	case "typescript":
+	case "mcp-typescript", "typescript":
 		if p.NPM != nil && p.NPM.Token != "" {
 			return true
 		}
