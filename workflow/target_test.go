@@ -56,11 +56,27 @@ func TestTarget_Validate(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "target with publishing successfully validates",
+			name: "typescript target with publishing successfully validates",
 			args: args{
 				supportedLangs: []string{"typescript"},
 				target: workflow.Target{
 					Target: "typescript",
+					Source: "openapi.yaml",
+					Publishing: &workflow.Publishing{
+						NPM: &workflow.NPM{
+							Token: "$TEST_TOKEN",
+						},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "mcp-typescript target with publishing successfully validates",
+			args: args{
+				supportedLangs: []string{"mcp-typescript"},
+				target: workflow.Target{
+					Target: "mcp-typescript",
 					Source: "openapi.yaml",
 					Publishing: &workflow.Publishing{
 						NPM: &workflow.NPM{
