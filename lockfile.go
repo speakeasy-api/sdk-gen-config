@@ -58,8 +58,9 @@ var getUUID = func() string {
 
 func NewLockFile() *LockFile {
 	return &LockFile{
-		LockVersion: v2,
-		ID:          getUUID(),
-		Features:    map[string]map[string]string{},
+		LockVersion:  v2,
+		ID:           getUUID(),
+		Features:     map[string]map[string]string{},
+		ReleaseNotes: map[string]string{},
 	}
 }
