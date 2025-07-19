@@ -63,8 +63,8 @@ func TestLoad_Success(t *testing.T) {
 							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
-							OAuth2ClientCredentialsEnabled: true,
-							OAuth2PasswordEnabled:          true,
+							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 						Tests: Tests{
 							GenerateTests:    false,
@@ -301,8 +301,8 @@ func TestLoad_Success(t *testing.T) {
 							SharedErrorComponentsApr2025:         true,
 						},
 						Auth: &Auth{
-							OAuth2ClientCredentialsEnabled: true,
-							OAuth2PasswordEnabled:          true,
+							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 						Tests: Tests{
 							GenerateTests:    false,
@@ -361,8 +361,8 @@ func TestLoad_Success(t *testing.T) {
 							NameResolutionFeb2025:                true,
 						},
 						Auth: &Auth{
-							OAuth2ClientCredentialsEnabled: true,
-							OAuth2PasswordEnabled:          true,
+							OAuth2ClientCredentialsEnabled: false,
+							OAuth2PasswordEnabled:          false,
 						},
 						Tests: Tests{
 							GenerateTests:    false,
