@@ -36,6 +36,7 @@ type TargetLock struct {
 	CodeSamplesNamespace      string `yaml:"codeSamplesNamespace,omitempty"`
 	CodeSamplesRevisionDigest string `yaml:"codeSamplesRevisionDigest,omitempty"`
 	CodeSamplesBlobDigest     string `yaml:"codeSamplesBlobDigest,omitempty"`
+	ReleaseNotes              string `yaml:"releaseNotes,omitempty"`
 }
 
 func LoadLockfile(dir string) (*LockFile, error) {
