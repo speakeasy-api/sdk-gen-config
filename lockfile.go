@@ -17,8 +17,7 @@ type LockFile struct {
 	GeneratedTests       GeneratedTests               `yaml:"generatedTests,omitempty"`
 	AdditionalProperties map[string]any               `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 
-	// Key is target/language and value is release notes in markdown format
-	ReleaseNotes map[string]string `yaml:"releaseNotes,omitempty"`
+	ReleaseNotes string `yaml:"releaseNotes,omitempty"`
 }
 
 type Management struct {
@@ -58,9 +57,8 @@ var getUUID = func() string {
 
 func NewLockFile() *LockFile {
 	return &LockFile{
-		LockVersion:  v2,
-		ID:           getUUID(),
-		Features:     map[string]map[string]string{},
-		ReleaseNotes: map[string]string{},
+		LockVersion: v2,
+		ID:          getUUID(),
+		Features:    map[string]map[string]string{},
 	}
 }

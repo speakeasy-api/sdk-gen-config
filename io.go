@@ -292,10 +292,6 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		lockFile.Features = make(map[string]map[string]string)
 	}
 
-	if lockFile.ReleaseNotes == nil {
-		lockFile.ReleaseNotes = make(map[string]string)
-	}
-
 	config := &Config{
 		Config:     cfg,
 		ConfigPath: configRes.Path,
