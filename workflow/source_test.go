@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/AlekSi/pointer"
+	"github.com/speakeasy-api/openapi/pointer"
 	"github.com/speakeasy-api/sdk-gen-config/workflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -72,7 +72,7 @@ func TestSource_Validate(t *testing.T) {
 							Location: "openapi.yaml",
 						},
 					},
-					Output: pointer.ToString("openapi.yaml"),
+					Output: pointer.From("openapi.yaml"),
 				},
 			},
 			wantErr: nil,
@@ -116,7 +116,7 @@ func TestSource_Validate(t *testing.T) {
 						{Document: &workflow.Document{Location: "overlay.yaml"}},
 						{Document: &workflow.Document{Location: "http://example.com/overlay.yaml"}},
 					},
-					Output: pointer.ToString("openapi.yaml"),
+					Output: pointer.From("openapi.yaml"),
 				},
 			},
 			wantErr: nil,
@@ -134,7 +134,7 @@ func TestSource_Validate(t *testing.T) {
 						{Document: &workflow.Document{Location: "overlay.yaml"}},
 						{Document: &workflow.Document{Location: "overlay.yaml"}},
 					},
-					Output: pointer.ToString("openapi.json"),
+					Output: pointer.From("openapi.json"),
 				},
 			},
 			wantErr: nil,
@@ -301,7 +301,7 @@ func TestSource_Validate(t *testing.T) {
 					},
 					Transformations: []workflow.Transformation{
 						{
-							RemoveUnused: pointer.ToBool(true),
+							RemoveUnused: pointer.From(true),
 						},
 					},
 				},
@@ -318,8 +318,8 @@ func TestSource_Validate(t *testing.T) {
 					},
 					Transformations: []workflow.Transformation{
 						{
-							RemoveUnused: pointer.ToBool(true),
-							Cleanup:      pointer.ToBool(true),
+							RemoveUnused: pointer.From(true),
+							Cleanup:      pointer.From(true),
 						},
 					},
 				},
@@ -400,8 +400,8 @@ func TestSource_Validate(t *testing.T) {
 						{
 							FilterOperations: &workflow.FilterOperationsOptions{
 								Operations: "abc, def",
-								Include:    pointer.ToBool(true),
-								Exclude:    pointer.ToBool(true),
+								Include:    pointer.From(true),
+								Exclude:    pointer.From(true),
 							},
 						},
 					},
@@ -514,7 +514,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 							Location: "openapi1.yaml",
 						},
 					},
-					Output: pointer.ToString("merged.yaml"),
+					Output: pointer.From("merged.yaml"),
 				},
 			},
 			wantOutputLocation: "merged.yaml",
@@ -547,7 +547,7 @@ func TestSource_GetOutputLocation(t *testing.T) {
 					Overlays: []workflow.Overlay{
 						{Document: &workflow.Document{Location: "overlay.yaml"}},
 					},
-					Output: pointer.ToString("processed.yaml"),
+					Output: pointer.From("processed.yaml"),
 				},
 			},
 			wantOutputLocation: "processed.yaml",

@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/daveshanley/vacuum/model"
 	"github.com/speakeasy-api/sdk-gen-config/lint"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -42,7 +41,7 @@ rulesets:
 				Rulesets: map[string]lint.Ruleset{
 					"default": {
 						Rulesets: []string{"test"},
-						Rules: map[string]*model.Rule{
+						Rules: map[string]*lint.Rule{
 							"test": {},
 						},
 					},
