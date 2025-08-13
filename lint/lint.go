@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"regexp"
 
-	"github.com/daveshanley/vacuum/model"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 const (
@@ -19,9 +19,34 @@ const (
 	lintFile = "lint.yaml"
 )
 
+// RuleCategory is a structure that represents a category of rules.
+type RuleCategory struct {
+	Id          string `json:"id" yaml:"id"`                   // The category ID
+	Name        string `json:"name" yaml:"name"`               // The name of the category
+	Description string `json:"description" yaml:"description"` // What is the category all about?
+}
+
+// Rule is a structure that represents a rule as part of a ruleset.
+type Rule struct {
+	Id                 string         `json:"id,omitempty" yaml:"id,omitempty"`
+	Description        string         `json:"description,omitempty" yaml:"description,omitempty"`
+	Message            string         `json:"message,omitempty" yaml:"message,omitempty"`
+	Given              interface{}    `json:"given,omitempty" yaml:"given,omitempty"`
+	Formats            []string       `json:"formats,omitempty" yaml:"formats,omitempty"`
+	Resolved           bool           `json:"resolved,omitempty" yaml:"resolved,omitempty"`
+	Recommended        bool           `json:"recommended,omitempty" yaml:"recommended,omitempty"`
+	Type               string         `json:"type,omitempty" yaml:"type,omitempty"`
+	Severity           string         `json:"severity,omitempty" yaml:"severity,omitempty"`
+	Then               interface{}    `json:"then,omitempty" yaml:"then,omitempty"`
+	PrecompiledPattern *regexp.Regexp `json:"-" yaml:"-"` // regex is slow.
+	RuleCategory       *RuleCategory  `json:"category,omitempty" yaml:"category,omitempty"`
+	Name               string         `json:"-" yaml:"-"`
+	HowToFix           string         `json:"howToFix,omitempty" yaml:"howToFix,omitempty"`
+}
+
 type Ruleset struct {
-	Rulesets []string               `yaml:"rulesets"`
-	Rules    map[string]*model.Rule `yaml:"rules"`
+	Rulesets []string         `yaml:"rulesets"`
+	Rules    map[string]*Rule `yaml:"rules"`
 }
 
 type Lint struct {

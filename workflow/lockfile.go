@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 const workflowLockfile = "workflow.lock"

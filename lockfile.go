@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/google/uuid"
-	orderedmap "github.com/wk8/go-ordered-map/v2"
-	"gopkg.in/yaml.v3"
+	"github.com/speakeasy-api/openapi/sequencedmap"
+	"go.yaml.in/yaml/v4"
 )
 
 type LockFile struct {
@@ -35,20 +35,20 @@ type Management struct {
 }
 
 type (
-	Examples       = *orderedmap.OrderedMap[string, *orderedmap.OrderedMap[string, OperationExamples]]
-	GeneratedTests = *orderedmap.OrderedMap[string, string]
+	Examples       = *sequencedmap.Map[string, *sequencedmap.Map[string, OperationExamples]]
+	GeneratedTests = *sequencedmap.Map[string, string]
 )
 
 type OperationExamples struct {
-	Parameters  *ParameterExamples                                                        `yaml:"parameters,omitempty"`
-	RequestBody *orderedmap.OrderedMap[string, yaml.Node]                                 `yaml:"requestBody,omitempty"`
-	Responses   *orderedmap.OrderedMap[string, *orderedmap.OrderedMap[string, yaml.Node]] `yaml:"responses,omitempty"`
+	Parameters  *ParameterExamples                                              `yaml:"parameters,omitempty"`
+	RequestBody *sequencedmap.Map[string, yaml.Node]                            `yaml:"requestBody,omitempty"`
+	Responses   *sequencedmap.Map[string, *sequencedmap.Map[string, yaml.Node]] `yaml:"responses,omitempty"`
 }
 
 type ParameterExamples struct {
-	Path   *orderedmap.OrderedMap[string, yaml.Node] `yaml:"path,omitempty"`
-	Query  *orderedmap.OrderedMap[string, yaml.Node] `yaml:"query,omitempty"`
-	Header *orderedmap.OrderedMap[string, yaml.Node] `yaml:"header,omitempty"`
+	Path   *sequencedmap.Map[string, yaml.Node] `yaml:"path,omitempty"`
+	Query  *sequencedmap.Map[string, yaml.Node] `yaml:"query,omitempty"`
+	Header *sequencedmap.Map[string, yaml.Node] `yaml:"header,omitempty"`
 }
 
 var getUUID = func() string {
