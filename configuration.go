@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/AlekSi/pointer"
 	"github.com/mitchellh/mapstructure"
+	"github.com/speakeasy-api/openapi/pointer"
 )
 
 const (
@@ -348,131 +348,131 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Name:              "baseServerURL",
 			Required:          false,
 			DefaultValue:      ptr(""),
-			Description:       pointer.To("The base URL of the server. This value will be used if global servers are not defined in the spec."),
-			ValidationRegex:   pointer.To(`^(https?):\/\/([\w\-]+\.)+\w+(\/.*)?$`),
-			ValidationMessage: pointer.To("Must be a valid server URL"),
+			Description:       pointer.From("The base URL of the server. This value will be used if global servers are not defined in the spec."),
+			ValidationRegex:   pointer.From(`^(https?):\/\/([\w\-]+\.)+\w+(\/.*)?$`),
+			ValidationMessage: pointer.From("Must be a valid server URL"),
 		},
 		{
 			Name:              "sdkClassName",
 			Required:          false,
 			DefaultValue:      ptr("SDK"),
-			Description:       pointer.To("Generated name of the root SDK class"),
-			ValidationRegex:   pointer.To(`^[\w.\-]+$`),
-			ValidationMessage: pointer.To("Letters, numbers, or .-_ only"),
+			Description:       pointer.From("Generated name of the root SDK class"),
+			ValidationRegex:   pointer.From(`^[\w.\-]+$`),
+			ValidationMessage: pointer.From("Letters, numbers, or .-_ only"),
 		},
 		{
 			Name:         "maintainOpenAPIOrder",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Maintains the order of things like parameters and fields when generating the SDK"),
+			Description:  pointer.From("Maintains the order of things like parameters and fields when generating the SDK"),
 		},
 		{
 			Name:         "deduplicateErrors",
 			Required:     false,
 			DefaultValue: ptr(false),
-			Description:  pointer.To("Deduplicates errors that have the same schema"),
+			Description:  pointer.From("Deduplicates errors that have the same schema"),
 		},
 		{
 			Name:         "skipErrorSuffix",
 			Required:     false,
 			DefaultValue: ptr(false),
-			Description:  pointer.To("Skips the automatic addition of an error suffix to error types"),
+			Description:  pointer.From("Skips the automatic addition of an error suffix to error types"),
 		},
 		{
 			Name:         "usageSnippets.optionalPropertyRendering",
 			Required:     false,
 			DefaultValue: ptr(OptionalPropertyRenderingOptionWithExample),
-			Description:  pointer.To("Controls how optional properties are rendered in usage snippets, by default they will be rendered when an example is present in the OpenAPI spec"),
+			Description:  pointer.From("Controls how optional properties are rendered in usage snippets, by default they will be rendered when an example is present in the OpenAPI spec"),
 		},
 		{
 			Name:         "usageSnippets.sdkInitStyle",
 			Required:     false,
 			DefaultValue: ptr(SDKInitStyleConstructor),
-			Description:  pointer.To("Controls how the SDK initialization is depicted in usage snippets, by default it will use the constructor"),
+			Description:  pointer.From("Controls how the SDK initialization is depicted in usage snippets, by default it will use the constructor"),
 		},
 		{
 			Name:         "useClassNamesForArrayFields",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Use class names for array fields instead of the child's schema type"),
+			Description:  pointer.From("Use class names for array fields instead of the child's schema type"),
 		},
 		{
 			Name:         "fixes.nameResolutionDec2023",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables a number of breaking changes introduced in December 2023, that improve name resolution for inline schemas and reduce chances of name collisions"),
+			Description:  pointer.From("Enables a number of breaking changes introduced in December 2023, that improve name resolution for inline schemas and reduce chances of name collisions"),
 		},
 		{
 			Name:         "fixes.nameResolutionFeb2025",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables a number of breaking changes introduced in February 2025, that improve name resolution for inline schemas and reduce chances of name collisions"),
+			Description:  pointer.From("Enables a number of breaking changes introduced in February 2025, that improve name resolution for inline schemas and reduce chances of name collisions"),
 		},
 		{
 			Name:         "fixes.parameterOrderingFeb2024",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables fixes to the ordering of parameters for an operation if they include multiple types of parameters (ie header, query, path) to match the order they are defined in the OpenAPI spec"),
+			Description:  pointer.From("Enables fixes to the ordering of parameters for an operation if they include multiple types of parameters (ie header, query, path) to match the order they are defined in the OpenAPI spec"),
 		},
 		{
 			Name:         "fixes.requestResponseComponentNamesFeb2024",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables fixes that will name inline schemas within request and response components with the component name of the parent if only one content type is defined"),
+			Description:  pointer.From("Enables fixes that will name inline schemas within request and response components with the component name of the parent if only one content type is defined"),
 		},
 		{
 			Name:         "fixes.methodSignaturesApr2024",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables fixes that will detect and mark optional request and security method arguments and order them according to optionality."),
+			Description:  pointer.From("Enables fixes that will detect and mark optional request and security method arguments and order them according to optionality."),
 		},
 		{
 			Name:         "auth.oAuth2ClientCredentialsEnabled",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables support for OAuth2 client credentials grant type (Enterprise tier only)"),
+			Description:  pointer.From("Enables support for OAuth2 client credentials grant type (Enterprise tier only)"),
 		},
 		{
 			Name:         "auth.oAuth2PasswordEnabled",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables support for OAuth2 resource owner password credentials grant type (Enterprise tier only)"),
+			Description:  pointer.From("Enables support for OAuth2 resource owner password credentials grant type (Enterprise tier only)"),
 		},
 		{
 			Name:         "tests.generateTests",
 			Required:     false,
 			DefaultValue: ptr(!newSDK),
-			Description:  pointer.To("Enables generation of tests"),
+			Description:  pointer.From("Enables generation of tests"),
 		},
 		{
 			Name:         "tests.generateNewTests",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables generation of new tests for any new operations found in the OpenAPI spec"),
+			Description:  pointer.From("Enables generation of new tests for any new operations found in the OpenAPI spec"),
 		},
 		{
 			Name:         "tests.skipResponseBodyAssertions",
 			Required:     false,
 			DefaultValue: ptr(false),
-			Description:  pointer.To("Skips the generation of response body assertions in tests"),
+			Description:  pointer.From("Skips the generation of response body assertions in tests"),
 		},
 		{
 			Name:         "fixes.securityFeb2025",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables fixes and refactoring for security that were introduced in February 2025"),
+			Description:  pointer.From("Enables fixes and refactoring for security that were introduced in February 2025"),
 		},
 		{
 			Name:         "fixes.sharedErrorComponentsApr2025",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"),
+			Description:  pointer.From("Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"),
 		},
 		{
 			Name:         "sdkHooksConfigAccess",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Enables access to the SDK configuration from hooks"),
+			Description:  pointer.From("Enables access to the SDK configuration from hooks"),
 		},
 	}
 }

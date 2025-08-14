@@ -8,7 +8,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/AlekSi/pointer"
+	"github.com/speakeasy-api/openapi/pointer"
 	"github.com/speakeasy-api/sdk-gen-config/workflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -94,7 +94,7 @@ targets:
 						Target: "typescript",
 						Source: "testSource",
 						Testing: &workflow.Testing{
-							Enabled: pointer.ToBool(true),
+							Enabled: pointer.From(true),
 						},
 					},
 				},
@@ -437,7 +437,8 @@ targets:
             registry:
                 location: registry.speakeasyapi.dev/org/workspace/testSource-typescript-code-samples
             blocking: false
-`}, {
+`,
+	}, {
 		name: "migrates a workflow with a code samples output and a source with a name that contains the target",
 		in: `workflowVersion: 1.0.0
 sources:

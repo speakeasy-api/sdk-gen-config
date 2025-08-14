@@ -10,7 +10,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/AlekSi/pointer"
+	"github.com/speakeasy-api/openapi/pointer"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
@@ -178,7 +178,7 @@ func (w Workflow) migrate(telemetryDisabled bool) Workflow {
 				sdkLabel := fmt.Sprintf("%s (SDK)", strings.ToUpper(string(target.Target[0]))+target.Target[1:])
 				target.CodeSamples = &CodeSamples{
 					Registry: codeSamplesRegistry,
-					Blocking: pointer.ToBool(false),
+					Blocking: pointer.From(false),
 					LabelOverride: &CodeSamplesLabelOverride{
 						FixedValue: &sdkLabel,
 					},
