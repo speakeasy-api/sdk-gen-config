@@ -373,6 +373,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Description:  pointer.To("Deduplicates errors that have the same schema"),
 		},
 		{
+			Name:         "inferSSEOverload",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Generates an overload if generator detects that the request body field `stream: true` is used for client intent to request `text/event-stream` response"),
+		},
+		{
 			Name:         "skipErrorSuffix",
 			Required:     false,
 			DefaultValue: ptr(false),
