@@ -98,6 +98,7 @@ type Generation struct {
 	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
 	Auth                        *Auth          `yaml:"auth,omitempty"`
 	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty"`
+	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty"`
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty"`
 
 	// Mock server generation configuration.
