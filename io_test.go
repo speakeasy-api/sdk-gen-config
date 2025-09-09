@@ -71,6 +71,7 @@ func TestLoad_Success(t *testing.T) {
 							GenerateNewTests: true,
 						},
 						UseClassNamesForArrayFields: true,
+						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
@@ -125,6 +126,7 @@ func TestLoad_Success(t *testing.T) {
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
+						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -182,6 +184,7 @@ func TestLoad_Success(t *testing.T) {
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
+						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -244,6 +247,7 @@ func TestLoad_Success(t *testing.T) {
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
+						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -310,6 +314,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
+						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
@@ -370,6 +375,7 @@ func TestLoad_Success(t *testing.T) {
 						},
 						MaintainOpenAPIOrder:        true,
 						UseClassNamesForArrayFields: true,
+						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
 					},
 					New: map[string]bool{
@@ -425,6 +431,7 @@ func TestLoad_Success(t *testing.T) {
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
+						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -488,6 +495,7 @@ func TestLoad_Success(t *testing.T) {
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
+						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{
 						"typescript": true,
@@ -555,6 +563,7 @@ func TestLoad_Success(t *testing.T) {
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
+						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{
 						"typescript": true,
@@ -622,6 +631,7 @@ func TestLoad_Success(t *testing.T) {
 						MockServer: &MockServer{
 							Disabled: true,
 						},
+						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -737,6 +747,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 					GenerateTests:    true,
 					GenerateNewTests: false,
 				},
+				HoistGlobalSecurity: true,
 			},
 			New: map[string]bool{},
 		},
