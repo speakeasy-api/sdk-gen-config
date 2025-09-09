@@ -73,6 +73,7 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
+						HoistGlobalSecurity:         true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -316,6 +317,7 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
+						HoistGlobalSecurity:         true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -377,6 +379,7 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
+						HoistGlobalSecurity:         true,
 					},
 					New: map[string]bool{
 						"go": true,
