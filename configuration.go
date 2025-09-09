@@ -100,6 +100,7 @@ type Generation struct {
 	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty"`
 	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty"`
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty"`
+	HoistGlobalSecurity         bool           `yaml:"hoistGlobalSecurity,omitempty"`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
@@ -480,6 +481,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.To("Enables access to the SDK configuration from hooks"),
+		},
+		{
+			Name:         "hoistGlobalSecurity",
+			Required:     false,
+			DefaultValue: ptr(!newSDK),
+			Description:  pointer.To("Enables hoisting of operation-level security schemes to global level when no global security is defined"),
 		},
 	}
 }
