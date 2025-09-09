@@ -98,6 +98,7 @@ type Generation struct {
 	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
 	Auth                        *Auth          `yaml:"auth,omitempty"`
 	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty"`
+	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty"`
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty"`
 
 	// Mock server generation configuration.
@@ -371,6 +372,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(false),
 			Description:  pointer.From("Deduplicates errors that have the same schema"),
+		},
+		{
+			Name:         "inferSSEOverload",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.To("Generates an overload if generator detects that the request body field `stream: true` is used for client intent to request `text/event-stream` response"),
 		},
 		{
 			Name:         "skipErrorSuffix",
