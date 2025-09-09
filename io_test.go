@@ -65,6 +65,7 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
 							OAuth2PasswordEnabled:          true,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    false,
@@ -73,7 +74,6 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
-						HoistGlobalSecurity:         true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -122,12 +122,12 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
-						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -180,12 +180,12 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
-						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -243,12 +243,12 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
-						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -308,6 +308,7 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
 							OAuth2PasswordEnabled:          true,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    false,
@@ -317,7 +318,6 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
-						HoistGlobalSecurity:         true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -370,6 +370,7 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
 							OAuth2PasswordEnabled:          true,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    false,
@@ -379,7 +380,6 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
-						HoistGlobalSecurity:         true,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -429,12 +429,12 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
-						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -493,12 +493,12 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
-						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{
 						"typescript": true,
@@ -561,12 +561,12 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
-						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{
 						"typescript": true,
@@ -626,6 +626,7 @@ func TestLoad_Success(t *testing.T) {
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: false,
 							OAuth2PasswordEnabled:          false,
+							HoistGlobalSecurity:            true,
 						},
 						Tests: Tests{
 							GenerateTests:    true,
@@ -634,7 +635,6 @@ func TestLoad_Success(t *testing.T) {
 						MockServer: &MockServer{
 							Disabled: true,
 						},
-						HoistGlobalSecurity: true,
 					},
 					New: map[string]bool{},
 				},
@@ -745,12 +745,12 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 				Auth: &Auth{
 					OAuth2ClientCredentialsEnabled: false,
 					OAuth2PasswordEnabled:          false,
+					HoistGlobalSecurity:            true,
 				},
 				Tests: Tests{
 					GenerateTests:    true,
 					GenerateNewTests: false,
 				},
-				HoistGlobalSecurity: true,
 			},
 			New: map[string]bool{},
 		},
