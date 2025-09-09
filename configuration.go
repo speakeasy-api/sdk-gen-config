@@ -377,7 +377,7 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Name:         "inferSSEOverload",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.To("Generates an overload if generator detects that the request body field `stream: true` is used for client intent to request `text/event-stream` response"),
+			Description:  pointer.From("Generates an overload if generator detects that the request body field `stream: true` is used for client intent to request `text/event-stream` response"),
 		},
 		{
 			Name:         "skipErrorSuffix",
