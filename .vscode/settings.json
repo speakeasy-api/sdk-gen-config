@@ -1,0 +1,11 @@
+{
+    "go.goroot": "/home/vgd/.local/share/mise/installs/go/1.25.0",
+    "debug.javascript.defaultRuntimeExecutable": {
+        "pwa-node": "/home/vgd/.local/share/mise/shims/node"
+    },
+    "go.alternateTools": {
+        "go": "/home/vgd/.local/share/mise/shims/go",
+        "dlv": "/home/vgd/.local/share/mise/shims/dlv",
+        "gopls": "/home/vgd/.local/share/mise/shims/gopls"
+    }
+}

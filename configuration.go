@@ -79,6 +79,7 @@ func (f *Fixes) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type Auth struct {
 	OAuth2ClientCredentialsEnabled bool `yaml:"oAuth2ClientCredentialsEnabled"`
 	OAuth2PasswordEnabled          bool `yaml:"oAuth2PasswordEnabled"`
+	HoistGlobalSecurity            bool `yaml:"hoistGlobalSecurity"`
 }
 
 type Tests struct {
@@ -480,6 +481,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.From("Enables access to the SDK configuration from hooks"),
+		},
+		{
+			Name:         "auth.hoistGlobalSecurity",
+			Required:     false,
+			DefaultValue: ptr(true),
+			Description:  pointer.To("Enables hoisting of operation-level security schemes to global level when no global security is defined"),
 		},
 	}
 }
