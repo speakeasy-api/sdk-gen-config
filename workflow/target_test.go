@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/AlekSi/pointer"
+	"github.com/speakeasy-api/openapi/pointer"
 	"github.com/speakeasy-api/sdk-gen-config/workflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -95,7 +95,7 @@ func TestTarget_Validate(t *testing.T) {
 					Target: "typescript",
 					Source: "openapi.yaml",
 					Testing: &workflow.Testing{
-						Enabled: pointer.ToBool(true),
+						Enabled: pointer.From(true),
 					},
 				},
 			},
@@ -109,9 +109,9 @@ func TestTarget_Validate(t *testing.T) {
 					Target: "typescript",
 					Source: "openapi.yaml",
 					Testing: &workflow.Testing{
-						Enabled: pointer.ToBool(true),
+						Enabled: pointer.From(true),
 						MockServer: &workflow.MockServer{
-							Enabled: pointer.ToBool(false),
+							Enabled: pointer.From(false),
 						},
 					},
 				},
