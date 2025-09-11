@@ -486,7 +486,7 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Name:         "auth.hoistGlobalSecurity",
 			Required:     false,
 			DefaultValue: ptr(true),
-			Description:  pointer.To("Enables hoisting of operation-level security schemes to global level when no global security is defined"),
+			Description:  pointer.From("Enables hoisting of operation-level security schemes to global level when no global security is defined"),
 		},
 	}
 }
