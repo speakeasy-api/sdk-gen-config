@@ -86,7 +86,7 @@ func (p SourceRegistry) Validate() error {
 }
 
 func (p *SourceRegistry) SetNamespace(namespace string) error {
-	p.Location = SourceRegistryLocation(baseRegistryURL + namespace)
+	p.Location = SourceRegistryLocation("https://" + baseRegistryURL + namespace)
 	return p.Validate()
 }
 
