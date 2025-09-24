@@ -27,6 +27,7 @@ type Workflow struct {
 	SpeakeasyVersion Version           `yaml:"speakeasyVersion,omitempty"`
 	Sources          map[string]Source `yaml:"sources"`
 	Targets          map[string]Target `yaml:"targets"`
+	Remotes          map[string]Remote `yaml:"remotes,omitempty"`
 }
 
 type Version string
@@ -96,6 +97,12 @@ func (w Workflow) Validate(supportLangs []string) error {
 	for sourceID, source := range w.Sources {
 		if err := source.Validate(); err != nil {
 			return fmt.Errorf("failed to validate source %s: %w", sourceID, err)
+		}
+	}
+
+	for remoteID, remote := range w.Remotes {
+		if err := remote.Validate(); err != nil {
+			return fmt.Errorf("failed to validate remote %s: %w", remoteID, err)
 		}
 	}
 
