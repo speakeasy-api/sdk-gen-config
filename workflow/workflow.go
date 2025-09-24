@@ -27,7 +27,7 @@ type Workflow struct {
 	SpeakeasyVersion Version              `yaml:"speakeasyVersion,omitempty"`
 	Sources          map[string]Source    `yaml:"sources"`
 	Targets          map[string]Target    `yaml:"targets"`
-	Dependents       map[string]Dependent `yaml:"dependents,omitempty"` // Currently only used by Google. Used to make rebuilding dependent SDKs that live elsewhere easier.
+	Dependents       map[string]Dependent `yaml:"dependents,omitempty"` // Currently only used by one customer. Used to make rebuilding dependent SDKs that live elsewhere easier.
 }
 
 type Version string

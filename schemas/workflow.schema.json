@@ -37,11 +37,11 @@
         "$ref": "#/$defs/target"
       }
     },
-    "remotes": {
+    "dependents": {
       "type": "object",
-      "description": "A map of remote names to remote configurations, used to define external repositories and their locations",
+      "description": "A map of dependent names to dependent configurations, used to define external repositories and their locations",
       "additionalProperties": {
-        "$ref": "#/$defs/remote"
+        "$ref": "#/$defs/dependent"
       }
     }
   },
@@ -183,25 +183,18 @@
       },
       "required": ["target", "source"]
     },
-    "remote": {
+    "dependent": {
       "type": "object",
       "additionalProperties": false,
-      "description": "A remote configuration for external repositories",
+      "description": "A dependent configuration for external repositories",
       "properties": {
-        "github_repo": {
-          "type": "string",
-          "description": "The GitHub repository URL"
-        },
         "location": {
           "type": "string",
           "description": "The local path to the repository"
         },
-        "tags": {
-          "type": "array",
-          "description": "A list of tags for the remote",
-          "items": {
-            "type": "string"
-          }
+        "cloneCommand": {
+          "type": "string",
+          "description": "Optional command to clone the repository"
         }
       },
       "required": ["location"]
