@@ -23,11 +23,11 @@ const (
 
 // Ensure you update schema/workflow.schema.json on changes
 type Workflow struct {
-	Version          string            `yaml:"workflowVersion"`
-	SpeakeasyVersion Version           `yaml:"speakeasyVersion,omitempty"`
-	Sources          map[string]Source `yaml:"sources"`
-	Targets          map[string]Target `yaml:"targets"`
-	Remotes          map[string]Remote `yaml:"remotes,omitempty"`
+	Version          string               `yaml:"workflowVersion"`
+	SpeakeasyVersion Version              `yaml:"speakeasyVersion,omitempty"`
+	Sources          map[string]Source    `yaml:"sources"`
+	Targets          map[string]Target    `yaml:"targets"`
+	Dependents       map[string]Dependent `yaml:"dependents,omitempty"` // Currently only used by Google. Used to make rebuilding dependent SDKs that live elsewhere easier.
 }
 
 type Version string
@@ -100,9 +100,9 @@ func (w Workflow) Validate(supportLangs []string) error {
 		}
 	}
 
-	for remoteID, remote := range w.Remotes {
-		if err := remote.Validate(); err != nil {
-			return fmt.Errorf("failed to validate remote %s: %w", remoteID, err)
+	for dependentID, dependent := range w.Dependents {
+		if err := dependent.Validate(); err != nil {
+			return fmt.Errorf("failed to validate dependent %s: %w", dependentID, err)
 		}
 	}
 
