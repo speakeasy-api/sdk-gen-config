@@ -36,6 +36,13 @@
       "additionalProperties": {
         "$ref": "#/$defs/target"
       }
+    },
+    "dependents": {
+      "type": "object",
+      "description": "A map of dependent names to dependent configurations, used to define external repositories and their locations",
+      "additionalProperties": {
+        "$ref": "#/$defs/dependent"
+      }
     }
   },
   "required": ["workflowVersion"],
@@ -175,6 +182,22 @@
         }
       },
       "required": ["target", "source"]
+    },
+    "dependent": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A dependent configuration for external repositories",
+      "properties": {
+        "location": {
+          "type": "string",
+          "description": "The local path to the repository"
+        },
+        "cloneCommand": {
+          "type": "string",
+          "description": "Optional command to clone the repository"
+        }
+      },
+      "required": ["location"]
     },
     "document": {
       "type": "object",
