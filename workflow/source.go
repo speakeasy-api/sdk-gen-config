@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/a8m/envsubst"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 )
 
@@ -76,11 +77,14 @@ type FallbackCodeSamples struct {
 type LocationString string
 
 func (l LocationString) Resolve() string {
-	if strings.HasPrefix(string(l), "$") {
-		return os.ExpandEnv(string(l))
+	s := string(l)
+
+	expanded, err := envsubst.String(s)
+	if err != nil {
+		return s
 	}
 
-	return string(l)
+	return expanded
 }
 
 func (l LocationString) Reference() string {

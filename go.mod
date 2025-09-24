@@ -3,6 +3,7 @@ module github.com/speakeasy-api/sdk-gen-config
 go 1.24.3
 
 require (
+	github.com/a8m/envsubst v1.4.3
 	github.com/google/uuid v1.5.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/speakeasy-api/openapi v1.6.4

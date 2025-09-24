@@ -15,6 +15,55 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func TestLocationStringResolve_EnvSubstitutions(t *testing.T) {
+	tests := []struct {
+		name string
+		env  map[string]string
+		val  workflow.LocationString
+		want string
+	}{
+		{
+			name: "simple substitution",
+			env:  map[string]string{"SDKGEN_ROOT": "/tmp"},
+			val:  "${SDKGEN_ROOT}/spec.yaml",
+			want: "/tmp/spec.yaml",
+		},
+		{
+			name: "fallback substitution",
+			env:  map[string]string{"SDKGEN_OPTION": ""},
+			val:  "${SDKGEN_OPTION:-default-value}",
+			want: "default-value",
+		},
+		{
+			name: "colon plus substitution",
+			env:  map[string]string{"SDKGEN_FEATURE": "enabled"},
+			val:  "/config${SDKGEN_FEATURE:+/premium}",
+			want: "/config/premium",
+		},
+		{
+			name: "multiple substitutions",
+			env: map[string]string{
+				"SDKGEN_HOST":    "api.example.com",
+				"SDKGEN_VERSION": "v1",
+			},
+			val:  "https://${SDKGEN_HOST}/${SDKGEN_VERSION}",
+			want: "https://api.example.com/v1",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, value := range tt.env {
+				t.Setenv(key, value)
+			}
+
+			result := tt.val.Resolve()
+
+			assert.Equal(t, tt.want, result)
+		})
+	}
+}
+
 func TestSource_Validate(t *testing.T) {
 	type args struct {
 		source workflow.Source
