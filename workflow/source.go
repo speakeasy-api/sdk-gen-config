@@ -77,7 +77,29 @@ type LocationString string
 
 func (l LocationString) Resolve() string {
 	if strings.HasPrefix(string(l), "$") {
-		return os.ExpandEnv(string(l))
+		s := string(l)
+
+		// Check for union syntax on env vars: ${var1} || ${var2} || fallback
+		if strings.Contains(s, " || ") {
+			parts := strings.Split(s, " || ")
+
+			for _, part := range parts {
+				part = strings.TrimSpace(part)
+
+				// If it starts with $, try to expand it
+				if strings.HasPrefix(part, "$") {
+					expanded := os.ExpandEnv(part)
+					if expanded != "" {
+						return expanded
+					}
+				} else {
+					// Not a variable, use as literal fallback
+					return part
+				}
+			}
+		}
+
+		return os.ExpandEnv(s)
 	}
 
 	return string(l)
