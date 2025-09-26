@@ -26,8 +26,8 @@ type FindWorkspaceOptions struct {
 }
 
 type FindWorkspaceResult struct {
-	Data []byte
-	Path string
+	Data         []byte
+	Path         string
 }
 
 func FindWorkspace(workingDir string, opts FindWorkspaceOptions) (*FindWorkspaceResult, error) {
