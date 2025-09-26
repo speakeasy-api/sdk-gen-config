@@ -571,3 +571,425 @@ func createTempFile(dir string, fileName, contents string) error {
 
 	return nil
 }
+
+func TestWorkflow_LoadWithLocal_Success(t *testing.T) {
+	type args struct {
+		workflowLocation   string
+		workflowContents   string
+		localContents      string
+		workingDir         string
+	}
+	tests := []struct {
+		name string
+		args args
+		want *workflow.Workflow
+	}{
+		{
+			name: "loads workflow with local override for sources",
+			args: args{
+				workflowLocation: "test/.speakeasy",
+				workflowContents: `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "./openapi.yaml"
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+`,
+				localContents: `sources:
+  testSource:
+    inputs:
+      - location: "./local-openapi.yaml"
+`,
+				workingDir: "test",
+			},
+			want: &workflow.Workflow{
+				Version: "1.0.0",
+				Sources: map[string]workflow.Source{
+					"testSource": {
+						Inputs: []workflow.Document{
+							{
+								Location: "./local-openapi.yaml",
+							},
+						},
+					},
+				},
+				Targets: map[string]workflow.Target{
+					"typescript": {
+						Target: "typescript",
+						Source: "testSource",
+					},
+				},
+			},
+		},
+		{
+			name: "loads workflow with local override for targets",
+			args: args{
+				workflowLocation: "test/.speakeasy",
+				workflowContents: `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "./openapi.yaml"
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+    output: ./ts-sdk
+`,
+				localContents: `targets:
+  typescript:
+    output: ./local-ts-sdk
+    testing:
+      enabled: true
+`,
+				workingDir: "test",
+			},
+			want: &workflow.Workflow{
+				Version: "1.0.0",
+				Sources: map[string]workflow.Source{
+					"testSource": {
+						Inputs: []workflow.Document{
+							{
+								Location: "./openapi.yaml",
+							},
+						},
+					},
+				},
+				Targets: map[string]workflow.Target{
+					"typescript": {
+						Target: "typescript",
+						Source: "testSource",
+						Output: pointer.From("./local-ts-sdk"),
+						Testing: &workflow.Testing{
+							Enabled: pointer.From(true),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "loads workflow with local override adding new targets",
+			args: args{
+				workflowLocation: "test/.speakeasy",
+				workflowContents: `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "./openapi.yaml"
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+`,
+				localContents: `targets:
+  python:
+    target: python
+    source: testSource
+    output: ./py-sdk
+`,
+				workingDir: "test",
+			},
+			want: &workflow.Workflow{
+				Version: "1.0.0",
+				Sources: map[string]workflow.Source{
+					"testSource": {
+						Inputs: []workflow.Document{
+							{
+								Location: "./openapi.yaml",
+							},
+						},
+					},
+				},
+				Targets: map[string]workflow.Target{
+					"typescript": {
+						Target: "typescript",
+						Source: "testSource",
+					},
+					"python": {
+						Target: "python",
+						Source: "testSource",
+						Output: pointer.From("./py-sdk"),
+					},
+				},
+			},
+		},
+		{
+			name: "loads workflow with local override for workflow version and speakeasy version",
+			args: args{
+				workflowLocation: "test/.speakeasy",
+				workflowContents: `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "./openapi.yaml"
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+`,
+				localContents: `workflowVersion: 1.0.0
+speakeasyVersion: v1.2.3
+`,
+				workingDir: "test",
+			},
+			want: &workflow.Workflow{
+				Version:          "1.0.0",
+				SpeakeasyVersion: "v1.2.3",
+				Sources: map[string]workflow.Source{
+					"testSource": {
+						Inputs: []workflow.Document{
+							{
+								Location: "./openapi.yaml",
+							},
+						},
+					},
+				},
+				Targets: map[string]workflow.Target{
+					"typescript": {
+						Target: "typescript",
+						Source: "testSource",
+					},
+				},
+			},
+		},
+		{
+			name: "loads workflow with complex local override merging nested structures",
+			args: args{
+				workflowLocation: "test/.speakeasy",
+				workflowContents: `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "./openapi.yaml"
+    registry:
+      location: "registry.example.com/org/workspace/api"
+      tags: 
+        - abc
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+    output: ./ts-sdk
+    codeSamples:
+      output: ./code-samples.yaml
+      blocking: false
+`,
+				localContents: `sources:
+  testSource:
+    registry:
+      location: OVERRIDE
+targets:
+  typescript:
+    codeSamples:
+      blocking: true
+      registry:
+        location: "registry.local.dev/org/workspace/samples"
+`,
+				workingDir: "test",
+			},
+			want: &workflow.Workflow{
+				Version: "1.0.0",
+				Sources: map[string]workflow.Source{
+					"testSource": {
+						Inputs: []workflow.Document{
+							{
+								Location: "./openapi.yaml",
+							},
+						},
+						Registry: &workflow.SourceRegistry{
+							Location: "OVERRIDE",
+							Tags:     []string{"abc"},
+						},
+					},
+				},
+				Targets: map[string]workflow.Target{
+					"typescript": {
+						Target: "typescript",
+						Source: "testSource",
+						Output: pointer.From("./ts-sdk"),
+						CodeSamples: &workflow.CodeSamples{
+							Output:   "./code-samples.yaml",
+							Blocking: pointer.From(true),
+							Registry: &workflow.SourceRegistry{
+								Location: "registry.local.dev/org/workspace/samples",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			basePath, err := os.MkdirTemp("", "workflow*")
+			require.NoError(t, err)
+			defer os.RemoveAll(basePath)
+
+			err = createTempFile(filepath.Join(basePath, tt.args.workflowLocation), "workflow.yaml", tt.args.workflowContents)
+			require.NoError(t, err)
+
+			err = createTempFile(filepath.Join(basePath, tt.args.workflowLocation), "workflow.local.yaml", tt.args.localContents)
+			require.NoError(t, err)
+
+			workflowFile, workflowPath, err := workflow.Load(filepath.Join(basePath, tt.args.workingDir))
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.want, workflowFile)
+			assert.Contains(t, workflowPath, filepath.Join(tt.args.workflowLocation, "workflow.yaml"))
+		})
+	}
+}
+
+func TestWorkflow_LoadWithLocal_NoLocalFile(t *testing.T) {
+	basePath, err := os.MkdirTemp("", "workflow*")
+	require.NoError(t, err)
+	defer os.RemoveAll(basePath)
+
+	workflowContents := `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "./openapi.yaml"
+targets:
+  typescript:
+    target: typescript
+    source: testSource
+`
+
+	err = createTempFile(filepath.Join(basePath, "test/.speakeasy"), "workflow.yaml", workflowContents)
+	require.NoError(t, err)
+
+	workflowFile, workflowPath, err := workflow.Load(filepath.Join(basePath, "test"))
+	require.NoError(t, err)
+
+	expected := &workflow.Workflow{
+		Version: "1.0.0",
+		Sources: map[string]workflow.Source{
+			"testSource": {
+				Inputs: []workflow.Document{
+					{
+						Location: "./openapi.yaml",
+					},
+				},
+			},
+		},
+		Targets: map[string]workflow.Target{
+			"typescript": {
+				Target: "typescript",
+				Source: "testSource",
+			},
+		},
+	}
+
+	assert.Equal(t, expected, workflowFile)
+	assert.Contains(t, workflowPath, filepath.Join("test/.speakeasy", "workflow.yaml"))
+}
+
+func TestWorkflow_LoadWithLocal_InvalidLocalFile(t *testing.T) {
+	basePath, err := os.MkdirTemp("", "workflow*")
+	require.NoError(t, err)
+	defer os.RemoveAll(basePath)
+
+	workflowContents := `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "./openapi.yaml"
+`
+
+	invalidLocalContents := `invalid yaml content: [
+`
+
+	err = createTempFile(filepath.Join(basePath, "test/.speakeasy"), "workflow.yaml", workflowContents)
+	require.NoError(t, err)
+
+	err = createTempFile(filepath.Join(basePath, "test/.speakeasy"), "workflow.local.yaml", invalidLocalContents)
+	require.NoError(t, err)
+
+	_, _, err = workflow.Load(filepath.Join(basePath, "test"))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to unmarshal workflow.local.yaml")
+}
+
+func TestWorkflow_Merge_Method(t *testing.T) {
+	baseWorkflow := &workflow.Workflow{
+		Version:          "1.0.0",
+		SpeakeasyVersion: "latest",
+		Sources: map[string]workflow.Source{
+			"source1": {
+				Inputs: []workflow.Document{
+					{Location: "./api.yaml"},
+				},
+			},
+		},
+		Targets: map[string]workflow.Target{
+			"typescript": {
+				Target: "typescript",
+				Source: "source1",
+				Output: pointer.From("./ts-sdk"),
+			},
+		},
+		Dependents: map[string]workflow.Dependent{
+			"dep1": {
+				Location: "source1",
+			},
+		},
+	}
+
+	localWorkflow := &workflow.Workflow{
+		Version:          "1.0.0",
+		SpeakeasyVersion: "v1.2.3",
+		Sources: map[string]workflow.Source{
+			"source1": {
+				Registry: &workflow.SourceRegistry{
+					Location: "registry.local.dev/org/workspace/api",
+				},
+			},
+			"source2": {
+				Inputs: []workflow.Document{
+					{Location: "./local-api.yaml"},
+				},
+			},
+		},
+		Targets: map[string]workflow.Target{
+			"typescript": {
+				Testing: &workflow.Testing{
+					Enabled: pointer.From(true),
+				},
+			},
+			"python": {
+				Target: "python",
+				Source: "source2",
+				Output: pointer.From("./py-sdk"),
+			},
+		},
+		Dependents: map[string]workflow.Dependent{
+			"dep2": {
+				Location: "source2",
+			},
+		},
+	}
+
+	baseWorkflow.Merge(localWorkflow)
+
+	assert.Equal(t, "v1.2.3", string(baseWorkflow.SpeakeasyVersion))
+
+	assert.Len(t, baseWorkflow.Sources, 2)
+	assert.Equal(t, "./api.yaml", string(baseWorkflow.Sources["source1"].Inputs[0].Location))
+	assert.Equal(t, "registry.local.dev/org/workspace/api", string(baseWorkflow.Sources["source1"].Registry.Location))
+	assert.Equal(t, "./local-api.yaml", string(baseWorkflow.Sources["source2"].Inputs[0].Location))
+
+	assert.Len(t, baseWorkflow.Targets, 2)
+	assert.Equal(t, "typescript", baseWorkflow.Targets["typescript"].Target)
+	assert.Equal(t, "./ts-sdk", *baseWorkflow.Targets["typescript"].Output)
+	assert.True(t, *baseWorkflow.Targets["typescript"].Testing.Enabled)
+	assert.Equal(t, "python", baseWorkflow.Targets["python"].Target)
+	assert.Equal(t, "./py-sdk", *baseWorkflow.Targets["python"].Output)
+
+	assert.Len(t, baseWorkflow.Dependents, 2)
+	assert.Equal(t, "source1", baseWorkflow.Dependents["dep1"].Location)
+	assert.Equal(t, "source2", baseWorkflow.Dependents["dep2"].Location)
+}

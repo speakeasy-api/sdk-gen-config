@@ -10,8 +10,8 @@ import (
 	"slices"
 	"strings"
 
+	"dario.cat/mergo"
 	"github.com/speakeasy-api/openapi/pointer"
-
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
 )
@@ -47,6 +47,21 @@ func Load(dir string) (*Workflow, string, error) {
 	var workflow Workflow
 	if err := yaml.Unmarshal(res.Data, &workflow); err != nil {
 		return nil, "", fmt.Errorf("failed to unmarshal %s: %w", workflowFile, err)
+	}
+
+	// Look for a workflow.local.yaml file and merge any set values into the workflow
+	localPath := strings.Replace(res.Path, "workflow.yaml", "workflow.local.yaml", 1)
+	localData, err := os.ReadFile(localPath)
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return nil, "", fmt.Errorf("failed to read workflow.local.yaml: %w", err)
+		}
+	} else {
+		var localWorkflow Workflow
+		if err := yaml.Unmarshal(localData, &localWorkflow); err != nil {
+			return nil, "", fmt.Errorf("failed to unmarshal workflow.local.yaml: %w", err)
+		}
+		workflow.Merge(&localWorkflow)
 	}
 
 	return &workflow, res.Path, nil
@@ -129,6 +144,34 @@ func validateSecret(secret string) error {
 	}
 
 	return nil
+}
+
+// Merge merges another workflow into this workflow
+func (w *Workflow) Merge(other *Workflow) {
+	// Merge maps using generic helper
+	mergeMap(w.Sources, other.Sources)
+	mergeMap(w.Targets, other.Targets)
+	mergeMap(w.Dependents, other.Dependents)
+
+	// Merge other top-level fields
+	if other.Version != "" {
+		w.Version = other.Version
+	}
+	if other.SpeakeasyVersion != "" {
+		w.SpeakeasyVersion = other.SpeakeasyVersion
+	}
+}
+
+// mergeMap merges two maps by using mergo on matching keys
+func mergeMap[T any](base map[string]T, other map[string]T) {
+	for key, otherValue := range other {
+		if baseValue, exists := base[key]; exists {
+			mergo.Merge(&baseValue, &otherValue, mergo.WithOverride)
+			base[key] = baseValue
+		} else {
+			base[key] = otherValue
+		}
+	}
 }
 
 func (v Version) String() string {
