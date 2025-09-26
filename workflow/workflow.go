@@ -190,6 +190,8 @@ func (w Workflow) migrate(telemetryDisabled bool) Workflow {
 						FixedValue: &sdkLabel,
 					},
 				}
+			} else if !target.CodeSamples.Enabled() {
+				// do nothing
 			} else if target.CodeSamples.Registry == nil {
 				target.CodeSamples.Registry = codeSamplesRegistry
 			} else if target.CodeSamples.Blocking != nil && !*target.CodeSamples.Blocking {

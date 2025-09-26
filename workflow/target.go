@@ -51,6 +51,7 @@ type CodeSamples struct {
 	LangOverride  *string                   `yaml:"langOverride,omitempty"`  // The value to use for the "lang" field of each codeSample (default: auto-detect)
 	LabelOverride *CodeSamplesLabelOverride `yaml:"labelOverride,omitempty"` // The value to use for the "label" field of each codeSample (default: operationId)
 	Blocking      *bool                     `yaml:"blocking,omitempty"`      // Default: true. If false, code samples failures will not consider the workflow as failed
+	Disabled      *bool                     `yaml:"disabled,omitempty"`      // Default: false. If true, code samples will not be generated
 }
 
 type CodeSamplesLabelOverride struct {
@@ -134,7 +135,7 @@ func (t Target) Validate(supportedLangs []string, sources map[string]Source) err
 		}
 	}
 
-	if t.CodeSamples != nil {
+	if t.CodeSamplesEnabled() {
 		// Output only needed if registry location is unset
 		if t.CodeSamples.Registry == nil {
 			ext := filepath.Ext(t.CodeSamples.Output)
@@ -272,4 +273,12 @@ func (p Publishing) IsPublished(target string) bool {
 	}
 
 	return false
+}
+
+func (c CodeSamples) Enabled() bool {
+	return c.Disabled == nil || !*c.Disabled
+}
+
+func (t Target) CodeSamplesEnabled() bool {
+	return t.CodeSamples != nil && t.CodeSamples.Enabled()
 }

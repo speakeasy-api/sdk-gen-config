@@ -275,6 +275,10 @@
               "description": "Optional flag to omit the label."
             }
           }
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "Optional flag to disable code samples."
         }
       },
       "required": []
