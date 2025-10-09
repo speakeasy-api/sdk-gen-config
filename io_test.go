@@ -74,6 +74,9 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
+						},
 					},
 					New: map[string]bool{
 						"go": true,
@@ -127,6 +130,9 @@ func TestLoad_Success(t *testing.T) {
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
+						},
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 					},
 					New: map[string]bool{},
@@ -185,6 +191,9 @@ func TestLoad_Success(t *testing.T) {
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
+						},
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 					},
 					New: map[string]bool{},
@@ -248,6 +257,9 @@ func TestLoad_Success(t *testing.T) {
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
+						},
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 					},
 					New: map[string]bool{},
@@ -318,6 +330,9 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
+						},
 					},
 					New: map[string]bool{
 						"go": true,
@@ -380,6 +395,9 @@ func TestLoad_Success(t *testing.T) {
 						UseClassNamesForArrayFields: true,
 						InferSSEOverload:            true,
 						SDKHooksConfigAccess:        true,
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
+						},
 					},
 					New: map[string]bool{
 						"go": true,
@@ -434,6 +452,9 @@ func TestLoad_Success(t *testing.T) {
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
+						},
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 					},
 					New: map[string]bool{},
@@ -498,6 +519,9 @@ func TestLoad_Success(t *testing.T) {
 						Tests: Tests{
 							GenerateTests:    true,
 							GenerateNewTests: false,
+						},
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 					},
 					New: map[string]bool{
@@ -567,6 +591,9 @@ func TestLoad_Success(t *testing.T) {
 							GenerateTests:    true,
 							GenerateNewTests: false,
 						},
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
+						},
 					},
 					New: map[string]bool{
 						"typescript": true,
@@ -634,6 +661,9 @@ func TestLoad_Success(t *testing.T) {
 						},
 						MockServer: &MockServer{
 							Disabled: true,
+						},
+						Schemas: Schemas{
+							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 					},
 					New: map[string]bool{},
@@ -751,6 +781,9 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 					GenerateTests:    true,
 					GenerateNewTests: false,
 				},
+				Schemas: Schemas{
+					AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
+				},
 			},
 			New: map[string]bool{},
 		},
@@ -783,13 +816,22 @@ func TestSaveConfig(t *testing.T) {
 	testCases := map[string]struct {
 		cfg      *Configuration
 		opts     []Option
-		expected []byte
+		expected string
 	}{
 		"no-options": {
 			cfg: &Configuration{
 				ConfigVersion: "0.0.0",
+				Generation: Generation{
+					Schemas: Schemas{
+						AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
+					},
+				},
 			},
-			expected: []byte("configVersion: 0.0.0\ngeneration: {}\n"),
+			expected: `configVersion: 0.0.0
+generation:
+  schemas:
+    allOfMergeStrategy: shallowMerge
+`,
 		},
 		"option-dontwrite": {
 			cfg: &Configuration{
@@ -829,7 +871,7 @@ func TestSaveConfig(t *testing.T) {
 
 			contents, err := os.ReadFile(configPath)
 			assert.NoError(t, err)
-			assert.Equal(t, testCase.expected, contents)
+			assert.Equal(t, testCase.expected, string(contents))
 		})
 	}
 }
