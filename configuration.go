@@ -88,6 +88,17 @@ type Tests struct {
 	SkipResponseBodyAssertions bool `yaml:"skipResponseBodyAssertions"`
 }
 
+type AllOfMergeStrategy string
+
+const (
+	AllOfMergeStrategyDeepMerge    AllOfMergeStrategy = "deepMerge"
+	AllOfMergeStrategyShallowMerge AllOfMergeStrategy = "shallowMerge"
+)
+
+type Schemas struct {
+	AllOfMergeStrategy AllOfMergeStrategy `yaml:"allOfMergeStrategy"`
+}
+
 type Generation struct {
 	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
 	BaseServerURL               string         `yaml:"baseServerUrl,omitempty"`
@@ -101,6 +112,7 @@ type Generation struct {
 	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty"`
 	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty"`
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty"`
+	Schemas                     Schemas        `yaml:"schemas"`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
@@ -487,6 +499,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(true),
 			Description:  pointer.From("Enables hoisting of operation-level security schemes to global level when no global security is defined"),
+		},
+		{
+			Name:         "schemas.allOfMergeStrategy",
+			Required:     false,
+			DefaultValue: ptr(AllOfMergeStrategyShallowMerge),
+			Description:  pointer.From("Controls how allOf schemas are merged, by default they will be merged using a shallow merge"),
 		},
 	}
 }
