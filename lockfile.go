@@ -12,6 +12,7 @@ type LockFile struct {
 	Management           Management                   `yaml:"management"`
 	Features             map[string]map[string]string `yaml:"features,omitempty"`
 	GeneratedFiles       []string                     `yaml:"generatedFiles,omitempty"`
+	GeneratedFileHashes  []string                     `yaml:"generatedFileHashes,omitempty"`
 	Examples             Examples                     `yaml:"examples,omitempty"`
 	ExamplesVersion      string                       `yaml:"examplesVersion,omitempty"`
 	GeneratedTests       GeneratedTests               `yaml:"generatedTests,omitempty"`
