@@ -13,8 +13,7 @@ import (
 
 func main() {
 	var (
-		out    string
-		pretty bool
+		out string
 	)
 	flag.StringVar(&out, "out", "-", "output file path or - for stdout")
 	flag.Parse()
@@ -62,11 +61,7 @@ func main() {
 		updateRefs(result)
 	}
 
-	if pretty {
-		b, err = json.MarshalIndent(result, "", "  ")
-	} else {
-		b, err = json.Marshal(result)
-	}
+	b, err = json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "final marshal: %v\n", err)
 		os.Exit(1)
