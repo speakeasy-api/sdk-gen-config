@@ -13,6 +13,7 @@ import (
 	"dario.cat/mergo"
 	"github.com/speakeasy-api/openapi/pointer"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
+	jsg "github.com/swaggest/jsonschema-go"
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,14 +24,41 @@ const (
 
 // Ensure you update schema/workflow.schema.json on changes
 type Workflow struct {
-	Version          string               `yaml:"workflowVersion"`
-	SpeakeasyVersion Version              `yaml:"speakeasyVersion,omitempty"`
-	Sources          map[string]Source    `yaml:"sources"`
-	Targets          map[string]Target    `yaml:"targets"`
-	Dependents       map[string]Dependent `yaml:"dependents,omitempty"` // Currently only used by one customer. Used to make rebuilding dependent SDKs that live elsewhere easier.
+	_                struct{}             `title:"Speakeasy Workflow Schema" additionalProperties:"false"`
+	Version          string               `yaml:"workflowVersion" description:"The version of the workflow schema" const:"1.0.0" required:"true"`
+	SpeakeasyVersion Version              `yaml:"speakeasyVersion,omitempty" description:"The version of the speakeasy CLI"`
+	Sources          map[string]Source    `yaml:"sources" description:"A map of source names to source configurations, where the output is an OpenAPI document"`
+	Targets          map[string]Target    `yaml:"targets" description:"A map of target names to target configurations, where the output is a speakeasy generation target"`
+	Dependents       map[string]Dependent `yaml:"dependents,omitempty" description:"A map of dependent names to dependent configurations, used to define external repositories and their locations"` // Currently only used by one customer. Used to make rebuilding dependent SDKs that live elsewhere easier.
 }
 
 type Version string
+
+func (Version) PrepareJSONSchema(schema *jsg.Schema) error {
+	latest := "latest"
+	latestDesc := "The latest version of the speakeasy CLI"
+	pattern := `^\d+\.\d+\.\d+$`
+	semverDesc := "A semver version of the speakeasy CLI, corresponding to https://github.com/speakeasy-api/speakeasy/releases"
+	stringType := jsg.String.Type()
+
+	schema.WithOneOf(
+		jsg.SchemaOrBool{
+			TypeObject: (&jsg.Schema{}).
+				WithConst(latest).
+				WithDescription(latestDesc).
+				ToSchemaOrBool().TypeObject,
+		},
+		jsg.SchemaOrBool{
+			TypeObject: (&jsg.Schema{}).
+				WithType(stringType).
+				WithPattern(pattern).
+				WithDescription(semverDesc).
+				ToSchemaOrBool().TypeObject,
+		},
+	)
+	schema.Type = nil
+	return nil
+}
 
 func Load(dir string) (*Workflow, string, error) {
 	res, err := workspace.FindWorkspace(dir, workspace.FindWorkspaceOptions{

@@ -10,22 +10,52 @@ import (
 
 	"github.com/a8m/envsubst"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
+	jsg "github.com/swaggest/jsonschema-go"
 )
 
 // Ensure you update schema/workflow.schema.json on changes
 type Source struct {
-	Inputs          []Document       `yaml:"inputs"`
-	Overlays        []Overlay        `yaml:"overlays,omitempty"`
-	Transformations []Transformation `yaml:"transformations,omitempty"`
-	Output          *string          `yaml:"output,omitempty"`
-	Ruleset         *string          `yaml:"ruleset,omitempty"`
-	Registry        *SourceRegistry  `yaml:"registry,omitempty"`
+	_               struct{}         `description:"A source configuration"`
+	Inputs          []Document       `yaml:"inputs" description:"A list of input documents (OpenAPI Specifications). These will be merged together" minItems:"1" required:"true"`
+	Overlays        []Overlay        `yaml:"overlays,omitempty" description:"A list of overlay files (OpenAPI Overlay Specification)"`
+	Transformations []Transformation `yaml:"transformations,omitempty" description:"A list of transformations to apply to the OpenAPI document"`
+	Output          *string          `yaml:"output,omitempty" description:"The output file name (optional)"`
+	Ruleset         *string          `yaml:"ruleset,omitempty" description:"The linting ruleset to use (optional)"`
+	Registry        *SourceRegistry  `yaml:"registry,omitempty" description:"The openapi registry configuration"`
 }
 
 // Either FallBackCodeSamples or Document
 type Overlay struct {
 	FallbackCodeSamples *FallbackCodeSamples `yaml:"fallbackCodeSamples,omitempty"`
 	Document            *Document            `yaml:"document,omitempty"`
+}
+
+func (Overlay) PrepareJSONSchema(schema *jsg.Schema) error {
+	// Replace with oneOf: either a Document or an object with fallbackCodeSamplesLanguage
+	fallbackLang := "fallbackCodeSamplesLanguage"
+	stringType := jsg.String.Type()
+	objectType := jsg.Object.Type()
+
+	schema.WithOneOf(
+		jsg.SchemaOrBool{
+			TypeObject: (&jsg.Schema{}).
+				WithRef("#/$defs/WorkflowDocument").
+				ToSchemaOrBool().TypeObject,
+		},
+		jsg.SchemaOrBool{
+			TypeObject: (&jsg.Schema{}).
+				WithType(objectType).
+				WithPropertiesItem(fallbackLang, jsg.SchemaOrBool{
+					TypeObject: (&jsg.Schema{}).WithType(stringType).ToSchemaOrBool().TypeObject,
+				}).
+				WithRequired(fallbackLang).
+				ToSchemaOrBool().TypeObject,
+		},
+	)
+	// Clear out the properties since we're replacing with oneOf
+	schema.Properties = nil
+	schema.Type = nil
+	return nil
 }
 
 func (o *Overlay) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -71,7 +101,7 @@ func (o Overlay) MarshalYAML() (interface{}, error) {
 }
 
 type FallbackCodeSamples struct {
-	FallbackCodeSamplesLanguage string `yaml:"fallbackCodeSamplesLanguage,omitempty"`
+	FallbackCodeSamplesLanguage string `yaml:"fallbackCodeSamplesLanguage,omitempty" required:"true"`
 }
 
 type LocationString string
@@ -92,8 +122,9 @@ func (l LocationString) Reference() string {
 }
 
 type Document struct {
-	Location LocationString `yaml:"location"`
-	Auth     *Auth          `yaml:",inline"`
+	_        struct{}       `additionalProperties:"false" description:"A local or remote document."`
+	Location LocationString `yaml:"location" description:"The location to resolve the document at. E.g. a file name, relative location, or a HTTP URL" minLength:"1" required:"true"`
+	Auth     *Auth          `yaml:"auth,omitempty"`
 }
 
 type SpeakeasyRegistryDocument struct {
@@ -106,15 +137,17 @@ type SpeakeasyRegistryDocument struct {
 }
 
 type Auth struct {
-	Header string `yaml:"authHeader,omitempty"`
-	Secret string `yaml:"authSecret,omitempty"`
+	_      struct{} `additionalProperties:"false" description:"Authentication information for the document (optional)"`
+	Header string   `yaml:"header" description:"A HTTP Header Name" required:"true"`
+	Secret string   `yaml:"secret" description:"A HTTP Header Value" required:"true"`
 }
 
 type (
 	SourceRegistryLocation string
 	SourceRegistry         struct {
-		Location SourceRegistryLocation `yaml:"location"`
-		Tags     []string               `yaml:"tags,omitempty"`
+		_        struct{}               `description:"The openapi registry configuration"`
+		Location SourceRegistryLocation `yaml:"location" description:"The registry location to use (for snapshotting/change tracking)" required:"true"`
+		Tags     []string               `yaml:"tags,omitempty" description:"The list of tags to use for the registry"`
 	}
 )
 
@@ -296,11 +329,13 @@ func (o Overlay) Validate() error {
 }
 
 type Transformation struct {
-	RemoveUnused     *bool                    `yaml:"removeUnused,omitempty"`
-	FilterOperations *FilterOperationsOptions `yaml:"filterOperations,omitempty"`
-	Cleanup          *bool                    `yaml:"cleanup,omitempty"`
-	Format           *bool                    `yaml:"format,omitempty"`
-	Normalize        *NormalizeOptions        `yaml:"normalize,omitempty"`
+	_                   struct{}                 `additionalProperties:"false" minProperties:"1" maxProperties:"1"`
+	RemoveUnused        *bool                    `yaml:"removeUnused,omitempty" description:"Remove unused components from the OpenAPI document"`
+	FilterOperations    *FilterOperationsOptions `yaml:"filterOperations,omitempty" description:"Filter operations from the OpenAPI document"`
+	Cleanup             *bool                    `yaml:"cleanup,omitempty" description:"Clean up the OpenAPI document"`
+	Format              *bool                    `yaml:"format,omitempty"`
+	JQSymbolicExecution *bool                    `yaml:"jqSymbolicExecution,omitempty"`
+	Normalize           *NormalizeOptions        `yaml:"normalize,omitempty"`
 }
 
 type NormalizeOptions struct {
@@ -308,12 +343,12 @@ type NormalizeOptions struct {
 }
 
 type FilterOperationsOptions struct {
-	Operations string `yaml:"operations"` // Comma-separated list of operations to filter
-	Include    *bool  `yaml:"include,omitempty"`
-	Exclude    *bool  `yaml:"exclude,omitempty"`
+	Operations string `yaml:"operations" description:"Comma-separated list of operations to filter" required:"true"` // Comma-separated list of operations to filter
+	Include    *bool  `yaml:"include,omitempty" description:"Include the specified operations (mutually exclusive with exclude)"`
+	Exclude    *bool  `yaml:"exclude,omitempty" description:"Exclude the specified operations (mutually exclusive with include)"`
 }
 
-var transformList = []string{"removeUnused", "filterOperations", "cleanup", "format", "normalize"}
+var transformList = []string{"removeUnused", "filterOperations", "cleanup", "format", "jqSymbolicExecution", "normalize"}
 
 func (t Transformation) Validate() error {
 	numNil := 0
@@ -327,6 +362,9 @@ func (t Transformation) Validate() error {
 		numNil++
 	}
 	if t.Format != nil {
+		numNil++
+	}
+	if t.JQSymbolicExecution != nil {
 		numNil++
 	}
 	if t.Normalize != nil {

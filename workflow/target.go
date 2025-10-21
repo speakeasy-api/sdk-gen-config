@@ -8,8 +8,9 @@ import (
 
 // Ensure you update schema/workflow.schema.json on changes
 type Target struct {
-	Target      string       `yaml:"target"`
-	Source      string       `yaml:"source"`
+	_           struct{}     `additionalProperties:"false"`
+	Target      string       `yaml:"target" enum:"csharp,go,java,mcp-typescript,php,python,ruby,swift,terraform,typescript,unity,postman" required:"true"`
+	Source      string       `yaml:"source" required:"true"`
 	Output      *string      `yaml:"output,omitempty"`
 	Publishing  *Publishing  `yaml:"publish,omitempty"`
 	CodeSamples *CodeSamples `yaml:"codeSamples,omitempty"`
@@ -20,43 +21,47 @@ type Target struct {
 
 // Configuration for target testing, such as `go test` for Go targets.
 type Testing struct {
+	_      struct{} `additionalProperties:"false" description:"Target testing configuration. By default, targets are not tested as part of the workflow."`
 	// When enabled, the target will be tested as part of the workflow.
-	Enabled *bool `yaml:"enabled,omitempty"`
+	Enabled *bool `yaml:"enabled,omitempty" description:"Defaults to false. If true, the target will be tested as part of the workflow."`
 
 	// Configuration for mockserver handling during testing. By default, the
 	// mockserver is enabled.
-	MockServer *MockServer `yaml:"mockServer,omitempty"`
+	MockServer *MockServer `yaml:"mockServer,omitempty" description:"Mock API server configuration for testing. By default and if generated, the mock API server is started before testing and used."`
 }
 
 // Configuration for mockserver handling during testing.
 type MockServer struct {
+	_      struct{} `additionalProperties:"false"`
 	// When enabled, the mockserver will be started during testing.
-	Enabled *bool `yaml:"enabled,omitempty"`
+	Enabled *bool `yaml:"enabled,omitempty" description:"Defaults to true. If false, the mock API server will not be started."`
 }
 
 type Publishing struct {
-	NPM       *NPM       `yaml:"npm,omitempty"`
-	PyPi      *PyPi      `yaml:"pypi,omitempty"`
-	Packagist *Packagist `yaml:"packagist,omitempty"`
-	Java      *Java      `yaml:"java,omitempty"`
-	RubyGems  *RubyGems  `yaml:"rubygems,omitempty"`
-	Nuget     *Nuget     `yaml:"nuget,omitempty"`
+	_         struct{}   `additionalProperties:"false" description:"The publishing configuration. See https://www.speakeasy.com/docs/workflow-reference/publishing-reference"`
+	NPM       *NPM       `yaml:"npm,omitempty" description:"NPM (Typescript) publishing configuration."`
+	PyPi      *PyPi      `yaml:"pypi,omitempty" description:"PyPI (Python)publishing configuration."`
+	Packagist *Packagist `yaml:"packagist,omitempty" description:"Packagist (PHP) publishing configuration."`
+	Java      *Java      `yaml:"java,omitempty" description:"Maven (Java) publishing configuration."`
+	RubyGems  *RubyGems  `yaml:"rubygems,omitempty" description:"Rubygems (Ruby) publishing configuration."`
+	Nuget     *Nuget     `yaml:"nuget,omitempty" description:"NuGet (C#) publishing configuration."`
 	Terraform *Terraform `yaml:"terraform,omitempty"`
 }
 
 type CodeSamples struct {
-	Output        string                    `yaml:"output,omitempty"`
-	Registry      *SourceRegistry           `yaml:"registry,omitempty"`
-	Style         *string                   `yaml:"style,omitempty"`         // Oneof "standard", "readme" (default: standard) (see codesamples.go)
-	LangOverride  *string                   `yaml:"langOverride,omitempty"`  // The value to use for the "lang" field of each codeSample (default: auto-detect)
-	LabelOverride *CodeSamplesLabelOverride `yaml:"labelOverride,omitempty"` // The value to use for the "label" field of each codeSample (default: operationId)
-	Blocking      *bool                     `yaml:"blocking,omitempty"`      // Default: true. If false, code samples failures will not consider the workflow as failed
-	Disabled      *bool                     `yaml:"disabled,omitempty"`      // Default: false. If true, code samples will not be generated
+	_             struct{}                  `additionalProperties:"false" description:"Code samples configuration. See https://www.speakeasy.com/guides/openapi/x-codesamples"`
+	Output        string                    `yaml:"output,omitempty" description:"The output file name"`
+	Registry      *SourceRegistry           `yaml:"registry,omitempty" description:"The output registry location."`
+	Style         *string                   `yaml:"style,omitempty" description:"Optional style for the code sample, one of 'standard' or 'readme'. Default is 'standard'."`         // Oneof "standard", "readme" (default: standard) (see codesamples.go)
+	LangOverride  *string                   `yaml:"langOverride,omitempty" description:"Optional language override for the code sample. Default behavior is to auto-detect."`  // The value to use for the "lang" field of each codeSample (default: auto-detect)
+	LabelOverride *CodeSamplesLabelOverride `yaml:"labelOverride,omitempty" description:"Optional label override for the code sample. Default is to use the operationId."` // The value to use for the "label" field of each codeSample (default: operationId)
+	Blocking      *bool                     `yaml:"blocking,omitempty" description:"Defaults to true. If false, code samples failures will not consider the workflow as failed"`      // Default: true. If false, code samples failures will not consider the workflow as failed
+	Disabled      *bool                     `yaml:"disabled,omitempty" description:"Optional flag to disable code samples."`      // Default: false. If true, code samples will not be generated
 }
 
 type CodeSamplesLabelOverride struct {
-	FixedValue *string `yaml:"fixedValue,omitempty"`
-	Omit       *bool   `yaml:"omit,omitempty"`
+	FixedValue *string `yaml:"fixedValue,omitempty" description:"Optional fixed value for the label."`
+	Omit       *bool   `yaml:"omit,omitempty" description:"Optional flag to omit the label."`
 }
 
 var SupportedLanguagesUsageSnippets = []string{
@@ -72,37 +77,43 @@ var SupportedLanguagesUsageSnippets = []string{
 }
 
 type NPM struct {
-	Token string `yaml:"token"`
+	_     struct{} `additionalProperties:"false"`
+	Token string   `yaml:"token" required:"true"`
 }
 
 type PyPi struct {
-	Token string `yaml:"token"`
+	_     struct{} `additionalProperties:"false"`
+	Token string   `yaml:"token" required:"true"`
 }
 
 type Packagist struct {
-	Username string `yaml:"username"`
-	Token    string `yaml:"token"`
+	_        struct{} `additionalProperties:"false"`
+	Username string   `yaml:"username" required:"true"`
+	Token    string   `yaml:"token" required:"true"`
 }
 
 type Java struct {
-	OSSRHUsername     string `yaml:"ossrhUsername"`
-	OSSHRPassword     string `yaml:"ossrhPassword"`
-	GPGSecretKey      string `yaml:"gpgSecretKey"`
-	GPGPassPhrase     string `yaml:"gpgPassPhrase"`
-	UseSonatypeLegacy bool   `yaml:"useSonatypeLegacy,omitempty"`
+	_                 struct{} `additionalProperties:"false"`
+	OSSRHUsername     string   `yaml:"ossrhUsername" required:"true"`
+	OSSHRPassword     string   `yaml:"ossrhPassword" required:"true"`
+	GPGSecretKey      string   `yaml:"gpgSecretKey" required:"true"`
+	GPGPassPhrase     string   `yaml:"gpgPassPhrase" required:"true"`
+	UseSonatypeLegacy bool     `yaml:"useSonatypeLegacy,omitempty" required:"true"`
 }
 
 type RubyGems struct {
-	Token string `yaml:"token"`
+	_     struct{} `additionalProperties:"false"`
+	Token string   `yaml:"token" required:"true"`
 }
 
 type Nuget struct {
-	APIKey string `yaml:"apiKey"`
+	_      struct{} `additionalProperties:"false"`
+	APIKey string   `yaml:"apiKey" required:"true"`
 }
 
 type Terraform struct {
-	GPGPrivateKey string `yaml:"gpgPrivateKey"`
-	GPGPassPhrase string `yaml:"gpgPassPhrase"`
+	GPGPrivateKey string `yaml:"gpgPrivateKey" required:"true"`
+	GPGPassPhrase string `yaml:"gpgPassPhrase" required:"true"`
 }
 
 func (t Target) Validate(supportedLangs []string, sources map[string]Source) error {

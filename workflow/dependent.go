@@ -4,8 +4,9 @@ import "fmt"
 
 // Ensure you update schema/workflow.schema.json on changes
 type Dependent struct {
-	Location     string `yaml:"location"`
-	CloneCommand string `yaml:"cloneCommand,omitempty"`
+	_            struct{} `additionalProperties:"false" description:"A dependent configuration for external repositories"`
+	Location     string   `yaml:"location" description:"The local path to the repository" required:"true"`
+	CloneCommand string   `yaml:"cloneCommand,omitempty" description:"Optional command to clone the repository"`
 }
 
 func (r Dependent) Validate() error {
