@@ -113,6 +113,7 @@ type Generation struct {
 	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty"`
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty"`
 	Schemas                     Schemas        `yaml:"schemas"`
+	RequestBodyFieldName        string         `yaml:"requestBodyFieldName,omitempty"`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
@@ -506,6 +507,17 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			DefaultValue: ptr(AllOfMergeStrategyShallowMerge),
 			Description:  pointer.From("Controls how allOf schemas are merged, by default they will be merged using a shallow merge"),
 		},
+	{
+		Name:         "requestBodyFieldName",
+		Required:     false,
+		DefaultValue: func() *any {
+			if newSDK {
+				return ptr("body")
+			}
+			return ptr("")
+		}(),
+		Description:  pointer.From("The name of the field to use for the request body in generated SDKs"),
+	},
 	}
 }
 
