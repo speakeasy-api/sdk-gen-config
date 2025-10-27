@@ -37,6 +37,8 @@ type Version string
 func (Version) PrepareJSONSchema(schema *jsg.Schema) error {
 	latest := "latest"
 	latestDesc := "The latest version of the speakeasy CLI"
+	pinned := "pinned"
+	pinnedDesc := "The installed version of the speakeasy CLI"
 	pattern := `^\d+\.\d+\.\d+$`
 	semverDesc := "A semver version of the speakeasy CLI, corresponding to https://github.com/speakeasy-api/speakeasy/releases"
 	stringType := jsg.String.Type()
@@ -46,6 +48,12 @@ func (Version) PrepareJSONSchema(schema *jsg.Schema) error {
 			TypeObject: (&jsg.Schema{}).
 				WithConst(latest).
 				WithDescription(latestDesc).
+				ToSchemaOrBool().TypeObject,
+		},
+		jsg.SchemaOrBool{
+			TypeObject: (&jsg.Schema{}).
+				WithConst(pinned).
+				WithDescription(pinnedDesc).
 				ToSchemaOrBool().TypeObject,
 		},
 		jsg.SchemaOrBool{
