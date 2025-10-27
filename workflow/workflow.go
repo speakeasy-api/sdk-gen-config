@@ -214,6 +214,9 @@ func (v Version) String() string {
 	if v == "" || v == "latest" {
 		return "latest"
 	}
+	if v == "pinned" {
+		return "pinned"
+	}
 
 	if !strings.HasPrefix(string(v), "v") {
 		return "v" + string(v)
