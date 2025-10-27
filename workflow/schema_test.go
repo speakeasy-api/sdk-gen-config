@@ -1,5 +1,7 @@
 package workflow_test
 
+//go:generate sh -c "cd ../tools/schema-gen && go run . -out ../../schemas/workflow.schema.generated.json"
+
 import (
 	"bytes"
 	"os"
