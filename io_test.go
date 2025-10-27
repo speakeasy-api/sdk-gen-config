@@ -77,6 +77,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						RequestBodyFieldName: "body",
 					},
 					New: map[string]bool{
 						"go": true,
@@ -333,6 +334,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						RequestBodyFieldName: "body",
 					},
 					New: map[string]bool{
 						"go": true,
@@ -398,6 +400,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						RequestBodyFieldName: "body",
 					},
 					New: map[string]bool{
 						"go": true,
