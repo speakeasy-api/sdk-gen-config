@@ -1,6 +1,6 @@
 package workflow_test
 
-//go:generate sh -c "cd ../tools/schema-gen && go run . -out ../../schemas/workflow.schema.generated.json"
+//go:generate sh -c "cd ../tools/schema-gen && go run . -out ../../schemas/workflow.schema.json"
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestSchemaInSync verifies that workflow.schema.generated.json is in sync with
+// TestSchemaInSync verifies that workflow.schema.json is in sync with
 // what the schema generator produces. This ensures the committed schema matches
 // the current Go struct definitions.
 func TestSchemaInSync(t *testing.T) {
@@ -28,14 +28,14 @@ func TestSchemaInSync(t *testing.T) {
 	require.NoError(t, err, "schema generator failed: %s", stderr.String())
 
 	// Read the committed schema
-	committedPath := filepath.Join("..", "schemas", "workflow.schema.generated.json")
+	committedPath := filepath.Join("..", "schemas", "workflow.schema.json")
 	committedBytes, err := os.ReadFile(committedPath)
 	require.NoError(t, err, "Failed to read committed schema")
 
 	// Compare byte-for-byte
 	generated := stdout.Bytes()
 	require.Equal(t, string(committedBytes), string(generated),
-		"Generated schema does not match committed workflow.schema.generated.json.\n"+
-			"Run: cd tools/schema-gen && go run . -out workflow.schema.generated.json\n"+
+		"Generated schema does not match committed workflow.schema.json.\n"+
+			"Run: cd tools/schema-gen && go run . -out workflow.schema.json\n"+
 			"Then commit the updated file.")
 }
