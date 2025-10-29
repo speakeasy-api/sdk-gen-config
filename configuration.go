@@ -46,7 +46,8 @@ const (
 type UsageSnippets struct {
 	OptionalPropertyRendering OptionalPropertyRenderingOption `yaml:"optionalPropertyRendering"`
 	SDKInitStyle              SDKInitStyle                    `yaml:"sdkInitStyle"`
-	AdditionalProperties      map[string]any                  `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	ServerToShowInSnippets    string                          `yaml:"serverToShowInSnippets,omitempty"` // If unset, no server will be shown, if an integer, use as server_idx, else look for a matching id
+	AdditionalProperties      map[string]any                  `yaml:",inline"`                          // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type Fixes struct {
@@ -410,6 +411,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(SDKInitStyleConstructor),
 			Description:  pointer.From("Controls how the SDK initialization is depicted in usage snippets, by default it will use the constructor"),
+		},
+		{
+			Name:         "usageSnippets.serverToShowInSnippets",
+			Required:     false,
+			DefaultValue: nil,
+			Description:  pointer.From("Controls which server is shown in usage snippets. If unset, no server will be shown. If an integer, it will be used as the server index. Otherwise, it will look for a matching server ID."),
 		},
 		{
 			Name:         "useClassNamesForArrayFields",
