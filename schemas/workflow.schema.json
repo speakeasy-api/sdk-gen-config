@@ -4,18 +4,18 @@
       "additionalProperties": false,
       "description": "Authentication information for the document (optional)",
       "properties": {
-        "header": {
+        "authHeader": {
           "description": "A HTTP Header Name",
           "type": "string"
         },
-        "secret": {
+        "authSecret": {
           "description": "A HTTP Header Value",
           "type": "string"
         }
       },
       "required": [
-        "header",
-        "secret"
+        "authHeader",
+        "authSecret"
       ],
       "type": "object"
     },

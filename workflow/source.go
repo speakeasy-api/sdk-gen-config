@@ -138,8 +138,8 @@ type SpeakeasyRegistryDocument struct {
 
 type Auth struct {
 	_      struct{} `additionalProperties:"false" description:"Authentication information for the document (optional)"`
-	Header string   `yaml:"header" description:"A HTTP Header Name" required:"true"`
-	Secret string   `yaml:"secret" description:"A HTTP Header Value" required:"true"`
+	Header string   `yaml:"authHeader" description:"A HTTP Header Name" required:"true"`
+	Secret string   `yaml:"authSecret" description:"A HTTP Header Value" required:"true"`
 }
 
 type (
