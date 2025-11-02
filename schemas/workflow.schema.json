@@ -107,8 +107,13 @@
       "additionalProperties": false,
       "description": "A local or remote document.",
       "properties": {
-        "auth": {
-          "$ref": "#/$defs/WorkflowAuth"
+        "authHeader": {
+          "description": "A HTTP Header Name",
+          "type": "string"
+        },
+        "authSecret": {
+          "description": "A HTTP Header Value",
+          "type": "string"
         },
         "location": {
           "description": "The location to resolve the document at. E.g. a file name, relative location, or a HTTP URL",
