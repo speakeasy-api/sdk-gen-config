@@ -127,6 +127,36 @@ type Document struct {
 	Auth     *Auth          `yaml:",inline"`
 }
 
+func (Document) PrepareJSONSchema(schema *jsg.Schema) error {
+	// Flatten Auth fields into Document for JSON schema since yaml:",inline" doesn't work with schema generation
+	authHeaderDesc := "A HTTP Header Name"
+	authSecretDesc := "A HTTP Header Value"
+	stringType := jsg.String.Type()
+
+	if schema.Properties == nil {
+		return nil
+	}
+
+	// Remove the Auth property reference
+	delete(schema.Properties, "Auth")
+
+	// Add the flattened auth fields directly
+	schema.WithPropertiesItem("authHeader", jsg.SchemaOrBool{
+		TypeObject: (&jsg.Schema{}).
+			WithType(stringType).
+			WithDescription(authHeaderDesc).
+			ToSchemaOrBool().TypeObject,
+	})
+	schema.WithPropertiesItem("authSecret", jsg.SchemaOrBool{
+		TypeObject: (&jsg.Schema{}).
+			WithType(stringType).
+			WithDescription(authSecretDesc).
+			ToSchemaOrBool().TypeObject,
+	})
+
+	return nil
+}
+
 type SpeakeasyRegistryDocument struct {
 	OrganizationSlug string
 	WorkspaceSlug    string
