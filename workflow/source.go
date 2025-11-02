@@ -124,7 +124,7 @@ func (l LocationString) Reference() string {
 type Document struct {
 	_        struct{}       `additionalProperties:"false" description:"A local or remote document."`
 	Location LocationString `yaml:"location" description:"The location to resolve the document at. E.g. a file name, relative location, or a HTTP URL" minLength:"1" required:"true"`
-	Auth     *Auth          `yaml:"auth,omitempty"`
+	Auth     *Auth          `yaml:",inline"`
 }
 
 type SpeakeasyRegistryDocument struct {

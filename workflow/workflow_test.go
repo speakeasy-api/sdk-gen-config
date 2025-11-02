@@ -574,10 +574,10 @@ func createTempFile(dir string, fileName, contents string) error {
 
 func TestWorkflow_LoadWithLocal_Success(t *testing.T) {
 	type args struct {
-		workflowLocation   string
-		workflowContents   string
-		localContents      string
-		workingDir         string
+		workflowLocation string
+		workflowContents string
+		localContents    string
+		workingDir       string
 	}
 	tests := []struct {
 		name string
@@ -992,4 +992,30 @@ func TestWorkflow_Merge_Method(t *testing.T) {
 	assert.Len(t, baseWorkflow.Dependents, 2)
 	assert.Equal(t, "source1", baseWorkflow.Dependents["dep1"].Location)
 	assert.Equal(t, "source2", baseWorkflow.Dependents["dep2"].Location)
+}
+
+func TestWorkflow_LoadWithRemote_WithAuth(t *testing.T) {
+	basePath, err := os.MkdirTemp("", "workflow*")
+	require.NoError(t, err)
+	defer os.RemoveAll(basePath)
+
+	workflowContents := `workflowVersion: 1.0.0
+sources:
+  testSource:
+    inputs:
+      - location: "http://example.com/openapi.yaml"
+        authHeader: Authorization
+        authSecret: $AUTH_TOKEN
+`
+
+	err = createTempFile(filepath.Join(basePath, "test/.speakeasy"), "workflow.yaml", workflowContents)
+	require.NoError(t, err)
+
+	workflowFile, _, err := workflow.Load(filepath.Join(basePath, "test"))
+	require.NoError(t, err)
+
+	assert.Equal(t, workflowFile.Sources["testSource"].Inputs[0].Auth, &workflow.Auth{
+		Header: "Authorization",
+		Secret: "$AUTH_TOKEN",
+	})
 }
