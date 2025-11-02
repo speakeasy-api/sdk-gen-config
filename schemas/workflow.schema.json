@@ -107,7 +107,7 @@
       "additionalProperties": false,
       "description": "A local or remote document.",
       "properties": {
-        "auth": {
+        "Auth": {
           "$ref": "#/$defs/WorkflowAuth"
         },
         "location": {
