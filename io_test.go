@@ -834,6 +834,7 @@ func TestSaveConfig(t *testing.T) {
 generation:
   schemas:
     allOfMergeStrategy: shallowMerge
+  requestBodyFieldName: ""
 `,
 		},
 		"option-dontwrite": {
