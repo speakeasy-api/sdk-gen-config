@@ -114,7 +114,7 @@ type Generation struct {
 	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty"`
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty"`
 	Schemas                     Schemas        `yaml:"schemas"`
-	RequestBodyFieldName        string         `yaml:"requestBodyFieldName,omitempty"`
+	RequestBodyFieldName        string         `yaml:"requestBodyFieldName"`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
