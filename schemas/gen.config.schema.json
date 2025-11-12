@@ -75,6 +75,10 @@
           "type": "boolean",
           "description": "Maintains the order of parameters and fields in the OpenAPI specification"
         },
+        "deduplicateErrors": {
+          "type": "boolean",
+          "description": "Deduplicates errors that have the same schema"
+        },
         "usageSnippets": {
           "$ref": "#/$defs/usageSnippets"
         },
@@ -87,6 +91,25 @@
         },
         "auth": {
           "$ref": "#/$defs/auth"
+        },
+        "skipErrorSuffix": {
+          "type": "boolean",
+          "description": "Skips the automatic addition of an error suffix to error types"
+        },
+        "inferSSEOverload": {
+          "type": "boolean",
+          "description": "Generates an overload if generator detects that the request body field 'stream: true' is used for client intent to request 'text/event-stream' response"
+        },
+        "sdkHooksConfigAccess": {
+          "type": "boolean",
+          "description": "Enables access to the SDK configuration from hooks"
+        },
+        "schemas": {
+          "$ref": "#/$defs/schemas"
+        },
+        "requestBodyFieldName": {
+          "type": "string",
+          "description": "The name of the field to use for the request body in generated SDKs"
         },
         "mockServer": {
           "$ref": "#/$defs/mockServer"
@@ -119,6 +142,15 @@
           "type": "string",
           "enum": ["always", "never", "withExample"],
           "description": "Controls how optional properties are rendered in usage snippets"
+        },
+        "sdkInitStyle": {
+          "type": "string",
+          "enum": ["constructor", "builder"],
+          "description": "Controls how the SDK initialization is depicted in usage snippets"
+        },
+        "serverToShowInSnippets": {
+          "type": ["string", "integer"],
+          "description": "Controls which server is shown in usage snippets. If unset, no server will be shown. If an integer, it will be used as the server index. Otherwise, it will look for a matching server ID."
         }
       },
       "additionalProperties": true
@@ -142,6 +174,14 @@
         "requestResponseComponentNamesFeb2024": {
           "type": "boolean",
           "description": "Enables request and response component naming fixes from February 2024"
+        },
+        "securityFeb2025": {
+          "type": "boolean",
+          "description": "Enables fixes and refactoring for security that were introduced in February 2025"
+        },
+        "sharedErrorComponentsApr2025": {
+          "type": "boolean",
+          "description": "Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"
         }
       },
       "additionalProperties": true
@@ -157,6 +197,22 @@
         "oAuth2PasswordEnabled": {
           "type": "boolean",
           "description": "Enables support for OAuth2 resource owner password credentials grant type"
+        },
+        "hoistGlobalSecurity": {
+          "type": "boolean",
+          "description": "Enables hoisting of operation-level security schemes to global level when no global security is defined"
+        }
+      },
+      "additionalProperties": false
+    },
+    "schemas": {
+      "type": "object",
+      "description": "Schema processing configuration",
+      "properties": {
+        "allOfMergeStrategy": {
+          "type": "string",
+          "enum": ["deepMerge", "shallowMerge"],
+          "description": "Controls how allOf schemas are merged"
         }
       },
       "additionalProperties": false
