@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "oneOf": [
     {
-      "$ref": "workflow.schema.generated.json"
+      "$ref": "workflow.schema.json"
     },
     {
       "$ref": "lint.schema.json"
