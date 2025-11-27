@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/speakeasy-api/sdk-gen-config/lockfile"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
 )
@@ -262,9 +263,18 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
 	}
 
-	var lockFile LockFile
-	if err := yaml.Unmarshal(lockFileRes.Data, &lockFile); err != nil {
-		return nil, fmt.Errorf("could not unmarshal gen.lock: %w", err)
+	var lockOpts []lockfile.LoadOption
+	if o.FS != nil {
+		lockOpts = append(lockOpts, lockfile.WithFileSystem(o.FS))
+	}
+
+	lock, err := lockfile.Load(lockFileRes.Data, lockOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse gen.lock: %w", err)
+	}
+
+	if o.FS != nil {
+		_ = lockfile.PopulateMissingChecksums(lock, o.FS)
 	}
 
 	cfg.New = newForLang
@@ -288,14 +298,14 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		}
 	}
 
-	if lockFile.Features == nil {
-		lockFile.Features = make(map[string]map[string]string)
+	if lock.Features == nil {
+		lock.Features = make(map[string]map[string]string)
 	}
 
 	config := &Config{
 		Config:     cfg,
 		ConfigPath: configRes.Path,
-		LockFile:   &lockFile,
+		LockFile:   lock,
 	}
 
 	if o.transformerFunc != nil {

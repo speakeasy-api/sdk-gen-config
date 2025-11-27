@@ -6,6 +6,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/speakeasy-api/openapi/pointer"
+	jsg "github.com/swaggest/jsonschema-go"
 )
 
 const (
@@ -43,21 +44,35 @@ const (
 	SDKInitStyleBuilder     SDKInitStyle = "builder"
 )
 
+// ServerIndex is a type that can be either a string (server ID) or an integer (server index)
+type ServerIndex string
+
+func (ServerIndex) PrepareJSONSchema(schema *jsg.Schema) error {
+	// Set the type to an array of types [string, integer]
+	schema.Type = &jsg.Type{
+		SliceOfSimpleTypeValues: []jsg.SimpleType{jsg.String, jsg.Integer},
+	}
+	schema.WithDescription("Controls which server is shown in usage snippets. If unset, no server will be shown. If an integer, it will be used as the server index. Otherwise, it will look for a matching server ID.")
+	return nil
+}
+
 type UsageSnippets struct {
-	OptionalPropertyRendering OptionalPropertyRenderingOption `yaml:"optionalPropertyRendering"`
-	SDKInitStyle              SDKInitStyle                    `yaml:"sdkInitStyle"`
-	ServerToShowInSnippets    string                          `yaml:"serverToShowInSnippets,omitempty"` // If unset, no server will be shown, if an integer, use as server_idx, else look for a matching id
-	AdditionalProperties      map[string]any                  `yaml:",inline"`                          // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	_                         struct{}                        `additionalProperties:"true" description:"Configuration for usage snippets"`
+	OptionalPropertyRendering OptionalPropertyRenderingOption `yaml:"optionalPropertyRendering" enum:"always,never,withExample" description:"Controls how optional properties are rendered in usage snippets"`
+	SDKInitStyle              SDKInitStyle                    `yaml:"sdkInitStyle" enum:"constructor,builder" description:"Controls how the SDK initialization is depicted in usage snippets"`
+	ServerToShowInSnippets    ServerIndex                     `yaml:"serverToShowInSnippets,omitempty"` // If unset, no server will be shown, if an integer, use as server_idx, else look for a matching id
+	AdditionalProperties      map[string]any                  `yaml:",inline" jsonschema:"-"`           // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type Fixes struct {
-	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023,omitempty"`
-	NameResolutionFeb2025                bool           `yaml:"nameResolutionFeb2025"`
-	ParameterOrderingFeb2024             bool           `yaml:"parameterOrderingFeb2024"`
-	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024"`
-	SecurityFeb2025                      bool           `yaml:"securityFeb2025"`
-	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025"`
-	AdditionalProperties                 map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	_                                    struct{}       `additionalProperties:"true" description:"Fixes applied to the SDK generation"`
+	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023,omitempty" description:"Enables name resolution fixes from December 2023"`
+	NameResolutionFeb2025                bool           `yaml:"nameResolutionFeb2025" description:"Enables name resolution fixes from February 2025"`
+	ParameterOrderingFeb2024             bool           `yaml:"parameterOrderingFeb2024" description:"Enables parameter ordering fixes from February 2024"`
+	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024" description:"Enables request and response component naming fixes from February 2024"`
+	SecurityFeb2025                      bool           `yaml:"securityFeb2025" description:"Enables fixes and refactoring for security that were introduced in February 2025"`
+	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025" description:"Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"`
+	AdditionalProperties                 map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 func (f *Fixes) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -78,15 +93,32 @@ func (f *Fixes) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type Auth struct {
-	OAuth2ClientCredentialsEnabled bool `yaml:"oAuth2ClientCredentialsEnabled"`
-	OAuth2PasswordEnabled          bool `yaml:"oAuth2PasswordEnabled"`
-	HoistGlobalSecurity            bool `yaml:"hoistGlobalSecurity"`
+	_                              struct{} `additionalProperties:"false" description:"Authentication configuration"`
+	OAuth2ClientCredentialsEnabled bool     `yaml:"oAuth2ClientCredentialsEnabled" description:"Enables support for OAuth2 client credentials grant type"`
+	OAuth2PasswordEnabled          bool     `yaml:"oAuth2PasswordEnabled" description:"Enables support for OAuth2 resource owner password credentials grant type"`
+	HoistGlobalSecurity            bool     `yaml:"hoistGlobalSecurity" description:"Enables hoisting of operation-level security schemes to global level when no global security is defined"`
 }
 
 type Tests struct {
-	GenerateTests              bool `yaml:"generateTests"`
-	GenerateNewTests           bool `yaml:"generateNewTests"`
-	SkipResponseBodyAssertions bool `yaml:"skipResponseBodyAssertions"`
+	_                          struct{}       `additionalProperties:"true" description:"Test generation configuration"`
+	GenerateTests              bool           `yaml:"generateTests" description:"Enables generation of tests"`
+	GenerateNewTests           bool           `yaml:"generateNewTests" description:"Enables generation of new tests for any new operations in the OpenAPI specification"`
+	SkipResponseBodyAssertions bool           `yaml:"skipResponseBodyAssertions" description:"Skip asserting that the client got the same response bodies returned by the mock server"`
+	AdditionalProperties       map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+}
+
+// PersistentEdits configures whether user edits to generated SDKs persist across regenerations
+// When enabled, user changes are preserved via 3-way merge with Git tracking
+type PersistentEdits struct {
+	_ struct{} `additionalProperties:"true" description:"Configures whether user edits to generated SDKs persist across regenerations"`
+	// Enabled allows user edits to generated SDK code to persist through regeneration
+	// Requires Git repository and creates a pristine branch for tracking
+	Enabled bool `yaml:"enabled,omitempty" description:"Enables preservation of user edits across SDK regenerations. Requires Git repository."`
+
+	// PristineBranch specifies the Git branch name for tracking pristine generated code
+	// Defaults to "sdk-pristine" if not specified
+	PristineBranch       string         `yaml:"pristineBranch,omitempty" description:"The Git branch name for tracking pristine generated code. Defaults to 'sdk-pristine' if not specified."`
+	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties
 }
 
 type AllOfMergeStrategy string
@@ -97,49 +129,56 @@ const (
 )
 
 type Schemas struct {
-	AllOfMergeStrategy AllOfMergeStrategy `yaml:"allOfMergeStrategy"`
+	_                  struct{}           `additionalProperties:"false" description:"Schema processing configuration"`
+	AllOfMergeStrategy AllOfMergeStrategy `yaml:"allOfMergeStrategy" enum:"deepMerge,shallowMerge" description:"Controls how allOf schemas are merged"`
 }
 
 type Generation struct {
+	_                           struct{}       `additionalProperties:"true" description:"Generation configuration"`
 	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
-	BaseServerURL               string         `yaml:"baseServerUrl,omitempty"`
-	SDKClassName                string         `yaml:"sdkClassName,omitempty"`
-	MaintainOpenAPIOrder        bool           `yaml:"maintainOpenAPIOrder,omitempty"`
-	DeduplicateErrors           bool           `yaml:"deduplicateErrors,omitempty"`
+	BaseServerURL               string         `yaml:"baseServerUrl,omitempty" description:"The base URL of the server. This value will be used if global servers are not defined in the spec."`
+	SDKClassName                string         `yaml:"sdkClassName,omitempty" description:"Generated name of the root SDK class"`
+	MaintainOpenAPIOrder        bool           `yaml:"maintainOpenAPIOrder,omitempty" description:"Maintains the order of parameters and fields in the OpenAPI specification"`
+	DeduplicateErrors           bool           `yaml:"deduplicateErrors,omitempty" description:"Deduplicates errors that have the same schema"`
 	UsageSnippets               *UsageSnippets `yaml:"usageSnippets,omitempty"`
-	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty"`
+	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty" description:"Use class names for array fields instead of the child's schema type"`
 	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
 	Auth                        *Auth          `yaml:"auth,omitempty"`
-	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty"`
-	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty"`
-	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty"`
+	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty" description:"Skips the automatic addition of an error suffix to error types"`
+	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty" description:"Generates an overload if generator detects that the request body field 'stream: true' is used for client intent to request 'text/event-stream' response"`
+	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty" description:"Enables access to the SDK configuration from hooks"`
 	Schemas                     Schemas        `yaml:"schemas"`
-	RequestBodyFieldName        string         `yaml:"requestBodyFieldName"`
+	RequestBodyFieldName        string         `yaml:"requestBodyFieldName" description:"The name of the field to use for the request body in generated SDKs"`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
 
-	Tests Tests `yaml:"tests,omitempty"`
+	// PersistentEdits configures whether user edits persist across regenerations
+	PersistentEdits *PersistentEdits `yaml:"persistentEdits,omitempty"`
+	Tests           Tests            `yaml:"tests,omitempty"`
 
-	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 type DevContainers struct {
-	Enabled bool `yaml:"enabled"`
+	_       struct{} `additionalProperties:"true" description:"Dev container configuration"`
+	Enabled bool     `yaml:"enabled" description:"Whether dev containers are enabled"`
 	// This can be a local path or a remote URL
-	SchemaPath           string         `yaml:"schemaPath"`
-	AdditionalProperties map[string]any `yaml:",inline"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+	SchemaPath           string         `yaml:"schemaPath" description:"Path to the schema file for the dev container"`
+	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
 // Generation configuration for the inter-templated mockserver target for test generation.
 type MockServer struct {
+	_ struct{} `additionalProperties:"false" description:"Mock server generation configuration"`
 	// Disables the code generation of the mockserver target.
-	Disabled bool `yaml:"disabled"`
+	Disabled bool `yaml:"disabled" description:"Disables the code generation of the mock server target"`
 }
 
 type LanguageConfig struct {
-	Version string         `yaml:"version"`
-	Cfg     map[string]any `yaml:",inline"`
+	_       struct{}       `additionalProperties:"true" description:"Language-specific SDK configuration"`
+	Version string         `yaml:"version" description:"SDK version"`
+	Cfg     map[string]any `yaml:",inline" jsonschema:"-"`
 }
 
 type SDKGenConfigField struct {
@@ -157,9 +196,10 @@ type SDKGenConfigField struct {
 
 // Ensure you update schema/gen.config.schema.json on changes
 type Configuration struct {
-	ConfigVersion string                    `yaml:"configVersion"`
-	Generation    Generation                `yaml:"generation"`
-	Languages     map[string]LanguageConfig `yaml:",inline"`
+	_             struct{}                  `title:"Gen YAML Configuration Schema" additionalProperties:"false"`
+	ConfigVersion string                    `yaml:"configVersion" description:"The version of the configuration file" minLength:"1" required:"true"`
+	Generation    Generation                `yaml:"generation" required:"true"`
+	Languages     map[string]LanguageConfig `yaml:",inline" jsonschema:"-"`
 	New           map[string]bool           `yaml:"-"`
 }
 
