@@ -107,18 +107,40 @@ type Tests struct {
 	AdditionalProperties       map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
+// PersistentEditsEnabled controls whether user edits persist across regenerations
+type PersistentEditsEnabled string
+
+const (
+	// PersistentEditsEnabledTrue enables persistent edits
+	PersistentEditsEnabledTrue PersistentEditsEnabled = "true"
+	// PersistentEditsEnabledNever disables persistent edits and prevents prompting
+	PersistentEditsEnabledNever PersistentEditsEnabled = "never"
+)
+
 // PersistentEdits configures whether user edits to generated SDKs persist across regenerations
 // When enabled, user changes are preserved via 3-way merge with Git tracking
 type PersistentEdits struct {
 	_ struct{} `additionalProperties:"true" description:"Configures whether user edits to generated SDKs persist across regenerations"`
-	// Enabled allows user edits to generated SDK code to persist through regeneration
-	// Requires Git repository and creates a pristine branch for tracking
-	Enabled bool `yaml:"enabled,omitempty" description:"Enables preservation of user edits across SDK regenerations. Requires Git repository."`
+	// Enabled controls preservation of user edits:
+	// - "true": enables persistent edits
+	// - omitted/empty: disabled but will prompt on dirty detection
+	// - "never": disabled and will never prompt
+	Enabled *PersistentEditsEnabled `yaml:"enabled,omitempty" enum:"true,never" description:"Enables preservation of user edits across SDK regenerations. Set to 'never' to disable prompts."`
 
 	// PristineBranch specifies the Git branch name for tracking pristine generated code
 	// Defaults to "sdk-pristine" if not specified
 	PristineBranch       string         `yaml:"pristineBranch,omitempty" description:"The Git branch name for tracking pristine generated code. Defaults to 'sdk-pristine' if not specified."`
 	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties
+}
+
+// IsEnabled returns true if persistent edits are enabled
+func (p *PersistentEdits) IsEnabled() bool {
+	return p != nil && p.Enabled != nil && *p.Enabled == PersistentEditsEnabledTrue
+}
+
+// IsNever returns true if persistent edits are explicitly set to never prompt
+func (p *PersistentEdits) IsNever() bool {
+	return p != nil && p.Enabled != nil && *p.Enabled == PersistentEditsEnabledNever
 }
 
 type AllOfMergeStrategy string

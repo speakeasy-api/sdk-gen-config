@@ -2,7 +2,7 @@ package lockfile
 
 import (
 	"bufio"
-	"crypto/sha1" // nolint:gosec // sha1 is intentional for lockfile compatibility
+	"crypto/sha1" // nolint:gosec // sha1 is intentional as we're effectively copying git
 	"encoding/hex"
 	"fmt"
 	"io"

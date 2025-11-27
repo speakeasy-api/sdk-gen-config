@@ -166,8 +166,15 @@
       "description": "Configures whether user edits to generated SDKs persist across regenerations",
       "properties": {
         "enabled": {
-          "description": "Enables preservation of user edits across SDK regenerations. Requires Git repository.",
-          "type": "boolean"
+          "description": "Enables preservation of user edits across SDK regenerations. Set to 'never' to disable prompts.",
+          "enum": [
+            "true",
+            "never"
+          ],
+          "type": [
+            "null",
+            "string"
+          ]
         },
         "pristineBranch": {
           "description": "The Git branch name for tracking pristine generated code. Defaults to 'sdk-pristine' if not specified.",
