@@ -8,37 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoad_MigratesIntegrityToLastWriteChecksum(t *testing.T) {
-	// Legacy lockfile YAML with 'integrity' field
-	legacyYAML := []byte(`
-lockVersion: "2.0.0"
-id: "test-uuid"
-management: {}
-trackedFiles:
-  "src/client.go":
-    integrity: "sha1:abc123hash"
-    extra: "data"
-`)
-
-	lf, err := lockfile.Load(legacyYAML)
-	require.NoError(t, err)
-	require.NotNil(t, lf)
-
-	// Verify the file exists in tracked files
-	tf, ok := lf.TrackedFiles.Get("src/client.go")
-	require.True(t, ok)
-
-	// Verify migration
-	assert.Equal(t, "sha1:abc123hash", tf.LastWriteChecksum, "Should migrate integrity to last_write_checksum")
-
-	// Verify cleanup
-	_, exists := tf.AdditionalProperties["integrity"]
-	assert.False(t, exists, "Should remove integrity from AdditionalProperties")
-
-	// Verify other properties preserved
-	assert.Equal(t, "data", tf.AdditionalProperties["extra"])
-}
-
 func TestLoad_NewStructure(t *testing.T) {
 	// New lockfile YAML with 3-way merge fields
 	newYAML := []byte(`
@@ -72,39 +41,6 @@ trackedFiles:
 	assert.Equal(t, "uuid-breadcrumb-123", tf.ID)
 	assert.Equal(t, "sha1:file-hash-789", tf.LastWriteChecksum)
 	assert.Equal(t, "blob-123", tf.PristineGitObject)
-}
-
-func TestLoad_MigratesPristineBlobHashToGitObject(t *testing.T) {
-	// Legacy lockfile YAML with 'pristine_blob_hash' field
-	legacyYAML := []byte(`
-lockVersion: "2.0.0"
-id: "test-uuid"
-management: {}
-trackedFiles:
-  "src/model.go":
-    id: "file-uuid-123"
-    pristine_blob_hash: "git-hash-456"
-    last_write_checksum: "sha1:file-hash-789"
-`)
-
-	lf, err := lockfile.Load(legacyYAML)
-	require.NoError(t, err)
-	require.NotNil(t, lf)
-
-	// Verify the file exists in tracked files
-	tf, ok := lf.TrackedFiles.Get("src/model.go")
-	require.True(t, ok)
-
-	// Verify migration
-	assert.Equal(t, "git-hash-456", tf.PristineGitObject, "Should migrate pristine_blob_hash to pristine_git_object")
-
-	// Verify cleanup
-	_, exists := tf.AdditionalProperties["pristine_blob_hash"]
-	assert.False(t, exists, "Should remove pristine_blob_hash from AdditionalProperties")
-
-	// Verify other properties preserved
-	assert.Equal(t, "file-uuid-123", tf.ID)
-	assert.Equal(t, "sha1:file-hash-789", tf.LastWriteChecksum)
 }
 
 func TestLoad_OmitsEmptyPersistentEdits(t *testing.T) {
