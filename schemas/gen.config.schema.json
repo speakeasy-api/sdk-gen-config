@@ -1,251 +1,303 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Gen YAML Configuration Schema",
-  "type": "object",
-  "additionalProperties": false,
-  "properties": {
-    "configVersion": {
-      "type": "string",
-      "description": "The version of the configuration file",
-      "minLength": 1
-    },
-    "generation": {
-      "$ref": "#/$defs/generation"
-    },
-    "go": {
-      "$ref": "./languages/go.schema.json",
-      "description": "Configuration specific to Go SDK"
-    },
-    "typescript": {
-      "$ref": "./languages/typescript.schema.json",
-      "description": "Configuration specific to TypeScript SDK"
-    },
-    "python": {
-      "$ref": "./languages/python.schema.json",
-      "description": "Configuration specific to Python SDK"
-    },
-    "java": {
-      "$ref": "./languages/java.schema.json",
-      "description": "Configuration specific to Java SDK"
-    },
-    "csharp": {
-      "$ref": "./languages/csharp.schema.json",
-      "description": "Configuration specific to C# SDK"
-    },
-    "unity": {
-      "$ref": "./languages/unity.schema.json",
-      "description": "Configuration specific to Unity SDK"
-    },
-    "php": {
-      "$ref": "./languages/php.schema.json",
-      "description": "Configuration specific to PHP SDK"
-    },
-    "ruby": {
-      "$ref": "./languages/ruby.schema.json",
-      "description": "Configuration specific to Ruby SDK"
-    },
-    "postman": {
-      "$ref": "./languages/postman.schema.json",
-      "description": "Configuration specific to Postman Collections"
-    },
-    "terraform": {
-      "$ref": "./languages/terraform.schema.json",
-      "description": "Configuration specific to Terraform Providers"
-    }
-  },
-  "required": ["configVersion", "generation"],
   "$defs": {
-    "generation": {
-      "type": "object",
-      "description": "Generation configuration",
-      "additionalProperties": true,
+    "SdkGenConfigAuth": {
+      "additionalProperties": false,
+      "description": "Authentication configuration",
       "properties": {
-        "devContainers": {
-          "$ref": "#/$defs/devContainers"
+        "hoistGlobalSecurity": {
+          "description": "Enables hoisting of operation-level security schemes to global level when no global security is defined",
+          "type": "boolean"
         },
-        "baseServerURL": {
-          "type": "string",
-          "description": "The base URL of the server. This value will be used if global servers are not defined in the spec."
+        "oAuth2ClientCredentialsEnabled": {
+          "description": "Enables support for OAuth2 client credentials grant type",
+          "type": "boolean"
         },
-        "sdkClassName": {
-          "type": "string",
-          "description": "Generated name of the root SDK class"
-        },
-        "maintainOpenAPIOrder": {
-          "type": "boolean",
-          "description": "Maintains the order of parameters and fields in the OpenAPI specification"
-        },
-        "deduplicateErrors": {
-          "type": "boolean",
-          "description": "Deduplicates errors that have the same schema"
-        },
-        "usageSnippets": {
-          "$ref": "#/$defs/usageSnippets"
-        },
-        "useClassNamesForArrayFields": {
-          "type": "boolean",
-          "description": "Use class names for array fields instead of the child's schema type"
-        },
-        "fixes": {
-          "$ref": "#/$defs/fixes"
-        },
-        "auth": {
-          "$ref": "#/$defs/auth"
-        },
-        "skipErrorSuffix": {
-          "type": "boolean",
-          "description": "Skips the automatic addition of an error suffix to error types"
-        },
-        "inferSSEOverload": {
-          "type": "boolean",
-          "description": "Generates an overload if generator detects that the request body field 'stream: true' is used for client intent to request 'text/event-stream' response"
-        },
-        "sdkHooksConfigAccess": {
-          "type": "boolean",
-          "description": "Enables access to the SDK configuration from hooks"
-        },
-        "schemas": {
-          "$ref": "#/$defs/schemas"
-        },
-        "requestBodyFieldName": {
-          "type": "string",
-          "description": "The name of the field to use for the request body in generated SDKs"
-        },
-        "mockServer": {
-          "$ref": "#/$defs/mockServer"
-        },
-        "tests": {
-          "$ref": "#/$defs/tests"
+        "oAuth2PasswordEnabled": {
+          "description": "Enables support for OAuth2 resource owner password credentials grant type",
+          "type": "boolean"
         }
-      }
+      },
+      "type": "object"
     },
-    "devContainers": {
-      "type": "object",
+    "SdkGenConfigDevContainers": {
+      "additionalProperties": true,
       "description": "Dev container configuration",
       "properties": {
         "enabled": {
-          "type": "boolean",
-          "description": "Whether dev containers are enabled"
+          "description": "Whether dev containers are enabled",
+          "type": "boolean"
         },
         "schemaPath": {
-          "type": "string",
-          "description": "Path to the schema file for the dev container"
+          "description": "Path to the schema file for the dev container",
+          "type": "string"
         }
       },
-      "additionalProperties": true
+      "type": "object"
     },
-    "usageSnippets": {
-      "type": "object",
-      "description": "Configuration for usage snippets",
-      "properties": {
-        "optionalPropertyRendering": {
-          "type": "string",
-          "enum": ["always", "never", "withExample"],
-          "description": "Controls how optional properties are rendered in usage snippets"
-        },
-        "sdkInitStyle": {
-          "type": "string",
-          "enum": ["constructor", "builder"],
-          "description": "Controls how the SDK initialization is depicted in usage snippets"
-        },
-        "serverToShowInSnippets": {
-          "type": ["string", "integer"],
-          "description": "Controls which server is shown in usage snippets. If unset, no server will be shown. If an integer, it will be used as the server index. Otherwise, it will look for a matching server ID."
-        }
-      },
-      "additionalProperties": true
-    },
-    "fixes": {
-      "type": "object",
+    "SdkGenConfigFixes": {
+      "additionalProperties": true,
       "description": "Fixes applied to the SDK generation",
       "properties": {
         "nameResolutionDec2023": {
-          "type": "boolean",
-          "description": "Enables name resolution fixes from December 2023"
+          "description": "Enables name resolution fixes from December 2023",
+          "type": "boolean"
         },
         "nameResolutionFeb2025": {
-          "type": "boolean",
-          "description": "Enables name resolution fixes from February 2025"
+          "description": "Enables name resolution fixes from February 2025",
+          "type": "boolean"
         },
         "parameterOrderingFeb2024": {
-          "type": "boolean",
-          "description": "Enables parameter ordering fixes from February 2024"
+          "description": "Enables parameter ordering fixes from February 2024",
+          "type": "boolean"
         },
         "requestResponseComponentNamesFeb2024": {
-          "type": "boolean",
-          "description": "Enables request and response component naming fixes from February 2024"
+          "description": "Enables request and response component naming fixes from February 2024",
+          "type": "boolean"
         },
         "securityFeb2025": {
-          "type": "boolean",
-          "description": "Enables fixes and refactoring for security that were introduced in February 2025"
+          "description": "Enables fixes and refactoring for security that were introduced in February 2025",
+          "type": "boolean"
         },
         "sharedErrorComponentsApr2025": {
-          "type": "boolean",
-          "description": "Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"
+          "description": "Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree",
+          "type": "boolean"
         }
       },
-      "additionalProperties": true
+      "type": "object"
     },
-    "auth": {
-      "type": "object",
-      "description": "Authentication configuration",
+    "SdkGenConfigGeneration": {
+      "additionalProperties": true,
+      "description": "Generation configuration",
       "properties": {
-        "oAuth2ClientCredentialsEnabled": {
-          "type": "boolean",
-          "description": "Enables support for OAuth2 client credentials grant type"
+        "auth": {
+          "$ref": "#/$defs/SdkGenConfigAuth"
         },
-        "oAuth2PasswordEnabled": {
-          "type": "boolean",
-          "description": "Enables support for OAuth2 resource owner password credentials grant type"
+        "baseServerUrl": {
+          "description": "The base URL of the server. This value will be used if global servers are not defined in the spec.",
+          "type": "string"
         },
-        "hoistGlobalSecurity": {
-          "type": "boolean",
-          "description": "Enables hoisting of operation-level security schemes to global level when no global security is defined"
+        "deduplicateErrors": {
+          "description": "Deduplicates errors that have the same schema",
+          "type": "boolean"
+        },
+        "devContainers": {
+          "$ref": "#/$defs/SdkGenConfigDevContainers"
+        },
+        "fixes": {
+          "$ref": "#/$defs/SdkGenConfigFixes"
+        },
+        "inferSSEOverload": {
+          "description": "Generates an overload if generator detects that the request body field 'stream: true' is used for client intent to request 'text/event-stream' response",
+          "type": "boolean"
+        },
+        "maintainOpenAPIOrder": {
+          "description": "Maintains the order of parameters and fields in the OpenAPI specification",
+          "type": "boolean"
+        },
+        "mockServer": {
+          "$ref": "#/$defs/SdkGenConfigMockServer"
+        },
+        "persistentEdits": {
+          "$ref": "#/$defs/SdkGenConfigPersistentEdits"
+        },
+        "requestBodyFieldName": {
+          "description": "The name of the field to use for the request body in generated SDKs",
+          "type": "string"
+        },
+        "schemas": {
+          "$ref": "#/$defs/SdkGenConfigSchemas"
+        },
+        "sdkClassName": {
+          "description": "Generated name of the root SDK class",
+          "type": "string"
+        },
+        "sdkHooksConfigAccess": {
+          "description": "Enables access to the SDK configuration from hooks",
+          "type": "boolean"
+        },
+        "skipErrorSuffix": {
+          "description": "Skips the automatic addition of an error suffix to error types",
+          "type": "boolean"
+        },
+        "tests": {
+          "$ref": "#/$defs/SdkGenConfigTests"
+        },
+        "usageSnippets": {
+          "$ref": "#/$defs/SdkGenConfigUsageSnippets"
+        },
+        "useClassNamesForArrayFields": {
+          "description": "Use class names for array fields instead of the child's schema type",
+          "type": "boolean"
         }
       },
-      "additionalProperties": false
+      "type": "object"
     },
-    "schemas": {
-      "type": "object",
-      "description": "Schema processing configuration",
+    "SdkGenConfigLanguageConfig": {
+      "additionalProperties": true,
+      "description": "Language-specific SDK configuration",
       "properties": {
-        "allOfMergeStrategy": {
-          "type": "string",
-          "enum": ["deepMerge", "shallowMerge"],
-          "description": "Controls how allOf schemas are merged"
+        "Cfg": {
+          "additionalProperties": {},
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "version": {
+          "description": "SDK version",
+          "type": "string"
         }
       },
-      "additionalProperties": false
+      "type": "object"
     },
-    "mockServer": {
-      "type": "object",
+    "SdkGenConfigMockServer": {
+      "additionalProperties": false,
       "description": "Mock server generation configuration",
       "properties": {
         "disabled": {
-          "type": "boolean",
-          "description": "Disables the code generation of the mock server target"
+          "description": "Disables the code generation of the mock server target",
+          "type": "boolean"
         }
       },
-      "additionalProperties": false
+      "type": "object"
     },
-    "tests": {
-      "type": "object",
+    "SdkGenConfigPersistentEdits": {
+      "additionalProperties": true,
+      "description": "Configures whether user edits to generated SDKs persist across regenerations",
+      "properties": {
+        "enabled": {
+          "description": "Enables preservation of user edits across SDK regenerations. Set to 'never' to disable prompts.",
+          "enum": [
+            "true",
+            "never"
+          ],
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "pristineBranch": {
+          "description": "The Git branch name for tracking pristine generated code. Defaults to 'sdk-pristine' if not specified.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SdkGenConfigSchemas": {
+      "additionalProperties": false,
+      "description": "Schema processing configuration",
+      "properties": {
+        "allOfMergeStrategy": {
+          "description": "Controls how allOf schemas are merged",
+          "enum": [
+            "deepMerge",
+            "shallowMerge"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SdkGenConfigServerIndex": {
+      "description": "Controls which server is shown in usage snippets. If unset, no server will be shown. If an integer, it will be used as the server index. Otherwise, it will look for a matching server ID.",
+      "type": [
+        "string",
+        "integer"
+      ]
+    },
+    "SdkGenConfigTests": {
+      "additionalProperties": true,
       "description": "Test generation configuration",
       "properties": {
-        "generateTests": {
-          "type": "boolean",
-          "description": "Enables generation of tests"
-        },
         "generateNewTests": {
-          "type": "boolean",
-          "description": "Enables generation of new tests for any new operations in the OpenAPI specification"
+          "description": "Enables generation of new tests for any new operations in the OpenAPI specification",
+          "type": "boolean"
+        },
+        "generateTests": {
+          "description": "Enables generation of tests",
+          "type": "boolean"
         },
         "skipResponseBodyAssertions": {
-          "type": "boolean",
-          "description": "Skip asserting that the client got the same response bodies returned by the mock server"
+          "description": "Skip asserting that the client got the same response bodies returned by the mock server",
+          "type": "boolean"
         }
       },
-      "additionalProperties": false
+      "type": "object"
+    },
+    "SdkGenConfigUsageSnippets": {
+      "additionalProperties": true,
+      "description": "Configuration for usage snippets",
+      "properties": {
+        "optionalPropertyRendering": {
+          "description": "Controls how optional properties are rendered in usage snippets",
+          "enum": [
+            "always",
+            "never",
+            "withExample"
+          ],
+          "type": "string"
+        },
+        "sdkInitStyle": {
+          "description": "Controls how the SDK initialization is depicted in usage snippets",
+          "enum": [
+            "constructor",
+            "builder"
+          ],
+          "type": "string"
+        },
+        "serverToShowInSnippets": {
+          "$ref": "#/$defs/SdkGenConfigServerIndex"
+        }
+      },
+      "type": "object"
     }
-  }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "configVersion": {
+      "description": "The version of the configuration file",
+      "minLength": 1,
+      "type": "string"
+    },
+    "csharp": {
+      "$ref": "./languages/csharp.schema.json"
+    },
+    "generation": {
+      "$ref": "#/$defs/SdkGenConfigGeneration"
+    },
+    "go": {
+      "$ref": "./languages/go.schema.json"
+    },
+    "java": {
+      "$ref": "./languages/java.schema.json"
+    },
+    "php": {
+      "$ref": "./languages/php.schema.json"
+    },
+    "postman": {
+      "$ref": "./languages/postman.schema.json"
+    },
+    "python": {
+      "$ref": "./languages/python.schema.json"
+    },
+    "ruby": {
+      "$ref": "./languages/ruby.schema.json"
+    },
+    "terraform": {
+      "$ref": "./languages/terraform.schema.json"
+    },
+    "typescript": {
+      "$ref": "./languages/typescript.schema.json"
+    },
+    "unity": {
+      "$ref": "./languages/unity.schema.json"
+    }
+  },
+  "required": [
+    "configVersion",
+    "generation"
+  ],
+  "title": "Gen YAML Configuration Schema",
+  "type": "object"
 }

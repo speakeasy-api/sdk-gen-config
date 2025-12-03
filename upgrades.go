@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+
+	"github.com/speakeasy-api/sdk-gen-config/lockfile"
 )
 
 var ErrFailedUpgrade = errors.New("failed to upgrade config")
@@ -111,8 +113,8 @@ func upgradeToV200(cfg map[string]any, uf UpgradeFunc) (string, map[string]any, 
 	}
 
 	newLockFile := map[string]any{
-		"lockVersion": v2,
-		"id":          getUUID(),
+		"lockVersion": lockfile.LockV2,
+		"id":          lockfile.GetUUID(),
 	}
 
 	delete(cfg, "configVersion")

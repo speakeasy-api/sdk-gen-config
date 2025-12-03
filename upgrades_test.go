@@ -3,6 +3,7 @@ package config
 import (
 	"testing"
 
+	"github.com/speakeasy-api/sdk-gen-config/lockfile"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -10,6 +11,7 @@ func Test_upgrade_Success(t *testing.T) {
 	getUUID = func() string {
 		return "123"
 	}
+	lockfile.GetUUID = getUUID
 
 	type args struct {
 		currentVersion string
@@ -57,7 +59,7 @@ func Test_upgrade_Success(t *testing.T) {
 				},
 			},
 			wantLockFile: map[string]any{
-				"lockVersion": v2,
+				"lockVersion": lockfile.LockV2,
 				"id":          "123",
 				"management": map[string]any{
 					"docChecksum":      "123",
@@ -90,7 +92,7 @@ func Test_upgrade_Success(t *testing.T) {
 				},
 			},
 			wantLockFile: map[string]any{
-				"lockVersion": v2,
+				"lockVersion": lockfile.LockV2,
 				"id":          "123",
 				"management": map[string]any{
 					"releaseVersion": "0.0.1",
@@ -146,7 +148,7 @@ func Test_upgrade_Success(t *testing.T) {
 				},
 			},
 			wantLockFile: map[string]any{
-				"lockVersion": v2,
+				"lockVersion": lockfile.LockV2,
 				"id":          "123",
 				"management": map[string]any{
 					"docChecksum":      "123",

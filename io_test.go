@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/speakeasy-api/openapi/sequencedmap"
+	"github.com/speakeasy-api/sdk-gen-config/lockfile"
 	"github.com/speakeasy-api/sdk-gen-config/testutils"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"github.com/stretchr/testify/assert"
@@ -17,6 +19,7 @@ func TestLoad_Success(t *testing.T) {
 	getUUID = func() string {
 		return "123"
 	}
+	lockfile.GetUUID = getUUID
 
 	type args struct {
 		langs        []string
@@ -85,10 +88,11 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
-					ID:          "123",
-					Management:  Management{},
-					Features:    make(map[string]map[string]string),
+					LockVersion:    lockfile.LockV2,
+					ID:             "123",
+					Management:     Management{},
+					Features:       make(map[string]map[string]string),
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -140,7 +144,7 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, "gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
+					LockVersion: lockfile.LockV2,
 					ID:          "123",
 					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
@@ -148,7 +152,8 @@ func TestLoad_Success(t *testing.T) {
 						SpeakeasyVersion: "1.3.1",
 						ReleaseVersion:   "1.3.0",
 					},
-					Features: make(map[string]map[string]string),
+					Features:       make(map[string]map[string]string),
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -201,7 +206,7 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
+					LockVersion: lockfile.LockV2,
 					ID:          "123",
 					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
@@ -214,6 +219,7 @@ func TestLoad_Success(t *testing.T) {
 							"core": "2.90.0",
 						},
 					},
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -267,7 +273,7 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
+					LockVersion: lockfile.LockV2,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
 					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
@@ -280,6 +286,7 @@ func TestLoad_Success(t *testing.T) {
 							"core": "2.90.0",
 						},
 					},
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -342,10 +349,11 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
-					ID:          "123",
-					Management:  Management{},
-					Features:    make(map[string]map[string]string),
+					LockVersion:    lockfile.LockV2,
+					ID:             "123",
+					Management:     Management{},
+					Features:       make(map[string]map[string]string),
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -408,10 +416,11 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, ".gen/gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
-					ID:          "123",
-					Management:  Management{},
-					Features:    make(map[string]map[string]string),
+					LockVersion:    lockfile.LockV2,
+					ID:             "123",
+					Management:     Management{},
+					Features:       make(map[string]map[string]string),
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -464,7 +473,7 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), filepath.Dir(testDir), "gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
+					LockVersion: lockfile.LockV2,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
 					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
@@ -477,6 +486,7 @@ func TestLoad_Success(t *testing.T) {
 							"core": "2.90.0",
 						},
 					},
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -533,7 +543,7 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, "gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
+					LockVersion: lockfile.LockV2,
 					ID:          "123",
 					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
@@ -546,6 +556,7 @@ func TestLoad_Success(t *testing.T) {
 							"core": "2.90.0",
 						},
 					},
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -604,7 +615,7 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
+					LockVersion: lockfile.LockV2,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
 					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
@@ -617,6 +628,7 @@ func TestLoad_Success(t *testing.T) {
 							"core": "2.90.0",
 						},
 					},
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -673,7 +685,7 @@ func TestLoad_Success(t *testing.T) {
 				},
 				ConfigPath: filepath.Join(os.TempDir(), testDir, ".speakeasy/gen.yaml"),
 				LockFile: &LockFile{
-					LockVersion: Version,
+					LockVersion: lockfile.LockV2,
 					ID:          "0f8fad5b-d9cb-469f-a165-70867728950e",
 					Management: Management{
 						DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
@@ -686,6 +698,7 @@ func TestLoad_Success(t *testing.T) {
 							"core": "2.90.0",
 						},
 					},
+					TrackedFiles: sequencedmap.New[string, TrackedFile](),
 				},
 			},
 		},
@@ -732,6 +745,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 	getUUID = func() string {
 		return "123"
 	}
+	lockfile.GetUUID = getUUID
 
 	// Create new config file in .speakeasy dir
 	speakeasyDir := filepath.Join(os.TempDir(), testDir, workspace.SpeakeasyFolder)
@@ -792,7 +806,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 		},
 		ConfigPath: filepath.Join(os.TempDir(), testDir, "gen.yaml"),
 		LockFile: &LockFile{
-			LockVersion: Version,
+			LockVersion: lockfile.LockV2,
 			ID:          "123",
 			Management: Management{
 				DocChecksum:      "2bba3b8f9d211b02569b3f9aff0d34b4",
@@ -805,6 +819,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 					"core": "2.90.0",
 				},
 			},
+			TrackedFiles: sequencedmap.New[string, TrackedFile](),
 		},
 	}, cfg)
 	_, err = os.Stat(filepath.Join(rootDir, "gen.yaml"))
