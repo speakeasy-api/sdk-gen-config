@@ -175,10 +175,6 @@
             "null",
             "string"
           ]
-        },
-        "pristineBranch": {
-          "description": "The Git branch name for tracking pristine generated code. Defaults to 'sdk-pristine' if not specified.",
-          "type": "string"
         }
       },
       "type": "object"

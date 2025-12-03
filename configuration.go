@@ -127,9 +127,6 @@ type PersistentEdits struct {
 	// - "never": disabled and will never prompt
 	Enabled *PersistentEditsEnabled `yaml:"enabled,omitempty" enum:"true,never" description:"Enables preservation of user edits across SDK regenerations. Set to 'never' to disable prompts."`
 
-	// PristineBranch specifies the Git branch name for tracking pristine generated code
-	// Defaults to "sdk-pristine" if not specified
-	PristineBranch       string         `yaml:"pristineBranch,omitempty" description:"The Git branch name for tracking pristine generated code. Defaults to 'sdk-pristine' if not specified."`
 	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties
 }
 
@@ -176,8 +173,8 @@ type Generation struct {
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
 
 	// PersistentEdits configures whether user edits persist across regenerations
-	PersistentEdits *PersistentEdits `yaml:"persistentEdits,omitempty"`
-	Tests           Tests            `yaml:"tests,omitempty"`
+	PersistentEdits PersistentEdits `yaml:"persistentEdits"`
+	Tests           Tests           `yaml:"tests,omitempty"`
 
 	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }

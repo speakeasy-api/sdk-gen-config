@@ -850,6 +850,7 @@ generation:
   schemas:
     allOfMergeStrategy: shallowMerge
   requestBodyFieldName: ""
+  persistentEdits: {}
 `,
 		},
 		"option-dontwrite": {
