@@ -127,6 +127,14 @@ type PersistentEdits struct {
 	// - "never": disabled and will never prompt
 	Enabled *PersistentEditsEnabled `yaml:"enabled,omitempty" enum:"true,never" description:"Enables preservation of user edits across SDK regenerations. Set to 'never' to disable prompts."`
 
+	// CompilePristine controls whether the initial compile pass runs to normalize
+	// pristine content to post-compile state. Formatters/linters rewrite files during
+	// compilation (e.g., go mod tidy, npm install). When true (default), an initial
+	// compile pass normalizes files so gen.lock checksums match actual files on disk.
+	// When false, this initial compile is skipped and only the final compile runs.
+	// Set to false for targets where formatters don't modify generated files.
+	CompilePristine *bool `yaml:"compilePristine,omitempty" description:"When true (default), runs an initial compile pass to normalize pristine content. Set to false for targets where formatters don't modify generated files."`
+
 	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties
 }
 
@@ -138,6 +146,15 @@ func (p *PersistentEdits) IsEnabled() bool {
 // IsNever returns true if persistent edits are explicitly set to never prompt
 func (p *PersistentEdits) IsNever() bool {
 	return p != nil && p.Enabled != nil && *p.Enabled == PersistentEditsEnabledNever
+}
+
+// ShouldCompilePristine returns true if the initial compile pass should run
+// to normalize pristine content to post-compile state. Defaults to true.
+func (p *PersistentEdits) ShouldCompilePristine() bool {
+	if p == nil || p.CompilePristine == nil {
+		return true // default to true
+	}
+	return *p.CompilePristine
 }
 
 type AllOfMergeStrategy string

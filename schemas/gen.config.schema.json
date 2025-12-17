@@ -165,6 +165,13 @@
       "additionalProperties": true,
       "description": "Configures whether user edits to generated SDKs persist across regenerations",
       "properties": {
+        "compilePristine": {
+          "description": "When true (default), runs an initial compile pass to normalize pristine content. Set to false for targets where formatters don't modify generated files.",
+          "type": [
+            "null",
+            "boolean"
+          ]
+        },
         "enabled": {
           "description": "Enables preservation of user edits across SDK regenerations. Set to 'never' to disable prompts.",
           "enum": [
