@@ -42,6 +42,7 @@ type Rule struct {
 	RuleCategory       *RuleCategory  `json:"category,omitempty" yaml:"category,omitempty"`
 	Name               string         `json:"-" yaml:"-"`
 	HowToFix           string         `json:"howToFix,omitempty" yaml:"howToFix,omitempty"`
+	Ignore             []string       `json:"ignore,omitempty" yaml:"ignore,omitempty"` // Regex patterns to exclude matching violations by JSONPath
 }
 
 type Ruleset struct {
