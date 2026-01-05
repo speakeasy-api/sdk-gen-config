@@ -72,6 +72,7 @@ type Fixes struct {
 	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024" description:"Enables request and response component naming fixes from February 2024"`
 	SecurityFeb2025                      bool           `yaml:"securityFeb2025" description:"Enables fixes and refactoring for security that were introduced in February 2025"`
 	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025" description:"Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"`
+	SharedNestedComponentsJan2026        bool           `yaml:"sharedNestedComponentsJan2026" description:"Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"`
 	AdditionalProperties                 map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -583,6 +584,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 				return ptr("")
 			}(),
 			Description: pointer.From("The name of the field to use for the request body in generated SDKs"),
+		},
+		{
+			Name:         "fixes.sharedNestedComponentsJan2026",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.From("Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"),
 		},
 	}
 }
