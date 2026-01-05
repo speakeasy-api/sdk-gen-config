@@ -61,6 +61,10 @@
         "sharedErrorComponentsApr2025": {
           "description": "Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree",
           "type": "boolean"
+        },
+        "sharedNestedComponentsJan2026": {
+          "description": "Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition",
+          "type": "boolean"
         }
       },
       "type": "object"
