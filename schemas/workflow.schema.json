@@ -119,6 +119,10 @@
           "description": "The location to resolve the document at. E.g. a file name, relative location, or a HTTP URL",
           "minLength": 1,
           "type": "string"
+        },
+        "modelNamespace": {
+          "description": "The model namespace/group for component schemas (used when merging multiple documents)",
+          "type": "string"
         }
       },
       "required": [
