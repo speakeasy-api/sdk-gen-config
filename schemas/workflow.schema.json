@@ -85,6 +85,17 @@
       },
       "type": "object"
     },
+    "WorkflowDeployment": {
+      "additionalProperties": false,
+      "description": "Gram deployment configuration for MCP servers. Presence of this block enables deployment.",
+      "properties": {
+        "project": {
+          "description": "Gram project name. Defaults to Gram's authenticated org context.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "WorkflowDependent": {
       "additionalProperties": false,
       "description": "A dependent configuration for external repositories",
@@ -408,6 +419,10 @@
       "properties": {
         "codeSamples": {
           "$ref": "#/$defs/WorkflowCodeSamples"
+        },
+        "deployment": {
+          "$ref": "#/$defs/WorkflowDeployment",
+          "description": "Gram deployment configuration for MCP servers. Presence of this block enables deployment."
         },
         "output": {
           "type": [

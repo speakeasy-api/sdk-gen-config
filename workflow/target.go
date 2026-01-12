@@ -17,11 +17,19 @@ type Target struct {
 
 	// Configuration for target testing. By default, target testing is disabled.
 	Testing *Testing `yaml:"testing,omitempty"`
+
+	// Configuration for Gram deployment. By default, deployment is disabled.
+	Deployment *Deployment `yaml:"deployment,omitempty"`
+}
+
+type Deployment struct {
+	_       struct{} `additionalProperties:"false" description:"Gram deployment configuration for MCP servers. Presence of this block enables deployment."`
+	Project string   `yaml:"project,omitempty" description:"Gram project name. Defaults to Gram's authenticated org context."`
 }
 
 // Configuration for target testing, such as `go test` for Go targets.
 type Testing struct {
-	_      struct{} `additionalProperties:"false" description:"Target testing configuration. By default, targets are not tested as part of the workflow."`
+	_ struct{} `additionalProperties:"false" description:"Target testing configuration. By default, targets are not tested as part of the workflow."`
 	// When enabled, the target will be tested as part of the workflow.
 	Enabled *bool `yaml:"enabled,omitempty" description:"Defaults to false. If true, the target will be tested as part of the workflow."`
 
@@ -32,7 +40,7 @@ type Testing struct {
 
 // Configuration for mockserver handling during testing.
 type MockServer struct {
-	_      struct{} `additionalProperties:"false"`
+	_ struct{} `additionalProperties:"false"`
 	// When enabled, the mockserver will be started during testing.
 	Enabled *bool `yaml:"enabled,omitempty" description:"Defaults to true. If false, the mock API server will not be started."`
 }
@@ -52,11 +60,11 @@ type CodeSamples struct {
 	_             struct{}                  `additionalProperties:"false" description:"Code samples configuration. See https://www.speakeasy.com/guides/openapi/x-codesamples"`
 	Output        string                    `yaml:"output,omitempty" description:"The output file name"`
 	Registry      *SourceRegistry           `yaml:"registry,omitempty" description:"The output registry location."`
-	Style         *string                   `yaml:"style,omitempty" description:"Optional style for the code sample, one of 'standard' or 'readme'. Default is 'standard'."`         // Oneof "standard", "readme" (default: standard) (see codesamples.go)
-	LangOverride  *string                   `yaml:"langOverride,omitempty" description:"Optional language override for the code sample. Default behavior is to auto-detect."`  // The value to use for the "lang" field of each codeSample (default: auto-detect)
-	LabelOverride *CodeSamplesLabelOverride `yaml:"labelOverride,omitempty" description:"Optional label override for the code sample. Default is to use the operationId."` // The value to use for the "label" field of each codeSample (default: operationId)
-	Blocking      *bool                     `yaml:"blocking,omitempty" description:"Defaults to true. If false, code samples failures will not consider the workflow as failed"`      // Default: true. If false, code samples failures will not consider the workflow as failed
-	Disabled      *bool                     `yaml:"disabled,omitempty" description:"Optional flag to disable code samples."`      // Default: false. If true, code samples will not be generated
+	Style         *string                   `yaml:"style,omitempty" description:"Optional style for the code sample, one of 'standard' or 'readme'. Default is 'standard'."`     // Oneof "standard", "readme" (default: standard) (see codesamples.go)
+	LangOverride  *string                   `yaml:"langOverride,omitempty" description:"Optional language override for the code sample. Default behavior is to auto-detect."`    // The value to use for the "lang" field of each codeSample (default: auto-detect)
+	LabelOverride *CodeSamplesLabelOverride `yaml:"labelOverride,omitempty" description:"Optional label override for the code sample. Default is to use the operationId."`       // The value to use for the "label" field of each codeSample (default: operationId)
+	Blocking      *bool                     `yaml:"blocking,omitempty" description:"Defaults to true. If false, code samples failures will not consider the workflow as failed"` // Default: true. If false, code samples failures will not consider the workflow as failed
+	Disabled      *bool                     `yaml:"disabled,omitempty" description:"Optional flag to disable code samples."`                                                     // Default: false. If true, code samples will not be generated
 }
 
 type CodeSamplesLabelOverride struct {
@@ -292,4 +300,8 @@ func (c CodeSamples) Enabled() bool {
 
 func (t Target) CodeSamplesEnabled() bool {
 	return t.CodeSamples != nil && t.CodeSamples.Enabled()
+}
+
+func (t Target) DeploymentEnabled() bool {
+	return t.Deployment != nil
 }
