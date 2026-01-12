@@ -122,9 +122,10 @@ func (l LocationString) Reference() string {
 }
 
 type Document struct {
-	_        struct{}       `additionalProperties:"false" description:"A local or remote document."`
-	Location LocationString `yaml:"location" description:"The location to resolve the document at. E.g. a file name, relative location, or a HTTP URL" minLength:"1" required:"true"`
-	Auth     *Auth          `yaml:",inline"`
+	_              struct{}       `additionalProperties:"false" description:"A local or remote document."`
+	Location       LocationString `yaml:"location" description:"The location to resolve the document at. E.g. a file name, relative location, or a HTTP URL" minLength:"1" required:"true"`
+	Auth           *Auth          `yaml:",inline"`
+	ModelNamespace string         `yaml:"modelNamespace,omitempty" description:"The model namespace/group for component schemas (used when merging multiple documents)"`
 }
 
 func (Document) PrepareJSONSchema(schema *jsg.Schema) error {
