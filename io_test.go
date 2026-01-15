@@ -82,6 +82,7 @@ func TestLoad_Success(t *testing.T) {
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 						RequestBodyFieldName: "body",
+						VersioningStrategy:   VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -140,6 +141,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						VersioningStrategy: VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{},
 				},
@@ -202,6 +204,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						VersioningStrategy: VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{},
 				},
@@ -269,6 +272,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						VersioningStrategy: VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{},
 				},
@@ -344,6 +348,7 @@ func TestLoad_Success(t *testing.T) {
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 						RequestBodyFieldName: "body",
+						VersioningStrategy:   VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -412,6 +417,7 @@ func TestLoad_Success(t *testing.T) {
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
 						RequestBodyFieldName: "body",
+						VersioningStrategy:   VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{
 						"go": true,
@@ -471,6 +477,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						VersioningStrategy: VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{},
 				},
@@ -539,6 +546,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						VersioningStrategy: VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{
 						"typescript": true,
@@ -611,6 +619,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						VersioningStrategy: VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{
 						"typescript": true,
@@ -683,6 +692,7 @@ func TestLoad_Success(t *testing.T) {
 						Schemas: Schemas{
 							AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 						},
+						VersioningStrategy: VersioningStrategyAutomatic,
 					},
 					New: map[string]bool{},
 				},
@@ -804,6 +814,7 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 				Schemas: Schemas{
 					AllOfMergeStrategy: AllOfMergeStrategyShallowMerge,
 				},
+				VersioningStrategy: VersioningStrategyAutomatic,
 			},
 			New: map[string]bool{},
 		},

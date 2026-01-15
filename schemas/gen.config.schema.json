@@ -132,6 +132,14 @@
         "useClassNamesForArrayFields": {
           "description": "Use class names for array fields instead of the child's schema type",
           "type": "boolean"
+        },
+        "versioningStrategy": {
+          "description": "Controls how SDK versions are determined. 'automatic' (default) bumps versions based on changes, 'manual' uses the version in gen.yaml as-is.",
+          "enum": [
+            "automatic",
+            "manual"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
