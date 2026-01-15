@@ -123,6 +123,10 @@
           "description": "Skips the automatic addition of an error suffix to error types",
           "type": "boolean"
         },
+        "skipVersioning": {
+          "description": "Disables automatic SDK version bumping. When enabled, the SDK version in gen.yaml will be used as-is without automatic increments based on changes.",
+          "type": "boolean"
+        },
         "tests": {
           "$ref": "#/$defs/SdkGenConfigTests"
         },

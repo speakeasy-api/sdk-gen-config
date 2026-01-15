@@ -169,6 +169,7 @@ type Generation struct {
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty" description:"Enables access to the SDK configuration from hooks"`
 	Schemas                     Schemas        `yaml:"schemas"`
 	RequestBodyFieldName        string         `yaml:"requestBodyFieldName" description:"The name of the field to use for the request body in generated SDKs"`
+	SkipVersioning              bool           `yaml:"skipVersioning,omitempty" description:"Disables automatic SDK version bumping. When enabled, the SDK version in gen.yaml will be used as-is without automatic increments based on changes."`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
@@ -590,6 +591,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.From("Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"),
+		},
+		{
+			Name:         "skipVersioning",
+			Required:     false,
+			DefaultValue: ptr(false),
+			Description:  pointer.From("Disables automatic SDK version bumping. When enabled, the SDK version in gen.yaml will be used as-is without automatic increments based on changes."),
 		},
 	}
 }
