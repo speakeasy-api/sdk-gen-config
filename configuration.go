@@ -148,6 +148,16 @@ const (
 	AllOfMergeStrategyShallowMerge AllOfMergeStrategy = "shallowMerge"
 )
 
+// VersioningStrategy controls how SDK versions are determined during generation
+type VersioningStrategy string
+
+const (
+	// VersioningStrategyAutomatic automatically bumps the SDK version based on changes to the spec, config, or generator
+	VersioningStrategyAutomatic VersioningStrategy = "automatic"
+	// VersioningStrategyManual uses the version specified in gen.yaml as-is without automatic bumping
+	VersioningStrategyManual VersioningStrategy = "manual"
+)
+
 type Schemas struct {
 	_                  struct{}           `additionalProperties:"false" description:"Schema processing configuration"`
 	AllOfMergeStrategy AllOfMergeStrategy `yaml:"allOfMergeStrategy" enum:"deepMerge,shallowMerge" description:"Controls how allOf schemas are merged"`
@@ -168,7 +178,8 @@ type Generation struct {
 	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty" description:"Generates an overload if generator detects that the request body field 'stream: true' is used for client intent to request 'text/event-stream' response"`
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty" description:"Enables access to the SDK configuration from hooks"`
 	Schemas                     Schemas        `yaml:"schemas"`
-	RequestBodyFieldName        string         `yaml:"requestBodyFieldName" description:"The name of the field to use for the request body in generated SDKs"`
+	RequestBodyFieldName        string             `yaml:"requestBodyFieldName" description:"The name of the field to use for the request body in generated SDKs"`
+	VersioningStrategy          VersioningStrategy `yaml:"versioningStrategy,omitempty" enum:"automatic,manual" description:"Controls how SDK versions are determined. 'automatic' (default) bumps versions based on changes, 'manual' uses the version in gen.yaml as-is."`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`
@@ -590,6 +601,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.From("Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"),
+		},
+		{
+			Name:         "versioningStrategy",
+			Required:     false,
+			DefaultValue: ptr(VersioningStrategyAutomatic),
+			Description:  pointer.From("Controls how SDK versions are determined. 'automatic' (default) bumps versions based on changes, 'manual' uses the version in gen.yaml as-is."),
 		},
 	}
 }
