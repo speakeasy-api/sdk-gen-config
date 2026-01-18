@@ -78,6 +78,13 @@
         "resolved": {
           "type": "boolean",
           "default": false
+        },
+        "ignore": {
+          "description": "Regex patterns to exclude matching violations by JSONPath",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
