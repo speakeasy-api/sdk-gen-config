@@ -81,6 +81,7 @@ type Management struct {
 	RepoSubDirectory     string         `yaml:"repoSubDirectory,omitempty"`
 	InstallationURL      string         `yaml:"installationURL,omitempty"`
 	Published            bool           `yaml:"published,omitempty"`
+	LastEventID          string         `yaml:"lastEventID,omitempty"`
 	AdditionalProperties map[string]any `yaml:",inline"`
 }
 
