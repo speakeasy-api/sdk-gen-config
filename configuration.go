@@ -177,6 +177,7 @@ type Generation struct {
 	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty" description:"Skips the automatic addition of an error suffix to error types"`
 	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty" description:"Generates an overload if generator detects that the request body field 'stream: true' is used for client intent to request 'text/event-stream' response"`
 	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty" description:"Enables access to the SDK configuration from hooks"`
+	ShowAllExamples             bool           `yaml:"showAllExamples,omitempty" description:"Shows all examples from the OpenAPI spec in generated documentation instead of just the first example"`
 	Schemas                     Schemas        `yaml:"schemas"`
 	RequestBodyFieldName        string             `yaml:"requestBodyFieldName" description:"The name of the field to use for the request body in generated SDKs"`
 	VersioningStrategy          VersioningStrategy `yaml:"versioningStrategy,omitempty" enum:"automatic,manual" description:"Controls how SDK versions are determined. 'automatic' (default) bumps versions based on changes, 'manual' uses the version in gen.yaml as-is."`
