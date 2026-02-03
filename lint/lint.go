@@ -6,47 +6,92 @@ import (
 	"io/fs"
 	"os"
 	"regexp"
+	"slices"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
 )
 
 const (
-	LintVersion = "1.0.0"
+	LintVersion2 = "2.0.0"
+	LintVersion1 = "1.0.0"
 )
 
 const (
 	lintFile = "lint.yaml"
 )
 
-// RuleCategory is a structure that represents a category of rules.
-type RuleCategory struct {
-	Id          string `json:"id" yaml:"id"`                   // The category ID
-	Name        string `json:"name" yaml:"name"`               // The name of the category
-	Description string `json:"description" yaml:"description"` // What is the category all about?
-}
-
 // Rule is a structure that represents a rule as part of a ruleset.
 type Rule struct {
-	Id                 string         `json:"id,omitempty" yaml:"id,omitempty"`
-	Description        string         `json:"description,omitempty" yaml:"description,omitempty"`
-	Message            string         `json:"message,omitempty" yaml:"message,omitempty"`
-	Given              interface{}    `json:"given,omitempty" yaml:"given,omitempty"`
-	Formats            []string       `json:"formats,omitempty" yaml:"formats,omitempty"`
-	Resolved           bool           `json:"resolved,omitempty" yaml:"resolved,omitempty"`
-	Recommended        bool           `json:"recommended,omitempty" yaml:"recommended,omitempty"`
-	Type               string         `json:"type,omitempty" yaml:"type,omitempty"`
-	Severity           string         `json:"severity,omitempty" yaml:"severity,omitempty"`
-	Then               interface{}    `json:"then,omitempty" yaml:"then,omitempty"`
-	PrecompiledPattern *regexp.Regexp `json:"-" yaml:"-"` // regex is slow.
-	RuleCategory       *RuleCategory  `json:"category,omitempty" yaml:"category,omitempty"`
-	Name               string         `json:"-" yaml:"-"`
-	HowToFix           string         `json:"howToFix,omitempty" yaml:"howToFix,omitempty"`
+	ID       string         `json:"id,omitempty" yaml:"id,omitempty"`             // The unique identifier for the rule
+	Severity string         `json:"severity,omitempty" yaml:"severity,omitempty"` // An overload for severity
+	Disabled bool           `json:"disabled,omitempty" yaml:"disabled,omitempty"` // Whether the rule is disabled
+	Match    *regexp.Regexp `json:"match,omitempty" yaml:"match,omitempty"`       // A regex pattern to match against
 }
 
 type Ruleset struct {
-	Rulesets []string         `yaml:"rulesets"`
-	Rules    map[string]*Rule `yaml:"rules"`
+	Rulesets []string `yaml:"rulesets,omitempty"` // Rulesets to extend
+	Rules    []Rule   `yaml:"rules"`              // List of rules in this ruleset to mutate or add to rules from the extended rulesets
+}
+
+func (r *Ruleset) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind != yaml.MappingNode {
+		return fmt.Errorf("unexpected kind %v for Ruleset", value.Kind)
+	}
+
+	// Handle each of the fields of Ruleset individually
+	var rulesetsNode *yaml.Node
+	var rulesNode *yaml.Node
+
+	for i := 0; i < len(value.Content); i += 2 {
+		keyNode := value.Content[i]
+		valNode := value.Content[i+1]
+
+		switch keyNode.Value {
+		case "rulesets":
+			rulesetsNode = valNode
+		case "rules":
+			rulesNode = valNode
+		}
+	}
+
+	// Unmarshal Rulesets
+	if rulesetsNode != nil {
+		var rulesets []string
+		if err := rulesetsNode.Decode(&rulesets); err != nil {
+			return err
+		}
+		r.Rulesets = rulesets
+	}
+
+	// Unmarshal Rules
+	if rulesNode == nil {
+		return nil
+	}
+
+	// For Rules if the node is a map we need to convert it to a slice otherwise handle it as a slice
+	switch rulesNode.Kind {
+	case yaml.MappingNode:
+		var rulesMap map[string]Rule
+		if err := rulesNode.Decode(&rulesMap); err != nil {
+			return err
+		}
+		for name, rule := range rulesMap {
+			if rule.ID == "" {
+				rule.ID = name
+			}
+			r.Rules = append(r.Rules, rule)
+		}
+	case yaml.SequenceNode:
+		var rulesSlice []Rule
+		if err := rulesNode.Decode(&rulesSlice); err != nil {
+			return err
+		}
+		r.Rules = rulesSlice
+	default:
+		return fmt.Errorf("unexpected kind %v for Ruleset", rulesNode.Kind)
+	}
+	return nil
 }
 
 type Lint struct {
@@ -99,7 +144,7 @@ func Load(searchDirs []string) (*Lint, string, error) {
 		return nil, "", fmt.Errorf("failed to unmarshal lint.yaml: %w", err)
 	}
 
-	if header.Version != LintVersion {
+	if !slices.Contains([]string{LintVersion1, LintVersion2}, header.Version) {
 		return nil, "", fmt.Errorf("unsupported lint version: %s", header.Version)
 	}
 
