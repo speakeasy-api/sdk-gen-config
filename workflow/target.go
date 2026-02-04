@@ -90,8 +90,9 @@ type NPM struct {
 }
 
 type PyPi struct {
-	_     struct{} `additionalProperties:"false"`
-	Token string   `yaml:"token" required:"true"`
+	_                    struct{} `additionalProperties:"false"`
+	Token                string   `yaml:"token,omitempty" description:"PyPI API token for token-based authentication. Not required if using trusted publishing."`
+	UseTrustedPublishing *bool    `yaml:"useTrustedPublishing,omitempty" description:"Use OIDC trusted publishing instead of token-based authentication. See https://docs.pypi.org/trusted-publishers/"`
 }
 
 type Packagist struct {
@@ -195,9 +196,15 @@ func (p Publishing) Validate(target string) error {
 			}
 		}
 	case "python":
-		if p.PyPi != nil && p.PyPi.Token != "" {
-			if err := validateSecret(p.PyPi.Token); err != nil {
-				return fmt.Errorf("failed to validate pypi token: %w", err)
+		if p.PyPi != nil {
+			usesTrustedPublishing := p.PyPi.UseTrustedPublishing != nil && *p.PyPi.UseTrustedPublishing
+			if usesTrustedPublishing && p.PyPi.Token != "" {
+				return fmt.Errorf("pypi token should not be provided when using trusted publishing")
+			}
+			if !usesTrustedPublishing && p.PyPi.Token != "" {
+				if err := validateSecret(p.PyPi.Token); err != nil {
+					return fmt.Errorf("failed to validate pypi token: %w", err)
+				}
 			}
 		}
 	case "php":
@@ -262,8 +269,11 @@ func (p Publishing) IsPublished(target string) bool {
 			return true
 		}
 	case "python":
-		if p.PyPi != nil && p.PyPi.Token != "" {
-			return true
+		if p.PyPi != nil {
+			usesTrustedPublishing := p.PyPi.UseTrustedPublishing != nil && *p.PyPi.UseTrustedPublishing
+			if usesTrustedPublishing || p.PyPi.Token != "" {
+				return true
+			}
 		}
 	case "php":
 		if p.Packagist != nil {
