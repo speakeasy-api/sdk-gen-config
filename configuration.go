@@ -319,16 +319,31 @@ type PullRequestOn struct {
 }
 
 type Jobs struct {
-	Generate Job `yaml:"generate,omitempty"`
-	Publish  Job `yaml:"publish,omitempty"`
-	Tag      Job `yaml:"tag,omitempty"`
-	Test     Job `yaml:"test,omitempty"`
+	Generate    Job            `yaml:"generate,omitempty"`
+	Publish     Job            `yaml:"publish,omitempty"`
+	Tag         Job            `yaml:"tag,omitempty"`
+	Test        Job            `yaml:"test,omitempty"`
+	PublishPypi *PublishPyPiJob `yaml:"publish-pypi,omitempty"`
 }
 
 type Job struct {
 	Uses    string            `yaml:"uses"`
 	With    map[string]any    `yaml:"with,omitempty"`
 	Secrets map[string]string `yaml:"secrets,omitempty"`
+}
+
+// PublishPyPiJob represents a job that publishes to PyPI using OIDC trusted publishing
+type PublishPyPiJob struct {
+	Needs  []string          `yaml:"needs"`
+	If     string            `yaml:"if"`
+	RunsOn string            `yaml:"runs-on"`
+	Steps  []PublishPyPiStep `yaml:"steps"`
+}
+
+// PublishPyPiStep represents a step in the publish-pypi job
+type PublishPyPiStep struct {
+	Uses string         `yaml:"uses"`
+	With map[string]any `yaml:"with,omitempty"`
 }
 
 type WorkflowDispatch struct {
