@@ -326,12 +326,17 @@
       "additionalProperties": false,
       "properties": {
         "token": {
+          "description": "PyPI API token for token-based authentication. Not required if using trusted publishing.",
           "type": "string"
+        },
+        "useTrustedPublishing": {
+          "description": "Use OIDC trusted publishing instead of token-based authentication. See https://docs.pypi.org/trusted-publishers/",
+          "type": [
+            "null",
+            "boolean"
+          ]
         }
       },
-      "required": [
-        "token"
-      ],
       "type": "object"
     },
     "WorkflowRubyGems": {
