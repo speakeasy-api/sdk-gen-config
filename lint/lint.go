@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"time"
 
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"gopkg.in/yaml.v3"
@@ -20,6 +21,15 @@ const (
 const (
 	lintFile = "lint.yaml"
 )
+
+// CustomRulesConfig configures custom rule loading.
+type CustomRulesConfig struct {
+	// Paths are glob patterns for rule files (e.g., "./rules/*.ts")
+	Paths []string `json:"paths,omitempty" yaml:"paths,omitempty"`
+
+	// Timeout is the maximum execution time per rule (default: 30s)
+	Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+}
 
 // Rule is a structure that represents a rule as part of a ruleset.
 type Rule struct {
@@ -98,6 +108,7 @@ type Lint struct {
 	Version        string             `yaml:"lintVersion"`
 	DefaultRuleset string             `yaml:"defaultRuleset"`
 	Rulesets       map[string]Ruleset `yaml:"rulesets"`
+	CustomRules    *CustomRulesConfig `yaml:"customRules,omitempty"`
 }
 
 func Load(searchDirs []string) (*Lint, string, error) {

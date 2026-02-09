@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/speakeasy-api/sdk-gen-config/lint"
 	"github.com/stretchr/testify/assert"
@@ -109,6 +110,75 @@ rulesets:
 							},
 						},
 					},
+				},
+			},
+		},
+		{
+			name: "loads a lint file with custom rules",
+			args: args{
+				lintLocation: "test/.speakeasy",
+				lintContents: `lintVersion: 2.0.0
+defaultRuleset: default
+rulesets:
+  default:
+    rules:
+      test: {}
+customRules:
+  paths:
+    - "./rules/*.ts"
+`,
+				workingDir: "test",
+			},
+			want: &lint.Lint{
+				Version:        "2.0.0",
+				DefaultRuleset: "default",
+				Rulesets: map[string]lint.Ruleset{
+					"default": {
+						Rules: []lint.Rule{
+							{
+								ID: "test",
+							},
+						},
+					},
+				},
+				CustomRules: &lint.CustomRulesConfig{
+					Paths: []string{"./rules/*.ts"},
+				},
+			},
+		},
+		{
+			name: "loads a lint file with custom rules and timeout",
+			args: args{
+				lintLocation: "test/.speakeasy",
+				lintContents: `lintVersion: 2.0.0
+defaultRuleset: default
+rulesets:
+  default:
+    rules:
+      test: {}
+customRules:
+  paths:
+    - "./rules/*.ts"
+    - "./rules/*.js"
+  timeout: 60s
+`,
+				workingDir: "test",
+			},
+			want: &lint.Lint{
+				Version:        "2.0.0",
+				DefaultRuleset: "default",
+				Rulesets: map[string]lint.Ruleset{
+					"default": {
+						Rules: []lint.Rule{
+							{
+								ID: "test",
+							},
+						},
+					},
+				},
+				CustomRules: &lint.CustomRulesConfig{
+					Paths:   []string{"./rules/*.ts", "./rules/*.js"},
+					Timeout: 60 * time.Second,
 				},
 			},
 		},
