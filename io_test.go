@@ -65,6 +65,7 @@ func TestLoad_Success(t *testing.T) {
 							SecurityFeb2025:                      true,
 							SharedErrorComponentsApr2025:         true,
 							SharedNestedComponentsJan2026:        true,
+							NameOverrideFeb2026:                  true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
@@ -330,6 +331,7 @@ func TestLoad_Success(t *testing.T) {
 							SecurityFeb2025:                      true,
 							SharedErrorComponentsApr2025:         true,
 							SharedNestedComponentsJan2026:        true,
+							NameOverrideFeb2026:                  true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,
@@ -399,6 +401,7 @@ func TestLoad_Success(t *testing.T) {
 							SharedErrorComponentsApr2025:         true,
 							NameResolutionFeb2025:                true,
 							SharedNestedComponentsJan2026:        true,
+							NameOverrideFeb2026:                  true,
 						},
 						Auth: &Auth{
 							OAuth2ClientCredentialsEnabled: true,

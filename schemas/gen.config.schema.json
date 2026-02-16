@@ -38,6 +38,10 @@
       "additionalProperties": true,
       "description": "Fixes applied to the SDK generation",
       "properties": {
+        "nameOverrideFeb2026": {
+          "description": "Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions",
+          "type": "boolean"
+        },
         "nameResolutionDec2023": {
           "description": "Enables name resolution fixes from December 2023",
           "type": "boolean"

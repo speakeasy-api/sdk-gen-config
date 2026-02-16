@@ -73,6 +73,7 @@ type Fixes struct {
 	SecurityFeb2025                      bool           `yaml:"securityFeb2025" description:"Enables fixes and refactoring for security that were introduced in February 2025"`
 	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025" description:"Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"`
 	SharedNestedComponentsJan2026        bool           `yaml:"sharedNestedComponentsJan2026" description:"Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"`
+	NameOverrideFeb2026                  bool           `yaml:"nameOverrideFeb2026" description:"Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions"`
 	AdditionalProperties                 map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -181,20 +182,20 @@ type Schemas struct {
 }
 
 type Generation struct {
-	_                           struct{}       `additionalProperties:"true" description:"Generation configuration"`
-	DevContainers               *DevContainers `yaml:"devContainers,omitempty"`
-	BaseServerURL               string         `yaml:"baseServerUrl,omitempty" description:"The base URL of the server. This value will be used if global servers are not defined in the spec."`
-	SDKClassName                string         `yaml:"sdkClassName,omitempty" description:"Generated name of the root SDK class"`
-	MaintainOpenAPIOrder        bool           `yaml:"maintainOpenAPIOrder,omitempty" description:"Maintains the order of parameters and fields in the OpenAPI specification"`
-	DeduplicateErrors           bool           `yaml:"deduplicateErrors,omitempty" description:"Deduplicates errors that have the same schema"`
-	UsageSnippets               *UsageSnippets `yaml:"usageSnippets,omitempty"`
-	UseClassNamesForArrayFields bool           `yaml:"useClassNamesForArrayFields,omitempty" description:"Use class names for array fields instead of the child's schema type"`
-	Fixes                       *Fixes         `yaml:"fixes,omitempty"`
-	Auth                        *Auth          `yaml:"auth,omitempty"`
-	SkipErrorSuffix             bool           `yaml:"skipErrorSuffix,omitempty" description:"Skips the automatic addition of an error suffix to error types"`
-	InferSSEOverload            bool           `yaml:"inferSSEOverload,omitempty" description:"Generates an overload if generator detects that the request body field 'stream: true' is used for client intent to request 'text/event-stream' response"`
-	SDKHooksConfigAccess        bool           `yaml:"sdkHooksConfigAccess,omitempty" description:"Enables access to the SDK configuration from hooks"`
-	Schemas                     Schemas        `yaml:"schemas"`
+	_                           struct{}           `additionalProperties:"true" description:"Generation configuration"`
+	DevContainers               *DevContainers     `yaml:"devContainers,omitempty"`
+	BaseServerURL               string             `yaml:"baseServerUrl,omitempty" description:"The base URL of the server. This value will be used if global servers are not defined in the spec."`
+	SDKClassName                string             `yaml:"sdkClassName,omitempty" description:"Generated name of the root SDK class"`
+	MaintainOpenAPIOrder        bool               `yaml:"maintainOpenAPIOrder,omitempty" description:"Maintains the order of parameters and fields in the OpenAPI specification"`
+	DeduplicateErrors           bool               `yaml:"deduplicateErrors,omitempty" description:"Deduplicates errors that have the same schema"`
+	UsageSnippets               *UsageSnippets     `yaml:"usageSnippets,omitempty"`
+	UseClassNamesForArrayFields bool               `yaml:"useClassNamesForArrayFields,omitempty" description:"Use class names for array fields instead of the child's schema type"`
+	Fixes                       *Fixes             `yaml:"fixes,omitempty"`
+	Auth                        *Auth              `yaml:"auth,omitempty"`
+	SkipErrorSuffix             bool               `yaml:"skipErrorSuffix,omitempty" description:"Skips the automatic addition of an error suffix to error types"`
+	InferSSEOverload            bool               `yaml:"inferSSEOverload,omitempty" description:"Generates an overload if generator detects that the request body field 'stream: true' is used for client intent to request 'text/event-stream' response"`
+	SDKHooksConfigAccess        bool               `yaml:"sdkHooksConfigAccess,omitempty" description:"Enables access to the SDK configuration from hooks"`
+	Schemas                     Schemas            `yaml:"schemas"`
 	RequestBodyFieldName        string             `yaml:"requestBodyFieldName" description:"The name of the field to use for the request body in generated SDKs"`
 	VersioningStrategy          VersioningStrategy `yaml:"versioningStrategy,omitempty" enum:"automatic,manual" description:"Controls how SDK versions are determined. 'automatic' (default) bumps versions based on changes, 'manual' uses the version in gen.yaml as-is."`
 
@@ -319,10 +320,10 @@ type PullRequestOn struct {
 }
 
 type Jobs struct {
-	Generate    Job            `yaml:"generate,omitempty"`
-	Publish     Job            `yaml:"publish,omitempty"`
-	Tag         Job            `yaml:"tag,omitempty"`
-	Test        Job            `yaml:"test,omitempty"`
+	Generate    Job             `yaml:"generate,omitempty"`
+	Publish     Job             `yaml:"publish,omitempty"`
+	Tag         Job             `yaml:"tag,omitempty"`
+	Test        Job             `yaml:"test,omitempty"`
 	PublishPypi *PublishPyPiJob `yaml:"publish-pypi,omitempty"`
 }
 
@@ -633,6 +634,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.From("Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"),
+		},
+		{
+			Name:         "fixes.nameOverrideFeb2026",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.From("Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions"),
 		},
 		{
 			Name:         "versioningStrategy",
