@@ -159,6 +159,22 @@ func (p *PersistentEdits) ShouldCompilePristine() bool {
 	return *p.CompilePristine
 }
 
+type GenerationStep string
+
+const (
+	GenerationStepCompile GenerationStep = "compile"
+	GenerationStepLint    GenerationStep = "lint"
+)
+
+func (GenerationStep) PrepareJSONSchema(schema *jsg.Schema) error {
+	schema.Type = &jsg.Type{SimpleTypes: (*jsg.SimpleType)(pointer.From(jsg.String))}
+	schema.Enum = []any{
+		string(GenerationStepCompile),
+		string(GenerationStepLint),
+	}
+	return nil
+}
+
 type AllOfMergeStrategy string
 
 const (
@@ -198,6 +214,7 @@ type Generation struct {
 	Schemas                     Schemas            `yaml:"schemas"`
 	RequestBodyFieldName        string             `yaml:"requestBodyFieldName" description:"The name of the field to use for the request body in generated SDKs"`
 	VersioningStrategy          VersioningStrategy `yaml:"versioningStrategy,omitempty" enum:"automatic,manual" description:"Controls how SDK versions are determined. 'automatic' (default) bumps versions based on changes, 'manual' uses the version in gen.yaml as-is."`
+	SkipSteps                   []GenerationStep   `yaml:"skipSteps,omitempty" description:"A list of generation steps to skip. 'compile' skips code compilation and linting commands, 'lint' skips only the linting commands."`
 
 	// Mock server generation configuration.
 	MockServer *MockServer `yaml:"mockServer,omitempty"`

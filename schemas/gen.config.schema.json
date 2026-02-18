@@ -127,6 +127,13 @@
           "description": "Skips the automatic addition of an error suffix to error types",
           "type": "boolean"
         },
+        "skipSteps": {
+          "description": "A list of generation steps to skip. 'compile' skips code compilation and linting commands, 'lint' skips only the linting commands.",
+          "items": {
+            "$ref": "#/$defs/SdkGenConfigGenerationStep"
+          },
+          "type": "array"
+        },
         "tests": {
           "$ref": "#/$defs/SdkGenConfigTests"
         },
@@ -147,6 +154,13 @@
         }
       },
       "type": "object"
+    },
+    "SdkGenConfigGenerationStep": {
+      "enum": [
+        "compile",
+        "lint"
+      ],
+      "type": "string"
     },
     "SdkGenConfigLanguageConfig": {
       "additionalProperties": true,
