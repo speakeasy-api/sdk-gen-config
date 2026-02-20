@@ -61,8 +61,7 @@
     }
   },
   "required": [
-    "version",
-    "packageName"
+    "version"
   ],
   "additionalProperties": true
 }
