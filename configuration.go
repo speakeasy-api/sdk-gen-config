@@ -73,7 +73,7 @@ type Fixes struct {
 	SecurityFeb2025                      bool           `yaml:"securityFeb2025" description:"Enables fixes and refactoring for security that were introduced in February 2025"`
 	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025" description:"Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"`
 	SharedNestedComponentsJan2026        bool           `yaml:"sharedNestedComponentsJan2026" description:"Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"`
-	NameOverrideFeb2026                  bool           `yaml:"nameOverrideFeb2026" description:"Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions"`
+	NameOverrideFeb2026                  bool           `yaml:"nameOverrideFeb2026" description:"Enables x-speakeasy-name-override fixes from February 2026, including using group + override for request/response type naming"`
 	AdditionalProperties                 map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
