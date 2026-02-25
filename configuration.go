@@ -109,6 +109,12 @@ type Tests struct {
 	AdditionalProperties       map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
+type AgentSkills struct {
+	_                    struct{}       `additionalProperties:"true" description:"Skills generation configuration for coding agents"`
+	GenerateSkills       bool           `yaml:"generateSkills" description:"Enables generation of skill files for coding agents"`
+	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
+}
+
 // PersistentEditsEnabled controls whether user edits persist across regenerations
 type PersistentEditsEnabled string
 
@@ -222,6 +228,7 @@ type Generation struct {
 	// PersistentEdits configures whether user edits persist across regenerations
 	PersistentEdits PersistentEdits `yaml:"persistentEdits"`
 	Tests           Tests           `yaml:"tests,omitempty"`
+	AgentSkills     *AgentSkills    `yaml:"agentSkills,omitempty"`
 
 	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
