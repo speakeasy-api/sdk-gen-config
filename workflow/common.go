@@ -14,9 +14,14 @@ const (
 	fileStatusNotExists
 	fileStatusRemote
 	fileStatusRegistry
+	fileStatusSourceRef
 )
 
 func getFileStatus(filePath string) fileStatus {
+	if strings.HasPrefix(filePath, "source:") {
+		return fileStatusSourceRef
+	}
+
 	if strings.Contains(filePath, "registry.speakeasyapi.dev") {
 		return fileStatusRegistry
 	}

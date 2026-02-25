@@ -299,6 +299,99 @@ func TestWorkflow_Validate(t *testing.T) {
 	}
 }
 
+func TestWorkflow_ValidateSourceDependencies(t *testing.T) {
+	tests := []struct {
+		name    string
+		sources map[string]workflow.Source
+		wantErr string
+	}{
+		{
+			name: "no source refs - passes",
+			sources: map[string]workflow.Source{
+				"a": {Inputs: []workflow.Document{{Location: "http://example.com/a.yaml"}}},
+				"b": {Inputs: []workflow.Document{{Location: "http://example.com/b.yaml"}}},
+			},
+		},
+		{
+			name: "valid source ref - passes",
+			sources: map[string]workflow.Source{
+				"base": {
+					Inputs: []workflow.Document{{Location: "http://example.com/base.yaml"}},
+					Output: pointer.From("base.yaml"),
+				},
+				"combined": {
+					Inputs: []workflow.Document{
+						{Location: "source:base"},
+						{Location: "http://example.com/other.yaml"},
+					},
+					Output: pointer.From("combined.yaml"),
+				},
+			},
+		},
+		{
+			name: "diamond dependency - passes",
+			sources: map[string]workflow.Source{
+				"a": {Inputs: []workflow.Document{{Location: "http://example.com/a.yaml"}}, Output: pointer.From("a.yaml")},
+				"b": {Inputs: []workflow.Document{{Location: "http://example.com/b.yaml"}}, Output: pointer.From("b.yaml")},
+				"c": {
+					Inputs: []workflow.Document{{Location: "source:a"}, {Location: "source:b"}},
+					Output: pointer.From("c.yaml"),
+				},
+			},
+		},
+		{
+			name: "chain A -> B -> C - passes",
+			sources: map[string]workflow.Source{
+				"a": {Inputs: []workflow.Document{{Location: "http://example.com/a.yaml"}}, Output: pointer.From("a.yaml")},
+				"b": {Inputs: []workflow.Document{{Location: "source:a"}}, Output: pointer.From("b.yaml")},
+				"c": {Inputs: []workflow.Document{{Location: "source:b"}}, Output: pointer.From("c.yaml")},
+			},
+		},
+		{
+			name: "self-reference - fails",
+			sources: map[string]workflow.Source{
+				"a": {
+					Inputs: []workflow.Document{{Location: "source:a"}},
+					Output: pointer.From("a.yaml"),
+				},
+			},
+			wantErr: "circular source dependency detected: a -> a",
+		},
+		{
+			name: "simple cycle A -> B -> A - fails",
+			sources: map[string]workflow.Source{
+				"a": {Inputs: []workflow.Document{{Location: "source:b"}}, Output: pointer.From("a.yaml")},
+				"b": {Inputs: []workflow.Document{{Location: "source:a"}}, Output: pointer.From("b.yaml")},
+			},
+			wantErr: "circular source dependency detected:",
+		},
+		{
+			name: "missing source ref - fails",
+			sources: map[string]workflow.Source{
+				"a": {
+					Inputs: []workflow.Document{{Location: "source:nonexistent"}},
+					Output: pointer.From("a.yaml"),
+				},
+			},
+			wantErr: `source "a" references unknown source "nonexistent"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			wf := workflow.Workflow{
+				Version: workflow.WorkflowVersion,
+				Sources: tt.sources,
+			}
+			err := wf.ValidateSourceDependencies()
+			if tt.wantErr == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestMigrate_Success(t *testing.T) {
 	tests := []struct {
 		name     string

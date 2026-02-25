@@ -244,6 +244,9 @@ func (s Source) handleSingleInput() (string, error) {
 		return "", fmt.Errorf("input file %s does not exist", input)
 	case fileStatusRemote, fileStatusRegistry:
 		return s.generateRegistryPath(input)
+	case fileStatusSourceRef:
+		// Source refs are resolved at runtime; generate a temp output path
+		return s.generateOutputPath()
 	default:
 		return "", fmt.Errorf("unknown file status for %s", input)
 	}
@@ -310,6 +313,14 @@ func (d Document) Validate() error {
 		return fmt.Errorf("location is required")
 	}
 
+	// Source references are validated at the workflow level (cycle detection, existence check)
+	if d.IsSourceRef() {
+		if d.Auth != nil {
+			return fmt.Errorf("auth is not supported for source references")
+		}
+		return nil
+	}
+
 	if d.Auth != nil {
 		if getFileStatus(d.Location.Resolve()) != fileStatusRemote {
 			return fmt.Errorf("auth is only supported for remote documents")
@@ -329,6 +340,21 @@ func (d Document) IsRemote() bool {
 
 func (d Document) IsSpeakeasyRegistry() bool {
 	return strings.Contains(d.Location.Resolve(), "registry.speakeasyapi.dev")
+}
+
+// IsSourceRef returns true if this document references another named source (e.g. "source:my-source").
+func (d Document) IsSourceRef() bool {
+	return getFileStatus(d.Location.Resolve()) == fileStatusSourceRef
+}
+
+// SourceRefName returns the referenced source name (e.g. "my-source" from "source:my-source").
+// Returns empty string if this is not a source reference.
+func (d Document) SourceRefName() string {
+	resolved := d.Location.Resolve()
+	if strings.HasPrefix(resolved, "source:") {
+		return strings.TrimPrefix(resolved, "source:")
+	}
+	return ""
 }
 
 func (f FallbackCodeSamples) Validate() error {
