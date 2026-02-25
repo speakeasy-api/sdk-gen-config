@@ -228,7 +228,7 @@ type Generation struct {
 	// PersistentEdits configures whether user edits persist across regenerations
 	PersistentEdits PersistentEdits `yaml:"persistentEdits"`
 	Tests           Tests           `yaml:"tests,omitempty"`
-	Skills          *AgentSkills    `yaml:"skills,omitempty"`
+	AgentSkills     *AgentSkills    `yaml:"agentSkills,omitempty"`
 
 	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
