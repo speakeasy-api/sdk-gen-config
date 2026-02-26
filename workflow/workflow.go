@@ -151,9 +151,80 @@ func (w Workflow) Validate(supportLangs []string) error {
 		}
 	}
 
+	if err := w.ValidateSourceDependencies(); err != nil {
+		return err
+	}
+
 	for dependentID, dependent := range w.Dependents {
 		if err := dependent.Validate(); err != nil {
 			return fmt.Errorf("failed to validate dependent %s: %w", dependentID, err)
+		}
+	}
+
+	return nil
+}
+
+// ValidateSourceDependencies checks that all source references point to existing
+// sources and that there are no circular dependencies between sources.
+func (w Workflow) ValidateSourceDependencies() error {
+	// Collect all source ref dependencies and validate they exist
+	deps := make(map[string][]string) // sourceID -> referenced sourceIDs
+	for sourceID, source := range w.Sources {
+		for _, input := range source.Inputs {
+			if input.IsSourceRef() {
+				refName := input.SourceRefName()
+				if _, ok := w.Sources[refName]; !ok {
+					return fmt.Errorf("source %q references unknown source %q", sourceID, refName)
+				}
+				deps[sourceID] = append(deps[sourceID], refName)
+			}
+		}
+	}
+
+	// DFS cycle detection
+	const (
+		unvisited = 0
+		visiting  = 1
+		visited   = 2
+	)
+	state := make(map[string]int)
+	var path []string
+
+	var visit func(id string) error
+	visit = func(id string) error {
+		if state[id] == visited {
+			return nil
+		}
+		if state[id] == visiting {
+			// Build cycle description
+			cycleStart := -1
+			for i, p := range path {
+				if p == id {
+					cycleStart = i
+					break
+				}
+			}
+			cycle := append(path[cycleStart:], id)
+			return fmt.Errorf("circular source dependency detected: %s", strings.Join(cycle, " -> "))
+		}
+
+		state[id] = visiting
+		path = append(path, id)
+
+		for _, dep := range deps[id] {
+			if err := visit(dep); err != nil {
+				return err
+			}
+		}
+
+		path = path[:len(path)-1]
+		state[id] = visited
+		return nil
+	}
+
+	for sourceID := range w.Sources {
+		if err := visit(sourceID); err != nil {
+			return err
 		}
 	}
 

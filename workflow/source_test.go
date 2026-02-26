@@ -69,9 +69,10 @@ func TestSource_Validate(t *testing.T) {
 		source workflow.Source
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr error
+		name          string
+		args          args
+		wantErr       error
+		skipRoundTrip bool // skip marshal/unmarshal/validate roundtrip (e.g. source refs need workflow context)
 	}{
 		{
 			name: "simple source successfully validates",
@@ -244,6 +245,38 @@ func TestSource_Validate(t *testing.T) {
 				},
 			},
 			wantErr: fmt.Errorf("failed to validate input 0: failed to validate authSecret: secret must be a environment variable reference (ie $MY_SECRET)"),
+		},
+		{
+			name: "source ref input successfully validates",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "source:other-source",
+						},
+					},
+					Output: pointer.From("output.yaml"),
+				},
+			},
+			skipRoundTrip: true, // roundtrip validation needs the referenced source in the workflow
+		},
+		{
+			name: "source ref input with auth fails",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "source:other-source",
+							Auth: &workflow.Auth{
+								Header: "Authorization",
+								Secret: "$AUTH_TOKEN",
+							},
+						},
+					},
+					Output: pointer.From("output.yaml"),
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate input 0: auth is not supported for source references"),
 		},
 		{
 			name: "overlay fails with no location",
@@ -477,7 +510,7 @@ func TestSource_Validate(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			if tt.wantErr == nil {
+			if tt.wantErr == nil && !tt.skipRoundTrip {
 				// Marshal to yaml
 				w := workflow.Workflow{
 					Version:          workflow.WorkflowVersion,
@@ -617,6 +650,19 @@ func TestSource_GetOutputLocation(t *testing.T) {
 			},
 			wantOutputLocation: ".speakeasy/temp/output_d910ba.yaml",
 		},
+		{
+			name: "source ref input returns auto-generated output location",
+			args: args{
+				source: workflow.Source{
+					Inputs: []workflow.Document{
+						{
+							Location: "source:other-source",
+						},
+					},
+				},
+			},
+			wantOutputLocation: ".speakeasy/temp/output_",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -634,6 +680,54 @@ func TestSource_GetOutputLocation(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.Contains(t, outputLocation, tt.wantOutputLocation)
+		})
+	}
+}
+
+func TestDocument_IsSourceRef(t *testing.T) {
+	tests := []struct {
+		name     string
+		location workflow.LocationString
+		wantRef  bool
+		wantName string
+	}{
+		{
+			name:     "source ref",
+			location: "source:my-source",
+			wantRef:  true,
+			wantName: "my-source",
+		},
+		{
+			name:     "source ref with hyphens and numbers",
+			location: "source:api-v2-combined",
+			wantRef:  true,
+			wantName: "api-v2-combined",
+		},
+		{
+			name:     "local file is not source ref",
+			location: "openapi.yaml",
+			wantRef:  false,
+			wantName: "",
+		},
+		{
+			name:     "remote URL is not source ref",
+			location: "http://example.com/openapi.yaml",
+			wantRef:  false,
+			wantName: "",
+		},
+		{
+			name:     "registry is not source ref",
+			location: "registry.speakeasyapi.dev/org/ws/name",
+			wantRef:  false,
+			wantName: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := workflow.Document{Location: tt.location}
+			assert.Equal(t, tt.wantRef, d.IsSourceRef())
+			assert.Equal(t, tt.wantName, d.SourceRefName())
 		})
 	}
 }
