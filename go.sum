@@ -25,8 +25,8 @@ github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR
 github.com/rogpeppe/go-internal v1.13.1/go.mod h1:uMEvuHeurkdAXX61udpOXGD/AzZDWNMNyH2VO9fmH0o=
 github.com/sergi/go-diff v1.3.1 h1:xkr+Oxo4BOQKmkn/B9eMK0g5Kg/983T9DqqPHwYqD+8=
 github.com/sergi/go-diff v1.3.1/go.mod h1:aMJSSKb2lpPvRNec0+w3fl7LP9IOFzdc9Pa4NFbPK1I=
-github.com/speakeasy-api/openapi v1.6.4 h1:WLoZYEK9xZQVb2JNkbXWS0HBwHYQ3GNqf+8Q3E/kXmA=
-github.com/speakeasy-api/openapi v1.6.4/go.mod h1:fy+CvRcKj+HDU0QNdnyG6UkfJOEjhqCuNC7o4AtLPAk=
+github.com/speakeasy-api/openapi v1.19.1 h1:tJ1J4WpCimHgicwh15gsACFj37es7oBip3Ee2xmXW7c=
+github.com/speakeasy-api/openapi v1.19.1/go.mod h1:UfKa7FqE4jgexJZuj51MmdHAFGmDv0Zaw3+yOd81YKU=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/swaggest/assertjson v1.9.0 h1:dKu0BfJkIxv/xe//mkCrK5yZbs79jL7OVf9Ija7o2xQ=
