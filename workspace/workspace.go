@@ -7,12 +7,65 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
 	SpeakeasyFolder = ".speakeasy"
 	GenFolder       = ".gen"
 )
+
+var GitIgnoreEntries = []string{"logs/", "temp/"}
+
+// EnsureDir creates .speakeasy/ inside parentDir with a .gitignore containing GitIgnoreEntries.
+func EnsureDir(parentDir string) error {
+	dir := filepath.Join(parentDir, SpeakeasyFolder)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("failed to create %s directory: %w", SpeakeasyFolder, err)
+	}
+	return ensureGitIgnore(dir)
+}
+
+func ensureGitIgnore(dir string) error {
+	path := filepath.Join(dir, ".gitignore")
+
+	existing, err := os.ReadFile(path)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("failed to read %s: %w", path, err)
+	}
+
+	content := string(existing)
+	var toAdd []string
+	for _, entry := range GitIgnoreEntries {
+		if !containsLine(content, entry) {
+			toAdd = append(toAdd, entry)
+		}
+	}
+
+	if len(toAdd) == 0 {
+		return nil
+	}
+
+	if len(content) > 0 && !strings.HasSuffix(content, "\n") {
+		content += "\n"
+	}
+
+	content += strings.Join(toAdd, "\n") + "\n"
+
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		return fmt.Errorf("failed to write %s: %w", path, err)
+	}
+	return nil
+}
+
+func containsLine(content, line string) bool {
+	for _, l := range strings.Split(content, "\n") {
+		if strings.TrimSpace(l) == strings.TrimSpace(line) {
+			return true
+		}
+	}
+	return false
+}
 
 type FS interface {
 	fs.StatFS
