@@ -17,8 +17,8 @@ const (
 
 var GitIgnoreEntries = []string{"logs/", "temp/", "reports/"}
 
-// EnsureDir creates .speakeasy/ inside parentDir with a .gitignore containing GitIgnoreEntries.
-func EnsureDir(parentDir string) error {
+// EnsureSpeakeasyDir creates .speakeasy/ inside parentDir with a .gitignore containing GitIgnoreEntries.
+func EnsureSpeakeasyDir(parentDir string) error {
 	dir := filepath.Join(parentDir, SpeakeasyFolder)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("failed to create %s directory: %w", SpeakeasyFolder, err)

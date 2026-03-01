@@ -10,7 +10,7 @@ import (
 func TestEnsureDir_CreatesFromScratch(t *testing.T) {
 	parent := t.TempDir()
 
-	if err := EnsureDir(parent); err != nil {
+	if err := EnsureSpeakeasyDir(parent); err != nil {
 		t.Fatalf("EnsureDir failed: %v", err)
 	}
 
@@ -31,10 +31,10 @@ func TestEnsureDir_CreatesFromScratch(t *testing.T) {
 func TestEnsureDir_Idempotent(t *testing.T) {
 	parent := t.TempDir()
 
-	if err := EnsureDir(parent); err != nil {
+	if err := EnsureSpeakeasyDir(parent); err != nil {
 		t.Fatalf("first EnsureDir failed: %v", err)
 	}
-	if err := EnsureDir(parent); err != nil {
+	if err := EnsureSpeakeasyDir(parent); err != nil {
 		t.Fatalf("second EnsureDir failed: %v", err)
 	}
 
@@ -65,7 +65,7 @@ func TestEnsureDir_MergesMissingEntries(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := EnsureDir(parent); err != nil {
+	if err := EnsureSpeakeasyDir(parent); err != nil {
 		t.Fatalf("EnsureDir failed: %v", err)
 	}
 
@@ -95,7 +95,7 @@ func TestEnsureDir_PreservesCustomContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := EnsureDir(parent); err != nil {
+	if err := EnsureSpeakeasyDir(parent); err != nil {
 		t.Fatalf("EnsureDir failed: %v", err)
 	}
 
@@ -127,7 +127,7 @@ func TestEnsureDir_HandlesNoTrailingNewline(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := EnsureDir(parent); err != nil {
+	if err := EnsureSpeakeasyDir(parent); err != nil {
 		t.Fatalf("EnsureDir failed: %v", err)
 	}
 
