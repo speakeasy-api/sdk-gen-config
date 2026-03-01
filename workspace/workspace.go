@@ -15,7 +15,7 @@ const (
 	GenFolder       = ".gen"
 )
 
-var GitIgnoreEntries = []string{"logs/", "temp/"}
+var GitIgnoreEntries = []string{"logs/", "temp/", "reports/"}
 
 // EnsureDir creates .speakeasy/ inside parentDir with a .gitignore containing GitIgnoreEntries.
 func EnsureDir(parentDir string) error {
