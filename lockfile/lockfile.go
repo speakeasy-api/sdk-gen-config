@@ -17,10 +17,6 @@ type (
 )
 
 type TrackedFile struct {
-	// Identity (The "Breadcrumb")
-	// UUID embedded in the file header.
-	ID string `yaml:"id,omitempty"`
-
 	// The Dirty Check (Optimization)
 	// The SHA-1 of the file content exactly as written to disk last time.
 	// If Disk_SHA == LastWriteChecksum, we skip the merge (Fast Path).

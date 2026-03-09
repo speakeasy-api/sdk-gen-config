@@ -20,7 +20,6 @@ persistentEdits:
   pristine_tree_hash: "tree-e5f6"
 trackedFiles:
   "pkg/models/user.go":
-    id: "uuid-breadcrumb-123"
     last_write_checksum: "sha1:file-hash-789"
     pristine_git_object: "blob-123"
 `)
@@ -38,7 +37,6 @@ trackedFiles:
 	tf, ok := lf.TrackedFiles.Get("pkg/models/user.go")
 	require.True(t, ok)
 
-	assert.Equal(t, "uuid-breadcrumb-123", tf.ID)
 	assert.Equal(t, "sha1:file-hash-789", tf.LastWriteChecksum)
 	assert.Equal(t, "blob-123", tf.PristineGitObject)
 }
@@ -51,7 +49,6 @@ id: "test-uuid"
 management: {}
 trackedFiles:
   "src/file.go":
-    id: "file-uuid"
     last_write_checksum: "sha1:hash"
 `)
 
