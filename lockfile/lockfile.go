@@ -18,7 +18,7 @@ type (
 
 type TrackedFile struct {
 	// Identity (The "Breadcrumb")
-	// UUID embedded in the file header. Allows detecting "Moves/Renames".
+	// UUID embedded in the file header.
 	ID string `yaml:"id,omitempty"`
 
 	// The Dirty Check (Optimization)
@@ -35,11 +35,6 @@ type TrackedFile struct {
 	// Set pre-generation by scanning disk vs lockfile entries.
 	// When true, the generator should not regenerate this file.
 	Deleted bool `yaml:"deleted,omitempty"`
-
-	// MovedTo indicates the user moved/renamed this file to a new path.
-	// Set pre-generation by scanning @generated-id headers on disk.
-	// The generator should write to the new path instead of the original.
-	MovedTo string `yaml:"moved_to,omitempty"`
 
 	AdditionalProperties map[string]any `yaml:",inline"`
 }
