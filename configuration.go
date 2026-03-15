@@ -137,6 +137,10 @@ type PersistentEdits struct {
 	// doesn't compile (syntax errors, missing deps) but you still want persistent edits.
 	CompilePristine *bool `yaml:"compilePristine,omitempty" description:"When true (default), runs an initial compile pass to normalize pristine content. Set to false when generated SDK doesn't compile but you still want persistent edits."`
 
+	// PatchFiles controls whether released customizations are collapsed into
+	// committed unified diff files under .speakeasy/patches.
+	PatchFiles *bool `yaml:"patchFiles,omitempty" description:"When true, stores released persistent-edit customizations as committed unified diff patch files under .speakeasy/patches."`
+
 	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties
 }
 
@@ -157,6 +161,12 @@ func (p *PersistentEdits) ShouldCompilePristine() bool {
 		return true // default to true
 	}
 	return *p.CompilePristine
+}
+
+// UsesPatchFiles returns true when released persistent-edit customizations
+// should be stored and replayed from committed patch files.
+func (p *PersistentEdits) UsesPatchFiles() bool {
+	return p != nil && p.PatchFiles != nil && *p.PatchFiles
 }
 
 type GenerationStep string

@@ -212,6 +212,13 @@
             "null",
             "string"
           ]
+        },
+        "patchFiles": {
+          "description": "When true, stores released persistent-edit customizations as committed unified diff patch files under .speakeasy/patches.",
+          "type": [
+            "null",
+            "boolean"
+          ]
         }
       },
       "type": "object"
