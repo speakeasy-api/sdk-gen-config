@@ -36,6 +36,23 @@ func TestTarget_Validate(t *testing.T) {
 			wantErr: nil,
 		},
 		{
+			name: "cli target with publishing successfully validates",
+			args: args{
+				supportedLangs: []string{"cli"},
+				target: workflow.Target{
+					Target: "cli",
+					Source: "openapi.yaml",
+					Publishing: &workflow.Publishing{
+						CLI: &workflow.CLI{
+							GPGPrivateKey: "$CLI_GPG_PRIVATE_KEY",
+							GPGPassPhrase: "$CLI_GPG_PASSPHRASE",
+						},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
 			name: "target that references a simple source successfully validates",
 			args: args{
 				supportedLangs: []string{"go"},
@@ -188,6 +205,23 @@ func TestTarget_Validate(t *testing.T) {
 				},
 			},
 			wantErr: fmt.Errorf("failed to validate publish: failed to validate npm token: secret must be a environment variable reference (ie $MY_SECRET)"),
+		},
+		{
+			name: "cli target with invalid publishing config fails",
+			args: args{
+				supportedLangs: []string{"cli"},
+				target: workflow.Target{
+					Target: "cli",
+					Source: "openapi.yaml",
+					Publishing: &workflow.Publishing{
+						CLI: &workflow.CLI{
+							GPGPrivateKey: "some-key",
+							GPGPassPhrase: "$CLI_GPG_PASSPHRASE",
+						},
+					},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: failed to validate cli gpgPrivateKey: secret must be a environment variable reference (ie $MY_SECRET)"),
 		},
 		{
 			name: "target with complex publishing config fails when non-secret is missing",

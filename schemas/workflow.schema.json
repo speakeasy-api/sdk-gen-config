@@ -19,6 +19,21 @@
       ],
       "type": "object"
     },
+    "WorkflowCLI": {
+      "properties": {
+        "gpgPassPhrase": {
+          "type": "string"
+        },
+        "gpgPrivateKey": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "gpgPrivateKey",
+        "gpgPassPhrase"
+      ],
+      "type": "object"
+    },
     "WorkflowCodeSamples": {
       "additionalProperties": false,
       "description": "Code samples configuration. See https://www.speakeasy.com/guides/openapi/x-codesamples",
@@ -292,6 +307,10 @@
       "additionalProperties": false,
       "description": "The publishing configuration. See https://www.speakeasy.com/docs/workflow-reference/publishing-reference",
       "properties": {
+        "cli": {
+          "$ref": "#/$defs/WorkflowCLI",
+          "description": "CLI publishing configuration."
+        },
         "java": {
           "$ref": "#/$defs/WorkflowJava",
           "description": "Maven (Java) publishing configuration."
@@ -446,6 +465,7 @@
         },
         "target": {
           "enum": [
+            "cli",
             "csharp",
             "go",
             "java",
