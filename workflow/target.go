@@ -9,7 +9,7 @@ import (
 // Ensure you update schema/workflow.schema.json on changes
 type Target struct {
 	_           struct{}     `additionalProperties:"false"`
-	Target      string       `yaml:"target" enum:"csharp,go,java,mcp-typescript,php,python,ruby,swift,terraform,typescript,unity,postman" required:"true"`
+	Target      string       `yaml:"target" enum:"cli,csharp,go,java,mcp-typescript,php,python,ruby,swift,terraform,typescript,unity,postman" required:"true"`
 	Source      string       `yaml:"source" required:"true"`
 	Output      *string      `yaml:"output,omitempty"`
 	Publishing  *Publishing  `yaml:"publish,omitempty"`
@@ -53,6 +53,7 @@ type Publishing struct {
 	Java      *Java      `yaml:"java,omitempty" description:"Maven (Java) publishing configuration."`
 	RubyGems  *RubyGems  `yaml:"rubygems,omitempty" description:"Rubygems (Ruby) publishing configuration."`
 	Nuget     *Nuget     `yaml:"nuget,omitempty" description:"NuGet (C#) publishing configuration."`
+	CLI       *CLI       `yaml:"cli,omitempty" description:"CLI publishing configuration."`
 	Terraform *Terraform `yaml:"terraform,omitempty"`
 }
 
@@ -118,6 +119,11 @@ type RubyGems struct {
 type Nuget struct {
 	_      struct{} `additionalProperties:"false"`
 	APIKey string   `yaml:"apiKey" required:"true"`
+}
+
+type CLI struct {
+	GPGPrivateKey string `yaml:"gpgPrivateKey" required:"true"`
+	GPGPassPhrase string `yaml:"gpgPassPhrase" required:"true"`
 }
 
 type Terraform struct {
@@ -247,6 +253,16 @@ func (p Publishing) Validate(target string) error {
 				return fmt.Errorf("failed to validate nuget api key: %w", err)
 			}
 		}
+	case "cli":
+		if p.CLI != nil {
+			if err := validateSecret(p.CLI.GPGPrivateKey); err != nil {
+				return fmt.Errorf("failed to validate cli gpgPrivateKey: %w", err)
+			}
+
+			if err := validateSecret(p.CLI.GPGPassPhrase); err != nil {
+				return fmt.Errorf("failed to validate cli gpgPassPhrase: %w", err)
+			}
+		}
 	case "terraform":
 		if p.Terraform != nil {
 			if err := validateSecret(p.Terraform.GPGPrivateKey); err != nil {
@@ -293,6 +309,10 @@ func (p Publishing) IsPublished(target string) bool {
 		}
 	case "csharp":
 		if p.Nuget != nil && p.Nuget.APIKey != "" {
+			return true
+		}
+	case "cli":
+		if p.CLI != nil && p.CLI.GPGPrivateKey != "" && p.CLI.GPGPassPhrase != "" {
 			return true
 		}
 	case "terraform":
