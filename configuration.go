@@ -74,6 +74,7 @@ type Fixes struct {
 	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025" description:"Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"`
 	SharedNestedComponentsJan2026        bool           `yaml:"sharedNestedComponentsJan2026" description:"Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"`
 	NameOverrideFeb2026                  bool           `yaml:"nameOverrideFeb2026" description:"Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions"`
+	ResponseEnvelopeNamingMar2026        bool           `yaml:"responseEnvelopeNamingMar2026" description:"Fixes response envelope type naming to not include group prefix from operationId, keeping type names stable across operationId renames"`
 	AdditionalProperties                 map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -86,6 +87,11 @@ func (f *Fixes) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	if tmp.NameResolutionFeb2025 {
+		tmp.NameResolutionDec2023 = true
+	}
+
+	if tmp.ResponseEnvelopeNamingMar2026 {
+		tmp.NameResolutionFeb2025 = true
 		tmp.NameResolutionDec2023 = true
 	}
 
