@@ -42,10 +42,6 @@
           "description": "Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions",
           "type": "boolean"
         },
-        "responseEnvelopeNamingMar2026": {
-          "description": "Fixes response envelope type naming to not include group prefix from operationId, keeping type names stable across operationId renames",
-          "type": "boolean"
-        },
         "nameResolutionDec2023": {
           "description": "Enables name resolution fixes from December 2023",
           "type": "boolean"
@@ -60,6 +56,10 @@
         },
         "requestResponseComponentNamesFeb2024": {
           "description": "Enables request and response component naming fixes from February 2024",
+          "type": "boolean"
+        },
+        "responseEnvelopeNamingMar2026": {
+          "description": "Fixes response envelope type naming to not include group prefix from operationId, keeping type names stable across operationId renames",
           "type": "boolean"
         },
         "securityFeb2025": {
