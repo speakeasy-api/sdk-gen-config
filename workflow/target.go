@@ -46,15 +46,16 @@ type MockServer struct {
 }
 
 type Publishing struct {
-	_         struct{}   `additionalProperties:"false" description:"The publishing configuration. See https://www.speakeasy.com/docs/workflow-reference/publishing-reference"`
-	NPM       *NPM       `yaml:"npm,omitempty" description:"NPM (Typescript) publishing configuration."`
-	PyPi      *PyPi      `yaml:"pypi,omitempty" description:"PyPI (Python)publishing configuration."`
-	Packagist *Packagist `yaml:"packagist,omitempty" description:"Packagist (PHP) publishing configuration."`
-	Java      *Java      `yaml:"java,omitempty" description:"Maven (Java) publishing configuration."`
-	RubyGems  *RubyGems  `yaml:"rubygems,omitempty" description:"Rubygems (Ruby) publishing configuration."`
-	Nuget     *Nuget     `yaml:"nuget,omitempty" description:"NuGet (C#) publishing configuration."`
-	CLI       *CLI       `yaml:"cli,omitempty" description:"CLI publishing configuration."`
-	Terraform *Terraform `yaml:"terraform,omitempty"`
+	_           struct{}     `additionalProperties:"false" description:"The publishing configuration. See https://www.speakeasy.com/docs/workflow-reference/publishing-reference"`
+	NPM         *NPM         `yaml:"npm,omitempty" description:"NPM (Typescript) publishing configuration."`
+	PyPi        *PyPi        `yaml:"pypi,omitempty" description:"PyPI (Python)publishing configuration."`
+	Packagist   *Packagist   `yaml:"packagist,omitempty" description:"Packagist (PHP) publishing configuration."`
+	Java        *Java        `yaml:"java,omitempty" description:"Maven (Java) publishing configuration."`
+	RubyGems    *RubyGems    `yaml:"rubygems,omitempty" description:"Rubygems (Ruby) publishing configuration."`
+	Nuget       *Nuget       `yaml:"nuget,omitempty" description:"NuGet (C#) publishing configuration."`
+	CLI         *CLI         `yaml:"cli,omitempty" description:"CLI publishing configuration."`
+	Terraform   *Terraform   `yaml:"terraform,omitempty"`
+	MCPRegistry *MCPRegistry `yaml:"mcpRegistry,omitempty" description:"MCP Registry publishing configuration. Publishes server metadata to the official MCP Registry (registry.modelcontextprotocol.io)."`
 }
 
 type CodeSamples struct {
@@ -131,6 +132,12 @@ type Terraform struct {
 	GPGPassPhrase string `yaml:"gpgPassPhrase" required:"true"`
 }
 
+type MCPRegistry struct {
+	_     struct{} `additionalProperties:"false"`
+	Auth  string   `yaml:"auth" enum:"github-oidc,github,dns" required:"true" description:"Authentication method for the MCP Registry. Use 'github-oidc' (recommended, no token needed) for io.github.* namespaces in GitHub Actions, 'github' with a PAT, or 'dns' for custom domain namespaces."`
+	Token string   `yaml:"token,omitempty" description:"Authentication token. Not needed for github-oidc. For github auth, a GitHub PAT with read:org and read:user scopes. For dns auth, the Ed25519 private key."`
+}
+
 func (t Target) Validate(supportedLangs []string, sources map[string]Source) error {
 	if t.Target == "" {
 		return fmt.Errorf("target is required")
@@ -199,6 +206,28 @@ func (p Publishing) Validate(target string) error {
 		if p.NPM != nil && p.NPM.Token != "" {
 			if err := validateSecret(p.NPM.Token); err != nil {
 				return fmt.Errorf("failed to validate npm token: %w", err)
+			}
+		}
+		if p.MCPRegistry != nil {
+			switch p.MCPRegistry.Auth {
+			case "github-oidc":
+				// No token needed — uses GitHub Actions OIDC
+			case "github":
+				if p.MCPRegistry.Token == "" {
+					return fmt.Errorf("mcpRegistry token is required for github auth")
+				}
+				if err := validateSecret(p.MCPRegistry.Token); err != nil {
+					return fmt.Errorf("failed to validate mcpRegistry token: %w", err)
+				}
+			case "dns":
+				if p.MCPRegistry.Token == "" {
+					return fmt.Errorf("mcpRegistry token is required for dns auth")
+				}
+				if err := validateSecret(p.MCPRegistry.Token); err != nil {
+					return fmt.Errorf("failed to validate mcpRegistry token: %w", err)
+				}
+			default:
+				return fmt.Errorf("mcpRegistry auth must be 'github-oidc', 'github', or 'dns'")
 			}
 		}
 	case "python":
@@ -282,6 +311,9 @@ func (p Publishing) IsPublished(target string) bool {
 	switch target {
 	case "mcp-typescript", "typescript":
 		if p.NPM != nil && p.NPM.Token != "" {
+			return true
+		}
+		if p.MCPRegistry != nil && p.MCPRegistry.Auth != "" {
 			return true
 		}
 	case "python":

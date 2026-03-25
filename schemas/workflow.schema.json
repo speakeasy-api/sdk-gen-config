@@ -221,6 +221,28 @@
       ],
       "type": "object"
     },
+    "WorkflowMCPRegistry": {
+      "additionalProperties": false,
+      "properties": {
+        "auth": {
+          "description": "Authentication method for the MCP Registry. Use 'github-oidc' (recommended, no token needed) for io.github.* namespaces in GitHub Actions, 'github' with a PAT, or 'dns' for custom domain namespaces.",
+          "enum": [
+            "github-oidc",
+            "github",
+            "dns"
+          ],
+          "type": "string"
+        },
+        "token": {
+          "description": "Authentication token. Not needed for github-oidc. For github auth, a GitHub PAT with read:org and read:user scopes. For dns auth, the Ed25519 private key.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "auth"
+      ],
+      "type": "object"
+    },
     "WorkflowMockServer": {
       "additionalProperties": false,
       "properties": {
@@ -314,6 +336,10 @@
         "java": {
           "$ref": "#/$defs/WorkflowJava",
           "description": "Maven (Java) publishing configuration."
+        },
+        "mcpRegistry": {
+          "$ref": "#/$defs/WorkflowMCPRegistry",
+          "description": "MCP Registry publishing configuration. Publishes server metadata to the official MCP Registry (registry.modelcontextprotocol.io)."
         },
         "npm": {
           "$ref": "#/$defs/WorkflowNPM",
