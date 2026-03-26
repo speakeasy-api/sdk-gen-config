@@ -660,6 +660,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Description:  pointer.From("Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions"),
 		},
 		{
+			Name:         "fixes.enumMemberCasingMar2026",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.From("Fixes enum member casing when SCREAMING_SNAKE_CASE values contain special characters like ampersands"),
+		},
+		{
 			Name:         "versioningStrategy",
 			Required:     false,
 			DefaultValue: ptr(VersioningStrategyAutomatic),
