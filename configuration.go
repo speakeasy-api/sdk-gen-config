@@ -74,6 +74,7 @@ type Fixes struct {
 	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025" description:"Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"`
 	SharedNestedComponentsJan2026        bool           `yaml:"sharedNestedComponentsJan2026" description:"Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"`
 	NameOverrideFeb2026                  bool           `yaml:"nameOverrideFeb2026" description:"Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions"`
+	ModelNamingOverrideFeb2026           bool           `yaml:"modelNamingOverrideFeb2026" description:"Uses group hierarchy + x-speakeasy-name-override for request/response type naming instead of raw operationId"`
 	AdditionalProperties                 map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 

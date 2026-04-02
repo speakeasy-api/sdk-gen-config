@@ -7,7 +7,7 @@ require (
 	github.com/a8m/envsubst v1.4.3
 	github.com/google/uuid v1.5.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/speakeasy-api/openapi v1.6.4
+	github.com/speakeasy-api/openapi v1.19.1
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggest/jsonschema-go v0.3.78
 	gopkg.in/yaml.v3 v3.0.1
