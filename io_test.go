@@ -845,6 +845,51 @@ func TestLoad_BackwardsCompatibility_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestLoad_PreservesExplicitDisabledTests(t *testing.T) {
+	t.Parallel()
+
+	tempDir := t.TempDir()
+	speakeasyDir := filepath.Join(tempDir, workspace.SpeakeasyFolder)
+
+	testutils.CreateTempFile(t, speakeasyDir, "gen.yaml", `configVersion: 2.0.0
+generation:
+  mockServer:
+    disabled: true
+  tests:
+    generateTests: false
+    generateNewTests: false
+    skipResponseBodyAssertions: false
+go:
+  version: 0.0.1
+`)
+	testutils.CreateTempFile(t, speakeasyDir, "gen.lock", `lockVersion: 2.0.0
+id: gen-3005
+management: {}
+features:
+  go:
+    core: 0.0.1
+`)
+
+	cfg, err := Load(tempDir, WithLanguages("go"), WithUpgradeFunc(testUpdateLang))
+	assert.NoError(t, err)
+	assert.False(t, cfg.Config.Generation.Tests.GenerateTests)
+	assert.False(t, cfg.Config.Generation.Tests.GenerateNewTests)
+	assert.False(t, cfg.Config.Generation.Tests.SkipResponseBodyAssertions)
+
+	contents, err := os.ReadFile(filepath.Join(speakeasyDir, "gen.yaml"))
+	assert.NoError(t, err)
+	assert.Contains(t, string(contents), "tests:")
+	assert.Contains(t, string(contents), "generateTests: false")
+
+	cfg, err = Load(tempDir, WithLanguages("go"), WithUpgradeFunc(testUpdateLang))
+	assert.NoError(t, err)
+	assert.False(t, cfg.Config.Generation.Tests.GenerateTests)
+
+	contents, err = os.ReadFile(filepath.Join(speakeasyDir, "gen.yaml"))
+	assert.NoError(t, err)
+	assert.NotContains(t, string(contents), "generateTests: true")
+}
+
 func TestSaveConfig(t *testing.T) {
 	t.Parallel()
 
@@ -868,6 +913,10 @@ generation:
     allOfMergeStrategy: shallowMerge
   requestBodyFieldName: ""
   persistentEdits: {}
+  tests:
+    generateTests: false
+    generateNewTests: false
+    skipResponseBodyAssertions: false
 `,
 		},
 		"option-dontwrite": {

@@ -204,7 +204,7 @@ type Generation struct {
 
 	// PersistentEdits configures whether user edits persist across regenerations
 	PersistentEdits PersistentEdits `yaml:"persistentEdits"`
-	Tests           Tests           `yaml:"tests,omitempty"`
+	Tests           Tests           `yaml:"tests"`
 
 	AdditionalProperties map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
