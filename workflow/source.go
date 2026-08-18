@@ -11,6 +11,7 @@ import (
 	"github.com/a8m/envsubst"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	jsg "github.com/swaggest/jsonschema-go"
+	"gopkg.in/yaml.v3"
 )
 
 // Ensure you update schema/workflow.schema.json on changes
@@ -203,6 +204,15 @@ func (s Source) Validate() error {
 		if err := transformation.Validate(); err != nil {
 			return fmt.Errorf("failed to validate transformation %d: %w", i, err)
 		}
+
+		if transformation.Format != nil && transformation.Format.GetStyle() == FormatStyleSorted {
+			if i != len(s.Transformations)-1 {
+				return fmt.Errorf("failed to validate transformation %d: format.style sorted must be the final transformation", i)
+			}
+			if !strings.EqualFold(s.outputExt(), ".json") {
+				return fmt.Errorf("failed to validate transformation %d: format.style sorted requires a JSON output (set output to a *.json path)", i)
+			}
+		}
 	}
 
 	if s.Registry != nil {
@@ -390,9 +400,125 @@ type Transformation struct {
 	RemoveUnused        *bool                    `yaml:"removeUnused,omitempty" description:"Remove unused components from the OpenAPI document"`
 	FilterOperations    *FilterOperationsOptions `yaml:"filterOperations,omitempty" description:"Filter operations from the OpenAPI document"`
 	Cleanup             *bool                    `yaml:"cleanup,omitempty" description:"Clean up the OpenAPI document"`
-	Format              *bool                    `yaml:"format,omitempty"`
+	Format              *FormatOptions           `yaml:"format,omitempty" description:"Format the OpenAPI document using the readable style or an explicitly selected style. Sorted formatting requires JSON output and must be the final transformation."`
 	JQSymbolicExecution *bool                    `yaml:"jqSymbolicExecution,omitempty"`
 	Normalize           *NormalizeOptions        `yaml:"normalize,omitempty"`
+}
+
+// FormatStyle selects how a workflow format transformation orders and renders a document.
+type FormatStyle string
+
+const (
+	// FormatStyleReadable preserves the existing OpenAPI-aware readable ordering.
+	FormatStyleReadable FormatStyle = "readable"
+	// FormatStyleSorted applies deterministic map and selected-array ordering.
+	FormatStyleSorted FormatStyle = "sorted"
+)
+
+// FormatOptions configures a workflow format transformation. It accepts both
+// the legacy boolean YAML form and an object containing an explicit style.
+type FormatOptions struct {
+	Style FormatStyle `yaml:"style" enum:"readable,sorted" required:"true" description:"Formatting style. Sorted applies deterministic key ordering, reorders selected arrays, requires JSON output, and must be the final transformation."`
+	// legacyBool preserves the original boolean form when a workflow is saved.
+	// It does not affect the selected formatting style.
+	legacyBool *bool
+}
+
+type formatOptionsYAML struct {
+	Style FormatStyle `yaml:"style"`
+}
+
+func (FormatOptions) PrepareJSONSchema(schema *jsg.Schema) error {
+	booleanType := jsg.Boolean.Type()
+	objectType := jsg.Object.Type()
+	stringType := jsg.String.Type()
+	additionalProperties := false
+
+	schema.WithOneOf(
+		jsg.SchemaOrBool{
+			TypeObject: (&jsg.Schema{}).
+				WithType(booleanType).
+				WithDescription("Use the readable formatting style").
+				ToSchemaOrBool().TypeObject,
+		},
+		jsg.SchemaOrBool{
+			TypeObject: (&jsg.Schema{}).
+				WithType(objectType).
+				WithPropertiesItem("style", jsg.SchemaOrBool{
+					TypeObject: (&jsg.Schema{}).
+						WithType(stringType).
+						WithEnum(string(FormatStyleReadable), string(FormatStyleSorted)).
+						WithDescription("Formatting style. Sorted applies deterministic key ordering, reorders selected arrays, requires JSON output, and must be the final transformation.").
+						ToSchemaOrBool().TypeObject,
+				}).
+				WithRequired("style").
+				WithAdditionalProperties(jsg.SchemaOrBool{TypeBoolean: &additionalProperties}).
+				ToSchemaOrBool().TypeObject,
+		},
+	)
+	schema.Properties = nil
+	schema.Required = nil
+	schema.Type = nil
+	return nil
+}
+
+func (f *FormatOptions) UnmarshalYAML(node *yaml.Node) error {
+	switch node.Kind {
+	case yaml.ScalarNode:
+		var typedValue bool
+		if err := node.Decode(&typedValue); err != nil {
+			return fmt.Errorf("format must be a boolean or an options object")
+		}
+		f.Style = FormatStyleReadable
+		f.legacyBool = &typedValue
+		return nil
+	case yaml.MappingNode:
+		for i := 0; i < len(node.Content); i += 2 {
+			key := node.Content[i].Value
+			if key != "style" {
+				return fmt.Errorf("format contains unsupported field %q", key)
+			}
+		}
+
+		var options formatOptionsYAML
+		if err := node.Decode(&options); err != nil {
+			return err
+		}
+		if options.Style == "" {
+			return fmt.Errorf("format.style is required")
+		}
+		f.Style = options.Style
+		f.legacyBool = nil
+		return nil
+	default:
+		return fmt.Errorf("format must be a boolean or an options object")
+	}
+}
+
+func (f FormatOptions) MarshalYAML() (interface{}, error) {
+	if f.legacyBool != nil && f.GetStyle() == FormatStyleReadable {
+		return *f.legacyBool, nil
+	}
+
+	return formatOptionsYAML{Style: f.GetStyle()}, nil
+}
+
+// GetStyle returns the configured style, defaulting to readable.
+func (f *FormatOptions) GetStyle() FormatStyle {
+	if f == nil || f.Style == "" {
+		return FormatStyleReadable
+	}
+	return f.Style
+}
+
+// Validate ensures the selected format style is supported.
+func (f *FormatOptions) Validate() error {
+	switch f.GetStyle() {
+	case FormatStyleReadable, FormatStyleSorted:
+		return nil
+	default:
+		return fmt.Errorf("format.style must be one of readable, sorted")
+	}
 }
 
 type NormalizeOptions struct {
@@ -420,6 +546,9 @@ func (t Transformation) Validate() error {
 	}
 	if t.Format != nil {
 		numNil++
+		if err := t.Format.Validate(); err != nil {
+			return err
+		}
 	}
 	if t.JQSymbolicExecution != nil {
 		numNil++

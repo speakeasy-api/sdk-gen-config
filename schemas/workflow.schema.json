@@ -193,6 +193,31 @@
       ],
       "type": "object"
     },
+    "WorkflowFormatOptions": {
+      "oneOf": [
+        {
+          "description": "Use the readable formatting style",
+          "type": "boolean"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "style": {
+              "description": "Formatting style. Sorted applies deterministic key ordering, reorders selected arrays, requires JSON output, and must be the final transformation.",
+              "enum": [
+                "readable",
+                "sorted"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "style"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "WorkflowJava": {
       "additionalProperties": false,
       "properties": {
@@ -567,10 +592,8 @@
           "description": "Filter operations from the OpenAPI document"
         },
         "format": {
-          "type": [
-            "null",
-            "boolean"
-          ]
+          "$ref": "#/$defs/WorkflowFormatOptions",
+          "description": "Format the OpenAPI document using the readable style or an explicitly selected style. Sorted formatting requires JSON output and must be the final transformation."
         },
         "jqSymbolicExecution": {
           "type": [
