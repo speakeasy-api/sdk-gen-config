@@ -66,8 +66,8 @@ type UsageSnippets struct {
 
 type Fixes struct {
 	_                                    struct{}       `additionalProperties:"true" description:"Fixes applied to the SDK generation"`
-	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023,omitempty" description:"Enables name resolution fixes from December 2023"`
-	NameResolutionFeb2025                bool           `yaml:"nameResolutionFeb2025" description:"Enables name resolution fixes from February 2025"`
+	NameResolutionDec2023                bool           `yaml:"nameResolutionDec2023,omitempty" description:"Deprecated. Use generation.nameResolution: 'ordered' instead."`
+	NameResolutionFeb2025                bool           `yaml:"nameResolutionFeb2025" description:"Deprecated. Use generation.nameResolution: 'shortest' instead."`
 	ParameterOrderingFeb2024             bool           `yaml:"parameterOrderingFeb2024" description:"Enables parameter ordering fixes from February 2024"`
 	RequestResponseComponentNamesFeb2024 bool           `yaml:"requestResponseComponentNamesFeb2024" description:"Enables request and response component naming fixes from February 2024"`
 	SecurityFeb2025                      bool           `yaml:"securityFeb2025" description:"Enables fixes and refactoring for security that were introduced in February 2025"`
@@ -190,6 +190,7 @@ type Generation struct {
 	DeduplicateErrors           bool               `yaml:"deduplicateErrors,omitempty" description:"Deduplicates errors that have the same schema"`
 	UsageSnippets               *UsageSnippets     `yaml:"usageSnippets,omitempty"`
 	UseClassNamesForArrayFields bool               `yaml:"useClassNamesForArrayFields,omitempty" description:"Use class names for array fields instead of the child's schema type"`
+	NameResolution              NameResolutionMode `yaml:"nameResolution,omitempty" enum:"legacy,ordered,shortest" description:"Controls the naming strategy for generated types. 'legacy': behavior from before December 2023, on a conflict the first registered type keeps the name. 'ordered' (formerly fixes.nameResolutionDec2023): conflicting types are renamed following a fixed precedence order, applying context prefixes and suffixes. 'shortest' (formerly fixes.nameResolutionFeb2025): conflicting types are renamed with the smallest set of context labels that uniquely distinguishes them. When set, takes precedence over the deprecated fixes flags, which are kept in sync for backward compatibility."`
 	Fixes                       *Fixes             `yaml:"fixes,omitempty"`
 	Auth                        *Auth              `yaml:"auth,omitempty"`
 	SkipErrorSuffix             bool               `yaml:"skipErrorSuffix,omitempty" description:"Skips the automatic addition of an error suffix to error types"`
@@ -532,13 +533,13 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Name:         "fixes.nameResolutionDec2023",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.From("Enables a number of breaking changes introduced in December 2023, that improve name resolution for inline schemas and reduce chances of name collisions"),
+			Description:  pointer.From("Deprecated: use generation.nameResolution 'ordered' instead. Enables a number of breaking changes introduced in December 2023, that improve name resolution for inline schemas and reduce chances of name collisions"),
 		},
 		{
 			Name:         "fixes.nameResolutionFeb2025",
 			Required:     false,
 			DefaultValue: ptr(newSDK),
-			Description:  pointer.From("Enables a number of breaking changes introduced in February 2025, that improve name resolution for inline schemas and reduce chances of name collisions"),
+			Description:  pointer.From("Deprecated: use generation.nameResolution 'shortest' instead. Enables a number of breaking changes introduced in February 2025, that improve name resolution for inline schemas and reduce chances of name collisions"),
 		},
 		{
 			Name:         "fixes.parameterOrderingFeb2024",
