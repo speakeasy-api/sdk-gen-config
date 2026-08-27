@@ -1,6 +1,9 @@
 package config
 
-import "slices"
+import (
+	"fmt"
+	"slices"
+)
 
 // NameResolutionMode consolidates the deprecated fixes.nameResolutionDec2023
 // and fixes.nameResolutionFeb2025 booleans into a single setting.
@@ -13,6 +16,9 @@ const (
 	NameResolutionOrdered NameResolutionMode = "ordered"
 	// NameResolutionShortest (formerly fixes.nameResolutionFeb2025): conflicting types renamed with the smallest distinguishing set of context labels.
 	NameResolutionShortest NameResolutionMode = "shortest"
+	// NameResolutionQualified: unnamed inline schemas are named after their property path from the
+	// nearest enclosing named schema (e.g. Order.status -> OrderStatus), even without a conflict.
+	NameResolutionQualified NameResolutionMode = "qualified"
 )
 
 // rank is the mode's position in NameResolutionModes; -1 for unknown modes.
@@ -27,7 +33,7 @@ func (m NameResolutionMode) AtLeast(mode NameResolutionMode) bool {
 
 // NameResolutionModes lists the supported modes, oldest first.
 func NameResolutionModes() []NameResolutionMode {
-	return []NameResolutionMode{NameResolutionLegacy, NameResolutionOrdered, NameResolutionShortest}
+	return []NameResolutionMode{NameResolutionLegacy, NameResolutionOrdered, NameResolutionShortest, NameResolutionQualified}
 }
 
 func (m NameResolutionMode) IsValid() bool {
@@ -82,4 +88,21 @@ func (g *Generation) SyncNameResolution() {
 		g.Fixes = &Fixes{}
 	}
 	mode.applyToFixes(g.Fixes)
+}
+
+// NameResolutionConflictWarning returns a warning when the deprecated fixes
+// booleans disagree with an explicit nameResolution mode, which takes
+// precedence and re-syncs them on save. Returns "" when consistent.
+func (g *Generation) NameResolutionConflictWarning() string {
+	mode := g.NameResolution
+	if mode == "" || !mode.IsValid() || g.Fixes == nil {
+		return ""
+	}
+
+	if g.Fixes.NameResolutionDec2023 == mode.AtLeast(NameResolutionOrdered) &&
+		g.Fixes.NameResolutionFeb2025 == mode.AtLeast(NameResolutionShortest) {
+		return ""
+	}
+
+	return fmt.Sprintf("generation.fixes.nameResolutionDec2023/nameResolutionFeb2025 are deprecated and ignored because generation.nameResolution is set to %q; remove the fixes flags or change nameResolution instead", mode)
 }

@@ -110,7 +110,8 @@
           "enum": [
             "legacy",
             "ordered",
-            "shortest"
+            "shortest",
+            "qualified"
           ],
           "type": "string"
         },

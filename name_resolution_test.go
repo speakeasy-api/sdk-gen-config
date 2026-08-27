@@ -56,8 +56,24 @@ func TestNameResolutionMode_IsValid(t *testing.T) {
 	assert.True(t, NameResolutionLegacy.IsValid())
 	assert.True(t, NameResolutionOrdered.IsValid())
 	assert.True(t, NameResolutionShortest.IsValid())
+	assert.True(t, NameResolutionQualified.IsValid())
 	assert.False(t, NameResolutionMode("").IsValid())
 	assert.False(t, NameResolutionMode("newest").IsValid())
+}
+
+func TestSyncNameResolution_QualifiedBackfillsBothBooleans(t *testing.T) {
+	g := Generation{NameResolution: NameResolutionQualified}
+	g.SyncNameResolution()
+
+	assert.Equal(t, NameResolutionQualified, g.NameResolution)
+	require.NotNil(t, g.Fixes)
+	assert.True(t, g.Fixes.NameResolutionDec2023)
+	assert.True(t, g.Fixes.NameResolutionFeb2025)
+}
+
+func TestGetNameResolution_BooleansNeverDeriveQualified(t *testing.T) {
+	g := Generation{Fixes: &Fixes{NameResolutionDec2023: true, NameResolutionFeb2025: true}}
+	assert.Equal(t, NameResolutionShortest, g.GetNameResolution())
 }
 
 func TestSyncNameResolution_MaterializesDerivedMode(t *testing.T) {
@@ -187,6 +203,18 @@ go:
 			expectContains: []string{"nameResolution: ordered", "nameResolutionDec2023: true", "nameResolutionFeb2025: false"},
 		},
 		{
+			name: "qualified mode back-fills both booleans",
+			genYaml: `configVersion: 2.0.0
+generation:
+  sdkClassName: test
+  nameResolution: qualified
+go:
+  version: 1.0.0
+`,
+			expectedMode:   NameResolutionQualified,
+			expectContains: []string{"nameResolution: qualified", "nameResolutionDec2023: true", "nameResolutionFeb2025: true"},
+		},
+		{
 			name: "mode wins over stale booleans",
 			genYaml: `configVersion: 2.0.0
 generation:
@@ -235,4 +263,22 @@ func TestNameResolutionMode_AtLeast(t *testing.T) {
 	assert.True(t, NameResolutionOrdered.AtLeast(NameResolutionOrdered))
 	assert.False(t, NameResolutionLegacy.AtLeast(NameResolutionOrdered))
 	assert.False(t, NameResolutionOrdered.AtLeast(NameResolutionShortest))
+	assert.True(t, NameResolutionQualified.AtLeast(NameResolutionShortest))
+	assert.False(t, NameResolutionShortest.AtLeast(NameResolutionQualified))
+}
+
+func TestNameResolutionConflictWarning(t *testing.T) {
+	g := Generation{NameResolution: NameResolutionOrdered, Fixes: &Fixes{NameResolutionDec2023: true, NameResolutionFeb2025: true}}
+	assert.Equal(t,
+		`generation.fixes.nameResolutionDec2023/nameResolutionFeb2025 are deprecated and ignored because generation.nameResolution is set to "ordered"; remove the fixes flags or change nameResolution instead`,
+		g.NameResolutionConflictWarning())
+
+	g = Generation{NameResolution: NameResolutionShortest, Fixes: &Fixes{NameResolutionDec2023: true, NameResolutionFeb2025: true}}
+	assert.Empty(t, g.NameResolutionConflictWarning(), "booleans consistent with the mode")
+
+	g = Generation{Fixes: &Fixes{NameResolutionFeb2025: true}}
+	assert.Empty(t, g.NameResolutionConflictWarning(), "no explicit mode, nothing overridden")
+
+	g = Generation{NameResolution: NameResolutionLegacy}
+	assert.Empty(t, g.NameResolutionConflictWarning(), "no fixes block, nothing overridden")
 }
