@@ -162,6 +162,16 @@ func Load(dir string, opts ...Option) (*Config, error) {
 			return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
 		}
 
+		// Reject an invalid nameResolution before any upgrade writes the file
+		// back, so a bad mode never leaves the config modified on disk.
+		if gen, ok := cfgMap["generation"].(map[string]any); ok {
+			if raw, exists := gen["nameResolution"]; exists {
+				if err := validateNameResolutionValue(raw); err != nil {
+					return nil, err
+				}
+			}
+		}
+
 		var lockFileMap map[string]any
 		lockFilePresent := false
 		if lockFileRes.Data != nil {
@@ -261,6 +271,11 @@ func Load(dir string, opts ...Option) (*Config, error) {
 	// Okay finally able to unmarshal the config file into expected struct
 	if err := yaml.Unmarshal(configRes.Data, cfg); err != nil {
 		return nil, fmt.Errorf("could not unmarshal gen.yaml: %w", err)
+	}
+
+	// An explicit nameResolution is authoritative: align the deprecated booleans
+	if cfg.Generation.NameResolution != "" {
+		cfg.Generation.SyncNameResolution()
 	}
 
 	var lockOpts []lockfile.LoadOption
@@ -369,6 +384,13 @@ func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
 
 func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 	o := applyOptions(opts)
+
+	if cfg.Generation.NameResolution != "" {
+		if err := cfg.Generation.NameResolution.Validate(); err != nil {
+			return err
+		}
+		cfg.Generation.SyncNameResolution()
+	}
 
 	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {

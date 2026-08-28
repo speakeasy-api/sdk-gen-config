@@ -43,11 +43,11 @@
           "type": "boolean"
         },
         "nameResolutionDec2023": {
-          "description": "Enables name resolution fixes from December 2023",
+          "description": "Deprecated. Use generation.nameResolution: 'ordered' instead.",
           "type": "boolean"
         },
         "nameResolutionFeb2025": {
-          "description": "Enables name resolution fixes from February 2025",
+          "description": "Deprecated. Use generation.nameResolution: 'shortest' instead.",
           "type": "boolean"
         },
         "parameterOrderingFeb2024": {
@@ -104,6 +104,16 @@
         },
         "mockServer": {
           "$ref": "#/$defs/SdkGenConfigMockServer"
+        },
+        "nameResolution": {
+          "description": "Controls the naming strategy for generated types. 'legacy': behavior from before December 2023, on a conflict the first registered type keeps the name. 'ordered' (formerly fixes.nameResolutionDec2023): conflicting types are renamed following a fixed precedence order, applying context prefixes and suffixes. 'shortest' (formerly fixes.nameResolutionFeb2025): conflicting types are renamed with the smallest set of context labels that uniquely distinguishes them. 'qualified': like 'shortest', but unnamed inline schemas are named after their property path from the nearest enclosing named schema (e.g. Order.status -\u003e OrderStatus), even without a conflict, so names stay stable as the spec grows. When set, takes precedence over the deprecated fixes flags, which are kept in sync for backward compatibility.",
+          "enum": [
+            "legacy",
+            "ordered",
+            "shortest",
+            "qualified"
+          ],
+          "type": "string"
         },
         "persistentEdits": {
           "$ref": "#/$defs/SdkGenConfigPersistentEdits"
