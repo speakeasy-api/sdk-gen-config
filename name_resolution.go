@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"slices"
 )
 
@@ -37,6 +38,24 @@ func NameResolutionModes() []NameResolutionMode {
 
 func (m NameResolutionMode) IsValid() bool {
 	return m.rank() >= 0
+}
+
+// Validate returns an error if a mode is set but unsupported.
+// An empty mode is valid: it defers to the deprecated fixes booleans.
+func (m NameResolutionMode) Validate() error {
+	if m != "" && !m.IsValid() {
+		return fmt.Errorf("invalid generation.nameResolution %q: must be one of %v", m, NameResolutionModes())
+	}
+	return nil
+}
+
+func validateNameResolutionValue(value any) error {
+	mode, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("invalid generation.nameResolution: must be a string")
+	}
+
+	return NameResolutionMode(mode).Validate()
 }
 
 func nameResolutionFromFixes(f *Fixes) NameResolutionMode {
@@ -89,3 +108,17 @@ func (g *Generation) SyncNameResolution() {
 	mode.applyToFixes(g.Fixes)
 }
 
+// NameResolutionAtLeastOrdered reports whether the effective mode is ordered or newer.
+func (g *Generation) NameResolutionAtLeastOrdered() bool {
+	return g.GetNameResolution().AtLeast(NameResolutionOrdered)
+}
+
+// NameResolutionAtLeastShortest reports whether the effective mode is shortest or newer.
+func (g *Generation) NameResolutionAtLeastShortest() bool {
+	return g.GetNameResolution().AtLeast(NameResolutionShortest)
+}
+
+// NameResolutionAtLeastQualified reports whether the effective mode is qualified or newer.
+func (g *Generation) NameResolutionAtLeastQualified() bool {
+	return g.GetNameResolution().AtLeast(NameResolutionQualified)
+}

@@ -165,8 +165,10 @@ func Load(dir string, opts ...Option) (*Config, error) {
 		// Reject an invalid nameResolution before any upgrade writes the file
 		// back, so a bad mode never leaves the config modified on disk.
 		if gen, ok := cfgMap["generation"].(map[string]any); ok {
-			if nr, ok := gen["nameResolution"].(string); ok && nr != "" && !NameResolutionMode(nr).IsValid() {
-				return nil, fmt.Errorf("invalid generation.nameResolution %q: must be one of %v", nr, NameResolutionModes())
+			if raw, exists := gen["nameResolution"]; exists {
+				if err := validateNameResolutionValue(raw); err != nil {
+					return nil, err
+				}
 			}
 		}
 
@@ -382,6 +384,13 @@ func GetTemplateVersion(dir, target string, opts ...Option) (string, error) {
 
 func SaveConfig(dir string, cfg *Configuration, opts ...Option) error {
 	o := applyOptions(opts)
+
+	if cfg.Generation.NameResolution != "" {
+		if err := cfg.Generation.NameResolution.Validate(); err != nil {
+			return err
+		}
+		cfg.Generation.SyncNameResolution()
+	}
 
 	configRes, err := FindConfigFile(dir, o.FS)
 	if err != nil {
