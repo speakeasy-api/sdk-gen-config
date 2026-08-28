@@ -344,7 +344,7 @@ go:
 		t.Run("invalid mode "+name+" rejected before any file rewrite", func(t *testing.T) {
 			dir := t.TempDir()
 			speakeasyDir := filepath.Join(dir, ".speakeasy")
-			genYaml := `configVersion: 2.0.0
+			genYaml := `configVersion: 1.0.0
 generation:
   sdkClassName: test
   nameResolution: ` + value + `
@@ -354,7 +354,7 @@ go:
 			testutils.CreateTempFile(t, speakeasyDir, "gen.yaml", genYaml)
 			testutils.CreateTempFile(t, speakeasyDir, "gen.lock", testutils.ReadTestFile(t, "v200-gen.lock"))
 
-			_, err := Load(dir, WithLanguages("go"))
+			_, err := Load(dir, WithLanguages("go"), WithUpgradeFunc(testUpdateLang))
 			require.ErrorContains(t, err, "invalid generation.nameResolution")
 
 			out, err := os.ReadFile(filepath.Join(speakeasyDir, "gen.yaml"))
