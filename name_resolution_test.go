@@ -267,18 +267,91 @@ func TestNameResolutionMode_AtLeast(t *testing.T) {
 	assert.False(t, NameResolutionShortest.AtLeast(NameResolutionQualified))
 }
 
-func TestNameResolutionConflictWarning(t *testing.T) {
-	g := Generation{NameResolution: NameResolutionOrdered, Fixes: &Fixes{NameResolutionDec2023: true, NameResolutionFeb2025: true}}
-	assert.Equal(t,
-		`generation.fixes.nameResolutionDec2023/nameResolutionFeb2025 are deprecated and ignored because generation.nameResolution is set to "ordered"; remove the fixes flags or change nameResolution instead`,
-		g.NameResolutionConflictWarning())
+// An explicit nameResolution is authoritative: Load aligns the deprecated
+// booleans with it in memory, whether they were stale in the file, absent, or
+// pre-populated from defaults.
+func TestNameResolution_LoadAlignsBooleansWithMode(t *testing.T) {
+	load := func(t *testing.T, genYaml string) *Configuration {
+		t.Helper()
+		dir := t.TempDir()
+		speakeasyDir := filepath.Join(dir, ".speakeasy")
+		testutils.CreateTempFile(t, speakeasyDir, "gen.yaml", genYaml)
+		testutils.CreateTempFile(t, speakeasyDir, "gen.lock", testutils.ReadTestFile(t, "v200-gen.lock"))
+		cfg, err := Load(dir, WithLanguages("go"))
+		require.NoError(t, err)
+		return cfg.Config
+	}
 
-	g = Generation{NameResolution: NameResolutionShortest, Fixes: &Fixes{NameResolutionDec2023: true, NameResolutionFeb2025: true}}
-	assert.Empty(t, g.NameResolutionConflictWarning(), "booleans consistent with the mode")
+	expected := map[NameResolutionMode][2]bool{
+		NameResolutionOrdered:   {true, false},
+		NameResolutionShortest:  {true, true},
+		NameResolutionQualified: {true, true},
+	}
 
-	g = Generation{Fixes: &Fixes{NameResolutionFeb2025: true}}
-	assert.Empty(t, g.NameResolutionConflictWarning(), "no explicit mode, nothing overridden")
+	for mode, want := range expected {
+		t.Run("mode-only "+string(mode), func(t *testing.T) {
+			cfg := load(t, `configVersion: 2.0.0
+generation:
+  sdkClassName: test
+  nameResolution: `+string(mode)+`
+go:
+  version: 1.0.0
+`)
+			assert.Equal(t, mode, cfg.Generation.GetNameResolution())
+			require.NotNil(t, cfg.Generation.Fixes)
+			assert.Equal(t, want[0], cfg.Generation.Fixes.NameResolutionDec2023)
+			assert.Equal(t, want[1], cfg.Generation.Fixes.NameResolutionFeb2025)
+		})
+	}
 
-	g = Generation{NameResolution: NameResolutionLegacy}
-	assert.Empty(t, g.NameResolutionConflictWarning(), "no fixes block, nothing overridden")
+	t.Run("stale booleans in the file are overridden", func(t *testing.T) {
+		cfg := load(t, `configVersion: 2.0.0
+generation:
+  sdkClassName: test
+  nameResolution: qualified
+  fixes:
+    nameResolutionDec2023: false
+    nameResolutionFeb2025: false
+go:
+  version: 1.0.0
+`)
+		assert.Equal(t, NameResolutionQualified, cfg.Generation.GetNameResolution())
+		assert.True(t, cfg.Generation.Fixes.NameResolutionDec2023)
+		assert.True(t, cfg.Generation.Fixes.NameResolutionFeb2025)
+	})
+
+	t.Run("boolean-only file is untouched by the alignment", func(t *testing.T) {
+		cfg := load(t, `configVersion: 2.0.0
+generation:
+  sdkClassName: test
+  fixes:
+    nameResolutionDec2023: true
+    nameResolutionFeb2025: false
+go:
+  version: 1.0.0
+`)
+		assert.Equal(t, NameResolutionOrdered, cfg.Generation.GetNameResolution())
+		assert.Equal(t, NameResolutionMode(""), cfg.Generation.NameResolution, "no mode materialized at load time")
+	})
+
+	t.Run("invalid mode rejected before any file rewrite", func(t *testing.T) {
+		dir := t.TempDir()
+		speakeasyDir := filepath.Join(dir, ".speakeasy")
+		genYaml := `configVersion: 2.0.0
+generation:
+  sdkClassName: test
+  nameResolution: newest
+go:
+  version: 1.0.0
+`
+		testutils.CreateTempFile(t, speakeasyDir, "gen.yaml", genYaml)
+		testutils.CreateTempFile(t, speakeasyDir, "gen.lock", testutils.ReadTestFile(t, "v200-gen.lock"))
+
+		_, err := Load(dir, WithLanguages("go"))
+		require.ErrorContains(t, err, "invalid generation.nameResolution")
+
+		out, err := os.ReadFile(filepath.Join(speakeasyDir, "gen.yaml"))
+		require.NoError(t, err)
+		assert.Equal(t, genYaml, string(out), "gen.yaml must be untouched after a rejected load")
+	})
 }

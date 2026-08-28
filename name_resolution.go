@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"slices"
 )
 
@@ -90,19 +89,3 @@ func (g *Generation) SyncNameResolution() {
 	mode.applyToFixes(g.Fixes)
 }
 
-// NameResolutionConflictWarning returns a warning when the deprecated fixes
-// booleans disagree with an explicit nameResolution mode, which takes
-// precedence and re-syncs them on save. Returns "" when consistent.
-func (g *Generation) NameResolutionConflictWarning() string {
-	mode := g.NameResolution
-	if mode == "" || !mode.IsValid() || g.Fixes == nil {
-		return ""
-	}
-
-	if g.Fixes.NameResolutionDec2023 == mode.AtLeast(NameResolutionOrdered) &&
-		g.Fixes.NameResolutionFeb2025 == mode.AtLeast(NameResolutionShortest) {
-		return ""
-	}
-
-	return fmt.Sprintf("generation.fixes.nameResolutionDec2023/nameResolutionFeb2025 are deprecated and ignored because generation.nameResolution is set to %q; remove the fixes flags or change nameResolution instead", mode)
-}
