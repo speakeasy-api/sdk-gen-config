@@ -334,24 +334,54 @@ go:
 		assert.Equal(t, NameResolutionMode(""), cfg.Generation.NameResolution, "no mode materialized at load time")
 	})
 
-	t.Run("invalid mode rejected before any file rewrite", func(t *testing.T) {
-		dir := t.TempDir()
-		speakeasyDir := filepath.Join(dir, ".speakeasy")
-		genYaml := `configVersion: 2.0.0
+	invalidModes := map[string]string{
+		"unsupported string": "newest",
+		"boolean":            "true",
+		"number":             "123",
+		"null":               "null",
+	}
+	for name, value := range invalidModes {
+		t.Run("invalid mode "+name+" rejected before any file rewrite", func(t *testing.T) {
+			dir := t.TempDir()
+			speakeasyDir := filepath.Join(dir, ".speakeasy")
+			genYaml := `configVersion: 2.0.0
 generation:
   sdkClassName: test
-  nameResolution: newest
+  nameResolution: ` + value + `
 go:
   version: 1.0.0
 `
-		testutils.CreateTempFile(t, speakeasyDir, "gen.yaml", genYaml)
-		testutils.CreateTempFile(t, speakeasyDir, "gen.lock", testutils.ReadTestFile(t, "v200-gen.lock"))
+			testutils.CreateTempFile(t, speakeasyDir, "gen.yaml", genYaml)
+			testutils.CreateTempFile(t, speakeasyDir, "gen.lock", testutils.ReadTestFile(t, "v200-gen.lock"))
 
-		_, err := Load(dir, WithLanguages("go"))
-		require.ErrorContains(t, err, "invalid generation.nameResolution")
+			_, err := Load(dir, WithLanguages("go"))
+			require.ErrorContains(t, err, "invalid generation.nameResolution")
 
-		out, err := os.ReadFile(filepath.Join(speakeasyDir, "gen.yaml"))
-		require.NoError(t, err)
-		assert.Equal(t, genYaml, string(out), "gen.yaml must be untouched after a rejected load")
-	})
+			out, err := os.ReadFile(filepath.Join(speakeasyDir, "gen.yaml"))
+			require.NoError(t, err)
+			assert.Equal(t, genYaml, string(out), "gen.yaml must be untouched after a rejected load")
+		})
+	}
+}
+
+func TestNameResolutionMode_Validate(t *testing.T) {
+	cases := map[string]struct {
+		mode    NameResolutionMode
+		wantErr bool
+	}{
+		"empty defers to fixes": {"", false},
+		"valid mode":            {NameResolutionQualified, false},
+		"wrong case":            {NameResolutionMode("Qualified"), true},
+		"unknown mode":          {NameResolutionMode("unknown"), true},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			err := tc.mode.Validate()
+			if tc.wantErr {
+				require.ErrorContains(t, err, "invalid generation.nameResolution")
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/speakeasy-api/sdk-gen-config/testutils"
 	"github.com/speakeasy-api/sdk-gen-config/workspace"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testDir = "gen/test"
@@ -960,6 +961,56 @@ generation:
 			assert.Equal(t, testCase.expected, string(contents))
 		})
 	}
+}
+
+func TestSaveConfig_NameResolutionInvariant(t *testing.T) {
+	t.Parallel()
+
+	t.Run("syncs-stale-booleans", func(t *testing.T) {
+		t.Parallel()
+
+		tempDir := t.TempDir()
+		speakeasyPath := filepath.Join(tempDir, ".speakeasy")
+		require.NoError(t, os.Mkdir(speakeasyPath, 0o755))
+
+		cfg := &Configuration{
+			ConfigVersion: Version,
+			Generation: Generation{
+				NameResolution: NameResolutionQualified,
+				Fixes:          &Fixes{NameResolutionDec2023: false, NameResolutionFeb2025: false},
+			},
+		}
+
+		require.NoError(t, SaveConfig(tempDir, cfg))
+
+		assert.True(t, cfg.Generation.Fixes.NameResolutionDec2023)
+		assert.True(t, cfg.Generation.Fixes.NameResolutionFeb2025)
+
+		contents, err := os.ReadFile(filepath.Join(speakeasyPath, "gen.yaml"))
+		require.NoError(t, err)
+		assert.Contains(t, string(contents), "nameResolutionDec2023: true")
+		assert.Contains(t, string(contents), "nameResolutionFeb2025: true")
+	})
+
+	t.Run("rejects-invalid-mode", func(t *testing.T) {
+		t.Parallel()
+
+		tempDir := t.TempDir()
+		speakeasyPath := filepath.Join(tempDir, ".speakeasy")
+		require.NoError(t, os.Mkdir(speakeasyPath, 0o755))
+
+		cfg := &Configuration{
+			ConfigVersion: Version,
+			Generation:    Generation{NameResolution: NameResolutionMode("Qualified")},
+		}
+
+		err := SaveConfig(tempDir, cfg)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid generation.nameResolution")
+
+		_, statErr := os.Stat(filepath.Join(speakeasyPath, "gen.yaml"))
+		assert.ErrorIs(t, statErr, fs.ErrNotExist)
+	})
 }
 
 func TestSaveLockFile(t *testing.T) {
