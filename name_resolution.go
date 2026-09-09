@@ -88,8 +88,15 @@ func (g *Generation) GetNameResolution() NameResolutionMode {
 
 // SyncNameResolution aligns nameResolution and the deprecated fixes booleans
 // so persisted configs stay readable by older tooling. Call before marshalling.
-// Explicit mode wins; legacy configs without one are left untouched.
+//
+// An explicitly set nameResolution mode is authoritative and backfills the boolean flags.
+// In legacy mode (all-false or absent) the fixes block is left untouched.
+// Otherwise, the mode gets materialized from the booleans and written back to the config.
 func (g *Generation) SyncNameResolution() {
+	if g.NameResolution != "" && !g.NameResolution.IsValid() {
+		return
+	}
+
 	mode := g.NameResolution
 	if mode == "" {
 		mode = nameResolutionFromFixes(g.Fixes)

@@ -127,6 +127,14 @@ func TestSyncNameResolution_ExplicitLegacyKeepsModeWithoutFixesBlock(t *testing.
 	assert.Nil(t, g.Fixes)
 }
 
+func TestSyncNameResolution_InvalidModeIsNoOp(t *testing.T) {
+	g := Generation{NameResolution: NameResolutionMode("invalid"), Fixes: &Fixes{NameResolutionFeb2025: true}}
+	g.SyncNameResolution()
+
+	assert.Equal(t, NameResolutionMode("invalid"), g.NameResolution)
+	assert.True(t, g.Fixes.NameResolutionFeb2025)
+}
+
 func TestNameResolution_PlainYAMLRoundTrip(t *testing.T) {
 	var g Generation
 	require.NoError(t, yaml.Unmarshal([]byte("nameResolution: ordered\n"), &g))
