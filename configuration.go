@@ -74,6 +74,7 @@ type Fixes struct {
 	SharedErrorComponentsApr2025         bool           `yaml:"sharedErrorComponentsApr2025" description:"Enables fixes that mean that when a component is used in both 2XX and 4XX responses, only the top level component will be duplicated to the errors scope as opposed to the entire component tree"`
 	SharedNestedComponentsJan2026        bool           `yaml:"sharedNestedComponentsJan2026" description:"Fixes component naming when the same schema is referenced in multiple places within nested structures, ensuring consistent naming based on the original component definition"`
 	NameOverrideFeb2026                  bool           `yaml:"nameOverrideFeb2026" description:"Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions"`
+	OpenSingleValueEnumsOct2026          bool           `yaml:"openSingleValueEnumsOct2026" description:"Opens single-value enums used in responses when forwardCompatibleEnumsByDefault is enabled, so unknown values decode instead of failing; enums that act as union discriminator tags stay closed"`
 	AdditionalProperties                 map[string]any `yaml:",inline" jsonschema:"-"` // Captures any additional properties that are not explicitly defined for backwards/forwards compatibility
 }
 
@@ -641,6 +642,12 @@ func GetGenerationDefaults(newSDK bool) []SDKGenConfigField {
 			Required:     false,
 			DefaultValue: ptr(newSDK),
 			Description:  pointer.From("Prevents component-level x-speakeasy-name-override from affecting parent names when referencing schema via $ref or hoisting allOf extensions"),
+		},
+		{
+			Name:         "fixes.openSingleValueEnumsOct2026",
+			Required:     false,
+			DefaultValue: ptr(newSDK),
+			Description:  pointer.From("Opens single-value enums used in responses when forwardCompatibleEnumsByDefault is enabled, so unknown values decode instead of failing; enums that act as union discriminator tags stay closed"),
 		},
 		{
 			Name:         "versioningStrategy",
