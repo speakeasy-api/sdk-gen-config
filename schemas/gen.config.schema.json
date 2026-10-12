@@ -50,6 +50,10 @@
           "description": "Deprecated. Use generation.nameResolution: 'shortest' instead.",
           "type": "boolean"
         },
+        "openSingleValueEnumsOct2026": {
+          "description": "Opens single-value enums used in responses when forwardCompatibleEnumsByDefault is enabled, so unknown values decode instead of failing; enums that act as union discriminator tags stay closed",
+          "type": "boolean"
+        },
         "parameterOrderingFeb2024": {
           "description": "Enables parameter ordering fixes from February 2024",
           "type": "boolean"
