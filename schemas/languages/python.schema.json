@@ -74,7 +74,7 @@
       "type": "string"
     },
     "preserveUnknownFields": {
-      "description": "Preserve undeclared fields in JSON request and response models, including nested models. Explicitly typed additional properties retain their validation. Disabled by default.",
+      "description": "Preserve undeclared fields in JSON request and response models, including nested models and schemas with additionalProperties: false. Explicitly typed additional properties retain their validation. Disabled by default.",
       "type": "boolean"
     },
     "responseFormat": {
