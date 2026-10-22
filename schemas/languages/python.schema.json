@@ -68,6 +68,10 @@
       "pattern": "^[\\w\\d.\\-_]+$",
       "type": "string"
     },
+    "preserveUnknownFields": {
+      "description": "Preserve undeclared fields in request and response models, including nested models. Explicitly typed additional properties retain their validation. Disabled by default.",
+      "type": "boolean"
+    },
     "packageName": {
       "description": "The distribution name of the PyPI Package. https://docs.python.org/3.11/distutils/setupscript.html#additional-meta-data",
       "pattern": "^@?[\\w\\d.\\-_\\u002f]+$",
