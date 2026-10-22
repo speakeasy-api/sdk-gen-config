@@ -63,6 +63,10 @@
       "pattern": "^(infer-optional-args|require-security-and-request)$",
       "type": "string"
     },
+    "modelSerializationMethods": {
+      "description": "Add to_dict and to_json convenience methods to models, using API field names and excluding unset fields by default.",
+      "type": "boolean"
+    },
     "outputModelSuffix": {
       "description": "The suffix to add to models with writeOnly fields that are created as input models",
       "pattern": "^[\\w\\d.\\-_]+$",
