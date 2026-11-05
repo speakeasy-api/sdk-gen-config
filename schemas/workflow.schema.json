@@ -250,16 +250,17 @@
       "additionalProperties": false,
       "properties": {
         "auth": {
-          "description": "Authentication method for the MCP Registry. Use 'github-oidc' (recommended, no token needed) for io.github.* namespaces in GitHub Actions, 'github' with a PAT, or 'dns' for custom domain namespaces.",
+          "description": "Authentication method for the MCP Registry. Use 'github-oidc' (recommended, no token needed) for io.github.* namespaces in GitHub Actions, 'github' with a PAT, 'dns' for custom domain namespaces verified by a DNS TXT record, or 'http' for custom domain namespaces verified by a /.well-known/mcp-registry-auth file.",
           "enum": [
             "github-oidc",
             "github",
-            "dns"
+            "dns",
+            "http"
           ],
           "type": "string"
         },
         "token": {
-          "description": "Authentication token. Not needed for github-oidc. For github auth, a GitHub PAT with read:org and read:user scopes. For dns auth, the Ed25519 private key.",
+          "description": "Authentication token. Not needed for github-oidc. For github auth, a GitHub PAT with read:org and read:user scopes. For dns or http auth, the Ed25519 private key.",
           "type": "string"
         }
       },

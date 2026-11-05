@@ -134,8 +134,8 @@ type Terraform struct {
 
 type MCPRegistry struct {
 	_     struct{} `additionalProperties:"false"`
-	Auth  string   `yaml:"auth" enum:"github-oidc,github,dns" required:"true" description:"Authentication method for the MCP Registry. Use 'github-oidc' (recommended, no token needed) for io.github.* namespaces in GitHub Actions, 'github' with a PAT, or 'dns' for custom domain namespaces."`
-	Token string   `yaml:"token,omitempty" description:"Authentication token. Not needed for github-oidc. For github auth, a GitHub PAT with read:org and read:user scopes. For dns auth, the Ed25519 private key."`
+	Auth  string   `yaml:"auth" enum:"github-oidc,github,dns,http" required:"true" description:"Authentication method for the MCP Registry. Use 'github-oidc' (recommended, no token needed) for io.github.* namespaces in GitHub Actions, 'github' with a PAT, 'dns' for custom domain namespaces verified by a DNS TXT record, or 'http' for custom domain namespaces verified by a /.well-known/mcp-registry-auth file."`
+	Token string   `yaml:"token,omitempty" description:"Authentication token. Not needed for github-oidc. For github auth, a GitHub PAT with read:org and read:user scopes. For dns or http auth, the Ed25519 private key."`
 }
 
 func (t Target) Validate(supportedLangs []string, sources map[string]Source) error {
@@ -219,15 +219,15 @@ func (p Publishing) Validate(target string) error {
 				if err := validateSecret(p.MCPRegistry.Token); err != nil {
 					return fmt.Errorf("failed to validate mcpRegistry token: %w", err)
 				}
-			case "dns":
+			case "dns", "http":
 				if p.MCPRegistry.Token == "" {
-					return fmt.Errorf("mcpRegistry token is required for dns auth")
+					return fmt.Errorf("mcpRegistry token is required for %s auth", p.MCPRegistry.Auth)
 				}
 				if err := validateSecret(p.MCPRegistry.Token); err != nil {
 					return fmt.Errorf("failed to validate mcpRegistry token: %w", err)
 				}
 			default:
-				return fmt.Errorf("mcpRegistry auth must be 'github-oidc', 'github', or 'dns'")
+				return fmt.Errorf("mcpRegistry auth must be 'github-oidc', 'github', 'dns', or 'http'")
 			}
 		}
 	case "python":
