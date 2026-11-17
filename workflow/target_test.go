@@ -257,6 +257,81 @@ func TestTarget_Validate(t *testing.T) {
 			},
 			wantErr: fmt.Errorf("failed to validate publish: failed to validate packagist token: secret must be a environment variable reference (ie $MY_SECRET)"),
 		},
+		{
+			name: "csharp target with nuget trusted publishing successfully validates",
+			args: args{
+				supportedLangs: []string{"csharp"},
+				target: workflow.Target{
+					Target: "csharp",
+					Source: "openapi.yaml",
+					Publishing: &workflow.Publishing{
+						Nuget: &workflow.Nuget{
+							Username:             "$NUGET_USERNAME",
+							UseTrustedPublishing: pointer.From(true),
+						},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "csharp target with nuget trusted publishing fails when apiKey is also set",
+			args: args{
+				supportedLangs: []string{"csharp"},
+				target: workflow.Target{
+					Target: "csharp",
+					Source: "openapi.yaml",
+					Publishing: &workflow.Publishing{
+						Nuget: &workflow.Nuget{
+							APIKey:               "$NUGET_API_KEY",
+							Username:             "$NUGET_USERNAME",
+							UseTrustedPublishing: pointer.From(true),
+						},
+					},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: nuget apiKey should not be provided when using trusted publishing"),
+		},
+		{
+			name: "csharp target with nuget trusted publishing fails when username is missing",
+			args: args{
+				supportedLangs: []string{"csharp"},
+				target: workflow.Target{
+					Target: "csharp",
+					Source: "openapi.yaml",
+					Publishing: &workflow.Publishing{
+						Nuget: &workflow.Nuget{
+							UseTrustedPublishing: pointer.From(true),
+						},
+					},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: nuget username must be provided when using trusted publishing"),
+		},
+		{
+			name: "csharp target with empty nuget block fails",
+			args: args{
+				supportedLangs: []string{"csharp"},
+				target: workflow.Target{
+					Target:     "csharp",
+					Source:     "openapi.yaml",
+					Publishing: &workflow.Publishing{Nuget: &workflow.Nuget{}},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: nuget apiKey must be provided when not using trusted publishing"),
+		},
+		{
+			name: "python target with empty pypi block fails",
+			args: args{
+				supportedLangs: []string{"python"},
+				target: workflow.Target{
+					Target:     "python",
+					Source:     "openapi.yaml",
+					Publishing: &workflow.Publishing{PyPi: &workflow.PyPi{}},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: pypi token must be provided when not using trusted publishing"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

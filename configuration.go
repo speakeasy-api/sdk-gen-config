@@ -322,11 +322,12 @@ type PullRequestOn struct {
 }
 
 type Jobs struct {
-	Generate    Job             `yaml:"generate,omitempty"`
-	Publish     Job             `yaml:"publish,omitempty"`
-	Tag         Job             `yaml:"tag,omitempty"`
-	Test        Job             `yaml:"test,omitempty"`
-	PublishPypi *PublishPyPiJob `yaml:"publish-pypi,omitempty"`
+	Generate     Job         `yaml:"generate,omitempty"`
+	Publish      Job         `yaml:"publish,omitempty"`
+	Tag          Job         `yaml:"tag,omitempty"`
+	Test         Job         `yaml:"test,omitempty"`
+	PublishPypi  *PublishJob `yaml:"publish-pypi,omitempty"`
+	PublishNuget *PublishJob `yaml:"publish-nuget,omitempty"`
 }
 
 type Job struct {
@@ -335,19 +336,25 @@ type Job struct {
 	Secrets map[string]string `yaml:"secrets,omitempty"`
 }
 
-// PublishPyPiJob represents a job that publishes to PyPI using OIDC trusted publishing
-type PublishPyPiJob struct {
-	Needs  []string          `yaml:"needs"`
-	If     string            `yaml:"if"`
-	RunsOn string            `yaml:"runs-on"`
-	Steps  []PublishPyPiStep `yaml:"steps"`
+// PublishJob represents a job in the caller's workflow that publishes a package
+// using OIDC trusted publishing via a composite action
+type PublishJob struct {
+	Needs  []string      `yaml:"needs"`
+	If     string        `yaml:"if"`
+	RunsOn string        `yaml:"runs-on"`
+	Steps  []PublishStep `yaml:"steps"`
 }
 
-// PublishPyPiStep represents a step in the publish-pypi job
-type PublishPyPiStep struct {
+// PublishStep represents a step in a PublishJob
+type PublishStep struct {
 	Uses string         `yaml:"uses"`
 	With map[string]any `yaml:"with,omitempty"`
 }
+
+type (
+	PublishPyPiJob  = PublishJob
+	PublishPyPiStep = PublishStep
+)
 
 type WorkflowDispatch struct {
 	Inputs Inputs `yaml:"inputs"`

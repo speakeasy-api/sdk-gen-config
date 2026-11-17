@@ -309,12 +309,21 @@
       "additionalProperties": false,
       "properties": {
         "apiKey": {
+          "description": "NuGet API key for key-based authentication. Not required if using trusted publishing.",
+          "type": "string"
+        },
+        "useTrustedPublishing": {
+          "description": "Use OIDC trusted publishing instead of API key authentication. See https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing",
+          "type": [
+            "null",
+            "boolean"
+          ]
+        },
+        "username": {
+          "description": "nuget.org username (profile name) that owns the trusted publishing policy. Required when using trusted publishing.",
           "type": "string"
         }
       },
-      "required": [
-        "apiKey"
-      ],
       "type": "object"
     },
     "WorkflowOverlay": {
