@@ -308,6 +308,30 @@ func TestTarget_Validate(t *testing.T) {
 			},
 			wantErr: fmt.Errorf("failed to validate publish: nuget username must be provided when using trusted publishing"),
 		},
+		{
+			name: "csharp target with empty nuget block fails",
+			args: args{
+				supportedLangs: []string{"csharp"},
+				target: workflow.Target{
+					Target:     "csharp",
+					Source:     "openapi.yaml",
+					Publishing: &workflow.Publishing{Nuget: &workflow.Nuget{}},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: nuget apiKey must be provided when not using trusted publishing"),
+		},
+		{
+			name: "python target with empty pypi block fails",
+			args: args{
+				supportedLangs: []string{"python"},
+				target: workflow.Target{
+					Target:     "python",
+					Source:     "openapi.yaml",
+					Publishing: &workflow.Publishing{PyPi: &workflow.PyPi{}},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: pypi token must be provided when not using trusted publishing"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

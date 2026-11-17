@@ -238,7 +238,10 @@ func (p Publishing) Validate(target string) error {
 			if usesTrustedPublishing && p.PyPi.Token != "" {
 				return fmt.Errorf("pypi token should not be provided when using trusted publishing")
 			}
-			if !usesTrustedPublishing && p.PyPi.Token != "" {
+			if !usesTrustedPublishing {
+				if p.PyPi.Token == "" {
+					return fmt.Errorf("pypi token must be provided when not using trusted publishing")
+				}
 				if err := validateSecret(p.PyPi.Token); err != nil {
 					return fmt.Errorf("failed to validate pypi token: %w", err)
 				}
@@ -287,7 +290,10 @@ func (p Publishing) Validate(target string) error {
 			if usesTrustedPublishing && p.Nuget.Username == "" {
 				return fmt.Errorf("nuget username must be provided when using trusted publishing")
 			}
-			if !usesTrustedPublishing && p.Nuget.APIKey != "" {
+			if !usesTrustedPublishing {
+				if p.Nuget.APIKey == "" {
+					return fmt.Errorf("nuget apiKey must be provided when not using trusted publishing")
+				}
 				if err := validateSecret(p.Nuget.APIKey); err != nil {
 					return fmt.Errorf("failed to validate nuget api key: %w", err)
 				}
