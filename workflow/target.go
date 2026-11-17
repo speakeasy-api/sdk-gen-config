@@ -118,8 +118,10 @@ type RubyGems struct {
 }
 
 type Nuget struct {
-	_      struct{} `additionalProperties:"false"`
-	APIKey string   `yaml:"apiKey" required:"true"`
+	_                    struct{} `additionalProperties:"false"`
+	APIKey               string   `yaml:"apiKey,omitempty" description:"NuGet API key for key-based authentication. Not required if using trusted publishing."`
+	Username             string   `yaml:"username,omitempty" description:"nuget.org username (profile name) that owns the trusted publishing policy. Required when using trusted publishing."`
+	UseTrustedPublishing *bool    `yaml:"useTrustedPublishing,omitempty" description:"Use OIDC trusted publishing instead of API key authentication. See https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing"`
 }
 
 type CLI struct {
@@ -277,9 +279,18 @@ func (p Publishing) Validate(target string) error {
 			}
 		}
 	case "csharp":
-		if p.Nuget != nil && p.Nuget.APIKey != "" {
-			if err := validateSecret(p.Nuget.APIKey); err != nil {
-				return fmt.Errorf("failed to validate nuget api key: %w", err)
+		if p.Nuget != nil {
+			usesTrustedPublishing := p.Nuget.UseTrustedPublishing != nil && *p.Nuget.UseTrustedPublishing
+			if usesTrustedPublishing && p.Nuget.APIKey != "" {
+				return fmt.Errorf("nuget apiKey should not be provided when using trusted publishing")
+			}
+			if usesTrustedPublishing && p.Nuget.Username == "" {
+				return fmt.Errorf("nuget username must be provided when using trusted publishing")
+			}
+			if !usesTrustedPublishing && p.Nuget.APIKey != "" {
+				if err := validateSecret(p.Nuget.APIKey); err != nil {
+					return fmt.Errorf("failed to validate nuget api key: %w", err)
+				}
 			}
 		}
 	case "cli":
@@ -340,8 +351,11 @@ func (p Publishing) IsPublished(target string) bool {
 			return true
 		}
 	case "csharp":
-		if p.Nuget != nil && p.Nuget.APIKey != "" {
-			return true
+		if p.Nuget != nil {
+			usesTrustedPublishing := p.Nuget.UseTrustedPublishing != nil && *p.Nuget.UseTrustedPublishing
+			if usesTrustedPublishing || p.Nuget.APIKey != "" {
+				return true
+			}
 		}
 	case "cli":
 		if p.CLI != nil && p.CLI.GPGPrivateKey != "" && p.CLI.GPGPassPhrase != "" {
