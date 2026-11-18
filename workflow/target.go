@@ -113,8 +113,10 @@ type Java struct {
 }
 
 type RubyGems struct {
-	_     struct{} `additionalProperties:"false"`
-	Token string   `yaml:"token" required:"true"`
+	_                    struct{} `additionalProperties:"false"`
+	Token                string   `yaml:"token,omitempty" description:"RubyGems API key for key-based authentication. Not required if using trusted publishing."`
+	Owner                string   `yaml:"owner,omitempty" description:"rubygems.org account (username or immutable account ID) that owns the gem. Only used with trusted publishing, and only required for the first push of a gem registered through a pending trusted publisher."`
+	UseTrustedPublishing *bool    `yaml:"useTrustedPublishing,omitempty" description:"Use OIDC trusted publishing instead of API key authentication. See https://guides.rubygems.org/trusted-publishing/"`
 }
 
 type Nuget struct {
@@ -276,9 +278,21 @@ func (p Publishing) Validate(target string) error {
 			}
 		}
 	case "ruby":
-		if p.RubyGems != nil && p.RubyGems.Token != "" {
-			if err := validateSecret(p.RubyGems.Token); err != nil {
-				return fmt.Errorf("failed to validate rubygems token: %w", err)
+		if p.RubyGems != nil {
+			usesTrustedPublishing := p.RubyGems.UseTrustedPublishing != nil && *p.RubyGems.UseTrustedPublishing
+			if usesTrustedPublishing && p.RubyGems.Token != "" {
+				return fmt.Errorf("rubygems token should not be provided when using trusted publishing")
+			}
+			if !usesTrustedPublishing {
+				if p.RubyGems.Owner != "" {
+					return fmt.Errorf("rubygems owner is only used with trusted publishing")
+				}
+				if p.RubyGems.Token == "" {
+					return fmt.Errorf("rubygems token must be provided when not using trusted publishing")
+				}
+				if err := validateSecret(p.RubyGems.Token); err != nil {
+					return fmt.Errorf("failed to validate rubygems token: %w", err)
+				}
 			}
 		}
 	case "csharp":
@@ -353,8 +367,11 @@ func (p Publishing) IsPublished(target string) bool {
 			}
 		}
 	case "ruby":
-		if p.RubyGems != nil && p.RubyGems.Token != "" {
-			return true
+		if p.RubyGems != nil {
+			usesTrustedPublishing := p.RubyGems.UseTrustedPublishing != nil && *p.RubyGems.UseTrustedPublishing
+			if usesTrustedPublishing || p.RubyGems.Token != "" {
+				return true
+			}
 		}
 	case "csharp":
 		if p.Nuget != nil {
