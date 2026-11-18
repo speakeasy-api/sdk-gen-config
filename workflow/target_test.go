@@ -366,6 +366,40 @@ func TestTarget_Validate(t *testing.T) {
 			wantErr: fmt.Errorf("failed to validate publish: rubygems token should not be provided when using trusted publishing"),
 		},
 		{
+			name: "ruby target with rubygems trusted publishing and owner successfully validates",
+			args: args{
+				supportedLangs: []string{"ruby"},
+				target: workflow.Target{
+					Target: "ruby",
+					Source: "openapi.yaml",
+					Publishing: &workflow.Publishing{
+						RubyGems: &workflow.RubyGems{
+							Owner:                "$RUBYGEMS_OWNER",
+							UseTrustedPublishing: pointer.From(true),
+						},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "ruby target with rubygems owner fails without trusted publishing",
+			args: args{
+				supportedLangs: []string{"ruby"},
+				target: workflow.Target{
+					Target: "ruby",
+					Source: "openapi.yaml",
+					Publishing: &workflow.Publishing{
+						RubyGems: &workflow.RubyGems{
+							Token: "$RUBYGEMS_AUTH_TOKEN",
+							Owner: "$RUBYGEMS_OWNER",
+						},
+					},
+				},
+			},
+			wantErr: fmt.Errorf("failed to validate publish: rubygems owner is only used with trusted publishing"),
+		},
+		{
 			name: "ruby target with empty rubygems block fails",
 			args: args{
 				supportedLangs: []string{"ruby"},

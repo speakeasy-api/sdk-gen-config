@@ -422,6 +422,10 @@
     "WorkflowRubyGems": {
       "additionalProperties": false,
       "properties": {
+        "owner": {
+          "description": "rubygems.org account (username or immutable account ID) that owns the gem. Only used with trusted publishing, and only required for the first push of a gem registered through a pending trusted publisher.",
+          "type": "string"
+        },
         "token": {
           "description": "RubyGems API key for key-based authentication. Not required if using trusted publishing.",
           "type": "string"
