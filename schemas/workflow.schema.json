@@ -423,12 +423,17 @@
       "additionalProperties": false,
       "properties": {
         "token": {
+          "description": "RubyGems API key for key-based authentication. Not required if using trusted publishing.",
           "type": "string"
+        },
+        "useTrustedPublishing": {
+          "description": "Use OIDC trusted publishing instead of API key authentication. See https://guides.rubygems.org/trusted-publishing/",
+          "type": [
+            "null",
+            "boolean"
+          ]
         }
       },
-      "required": [
-        "token"
-      ],
       "type": "object"
     },
     "WorkflowSource": {

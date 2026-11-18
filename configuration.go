@@ -322,12 +322,13 @@ type PullRequestOn struct {
 }
 
 type Jobs struct {
-	Generate     Job         `yaml:"generate,omitempty"`
-	Publish      Job         `yaml:"publish,omitempty"`
-	Tag          Job         `yaml:"tag,omitempty"`
-	Test         Job         `yaml:"test,omitempty"`
-	PublishPypi  *PublishJob `yaml:"publish-pypi,omitempty"`
-	PublishNuget *PublishJob `yaml:"publish-nuget,omitempty"`
+	Generate        Job         `yaml:"generate,omitempty"`
+	Publish         Job         `yaml:"publish,omitempty"`
+	Tag             Job         `yaml:"tag,omitempty"`
+	Test            Job         `yaml:"test,omitempty"`
+	PublishPypi     *PublishJob `yaml:"publish-pypi,omitempty"`
+	PublishNuget    *PublishJob `yaml:"publish-nuget,omitempty"`
+	PublishRubygems *PublishJob `yaml:"publish-rubygems,omitempty"`
 }
 
 type Job struct {
